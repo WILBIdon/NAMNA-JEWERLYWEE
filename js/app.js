@@ -11,7 +11,7 @@
 const CONFIG = {
   // Pega aquí la URL de tu Google Apps Script implementado
   // Es OBLIGATORIO para cargar las múltiples fotos desde Drive
-  APPS_SCRIPT_URL: '',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec',
 
   // Conexión directa a tu Google Sheet (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
