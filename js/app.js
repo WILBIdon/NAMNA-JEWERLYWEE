@@ -16,7 +16,7 @@ const CONFIG = {
   // Conexión directa a tu Google Sheet (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
 
-  WHATSAPP_NUMBER: '521234567890',
+  WHATSAPP_NUMBER: '4917670201873',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
   CACHE_DURATION_MS: 5 * 60 * 1000,
