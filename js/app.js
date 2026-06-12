@@ -140,7 +140,9 @@ async function fetchFromAppsScript() {
     const data = await response.json();
     if (data.error) throw new Error(data.message);
     
-    return data.map(item => {
+    const arrayData = data.productos ? data.productos : data;
+    
+    return arrayData.map(item => {
       let imgs = Array.isArray(item.imagenes) ? item.imagenes : [];
       if (item.imagen && imgs.length === 0) imgs.push(item.imagen);
       if (imgs.length === 0) imgs.push(CATEGORY_IMAGE_FALLBACK[item.categoria] || CATEGORY_IMAGE_FALLBACK._default);
