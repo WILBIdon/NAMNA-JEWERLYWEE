@@ -2,36 +2,25 @@
  * ================================================================
  * NAMNA JEWERLYWEE — Servidor Seguro Avanzado (Google Apps Script)
  * 
- * ARQUITECTURA DE ALTO RENDIMIENTO:
- * 1. Módulo de Indexación de Drive: Lee la carpeta 1 vez por sesión
- *    creando un mapa [Código] -> [ID_Foto] en memoria (O(1)).
- * 2. Módulo de Sincronización: Conecta la Lista Externa de precios
- *    con la Hoja Maestra.
+ * MOTOR DE SINCRONIZACIÓN INTELIGENTE (Fase 1.5):
+ * 1. Módulo Drive: Indexa fotos principales y fotos hijas (-1, -2).
+ * 2. Módulo Sincronizador: Alimenta la Hoja Maestra desde la Lista 
+ *    Externa, llenando columnas vacías y creando nuevos productos.
  * ================================================================
  */
 
-// ╔═══════════════════════════════════════════════════════════╗
-// ║  CONFIGURACIÓN DEL SISTEMA                                ║
-// ╚═══════════════════════════════════════════════════════════╝
-// 1. ID de la carpeta de Google Drive con las fotos
 const DRIVE_FOLDER_ID = "1LhBRO7GDiPh_ROtLF9ip6lnBxwz0MYyP";
-
-// 2. ID del archivo externo de Lista de Precios
 const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
-
-// 3. Fallback visual (Imagen que se muestra si el producto no tiene foto)
-const FALLBACK_IMAGE_URL = "https://via.placeholder.com/400x400/F3ECE3/3B4643?text=NAMNA+Jewelry";
-
+const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
 
 // ═══════════════════════════════════════════════════════════════
-// BLOQUE 1: EL SERVIDOR WEB (API para la página móvil)
+// BLOQUE 1: LA API WEB (Sirve los datos al catálogo)
 // ═══════════════════════════════════════════════════════════════
 function doGet() {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     const data = sheet.getDataRange().getValues();
     
-    // ── 1. CONTROL DE DAÑOS: Validar estructura ──
     const headers = data[0];
     if (!headers.includes("ID_Producto") || !headers.includes("Precio_Publico") || !headers.includes("Visible")) {
       throw new Error("Estructura de la hoja alterada. Faltan columnas críticas.");
@@ -43,16 +32,16 @@ function doGet() {
       desc:      headers.indexOf("Descripción"),
       cat:       headers.indexOf("Categoría"),
       precioPub: headers.indexOf("Precio_Publico"),
-      visible:   headers.indexOf("Visible")
+      visible:   headers.indexOf("Visible"),
+      stock:     headers.indexOf("Stock")
     };
 
-    // ── 2. INDEXACIÓN EN MEMORIA (El secreto de la velocidad) ──
-    // Se ejecuta una sola vez. No consulta a Drive fila por fila.
+    // ── INDEXACIÓN EN MEMORIA (Fotos principales + Hijas) ──
     const mapaFotos = crearMapaFotos(DRIVE_FOLDER_ID);
 
     const productosValidos = [];
 
-    // ── 3. PROCESAMIENTO COMBINADO ──
+    // ── PROCESAMIENTO ──
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       
@@ -61,34 +50,46 @@ function doGet() {
       
       if (String(row[idx.visible]).trim().toLowerCase() !== "sí") continue;
 
-      // Limpieza de datos
-      const precio     = Number(row[idx.precioPub]) || 0;
-      const nombre     = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
-      const categoria  = row[idx.cat]    ? String(row[idx.cat]).trim()    : "General";
-      const descripcion = row[idx.desc]  ? String(row[idx.desc]).trim()   : "";
+      const precio = Number(row[idx.precioPub]) || 0;
+      const stock  = Number(row[idx.stock]) || 0;
+      const nombre = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
+      const cat    = row[idx.cat]    ? String(row[idx.cat]).trim()    : "Joyería";
+      const desc   = row[idx.desc]   ? String(row[idx.desc]).trim()   : "";
 
-      // ── 4. ASOCIACIÓN DINÁMICA DE FOTOS EN TIEMPO REAL ──
-      let urlImagen = FALLBACK_IMAGE_URL;
-      
-      // Busca el ID del producto en nuestro mapa en memoria
-      const idDriveFoto = mapaFotos[idProducto.toLowerCase()];
-      
-      if (idDriveFoto) {
-        // Construye URL de descarga nativa optimizada a 400px
-        urlImagen = `https://drive.google.com/uc?export=view&id=${idDriveFoto}&sz=w400`;
+      // ── ASIGNACIÓN DE FOTOS (Principal e Hijas) ──
+      const fotosDrive = mapaFotos[idProducto.toLowerCase()];
+      let imagenes = [FALLBACK_IMAGE_URL];
+
+      if (fotosDrive) {
+        imagenes = [];
+        
+        // Foto principal (si existe, va primero)
+        if (fotosDrive.principal) {
+          imagenes.push(`https://drive.google.com/uc?export=view&id=${fotosDrive.principal}&sz=w600`);
+        }
+        
+        // Fotos hijas
+        fotosDrive.hijas.forEach(idHija => {
+          imagenes.push(`https://drive.google.com/uc?export=view&id=${idHija}&sz=w600`);
+        });
+
+        // Si no hay ninguna por algún motivo, poner fallback
+        if (imagenes.length === 0) {
+          imagenes.push(FALLBACK_IMAGE_URL);
+        }
       }
 
       productosValidos.push({
         id:          idProducto,
         nombre:      nombre,
-        descripcion: descripcion,
-        categoria:   categoria,
+        descripcion: desc,
+        categoria:   cat,
         precio:      precio,
-        imagen:      urlImagen
+        stock:       stock,
+        imagenes:    imagenes // Ahora es un Array de imágenes
       });
     }
 
-    // ── 5. ENTREGA SEGURA AL FRONTEND ──
     return ContentService
       .createTextOutput(JSON.stringify(productosValidos))
       .setMimeType(ContentService.MimeType.JSON);
@@ -101,8 +102,9 @@ function doGet() {
 }
 
 /**
- * ── MÓDULO DE MAPEO INDEXADO (Indexa la carpeta en un Diccionario RAM) ──
- * Lee todos los archivos de Drive y crea un mapa [NombreSinExt] => [IdArchivo]
+ * ── MÓDULO DE MAPEO: SOPORTE PARA FOTOS HIJAS ──
+ * Estructura del mapa:
+ * mapa["n. ruby d."] = { principal: "id1", hijas: ["id2", "id3"] }
  */
 function crearMapaFotos(folderId) {
   const mapa = {};
@@ -113,12 +115,25 @@ function crearMapaFotos(folderId) {
     while (archivos.hasNext()) {
       const archivo = archivos.next();
       const id = archivo.getId();
-      const nombreCompleto = archivo.getName(); // Ej: "PROD-001.jpg"
+      const nombreCompleto = archivo.getName(); // Ej: "N. Ruby D..jpg" o "N. Ruby D.-1.jpg"
       
-      // Limpiar la extensión (.jpg, .png, .jpeg) para dejar el código base
-      const nombreBase = nombreCompleto.split('.')[0].trim().toLowerCase();
+      const nombreSinExt = nombreCompleto.split('.')[0].trim().toLowerCase();
       
-      mapa[nombreBase] = id;
+      // Detectar si es una foto hija (termina en guión y un número, ej: "-1")
+      // Regex: quita "-1", "-2" del final para obtener el código base del producto
+      const baseCode = nombreSinExt.replace(/-\d+$/, '').trim();
+      
+      if (!mapa[baseCode]) {
+        mapa[baseCode] = { principal: null, hijas: [] };
+      }
+      
+      if (nombreSinExt === baseCode) {
+        // Es la foto principal
+        mapa[baseCode].principal = id;
+      } else {
+        // Es una foto hija
+        mapa[baseCode].hijas.push(id);
+      }
     }
   } catch(e) {
     console.error("Error leyendo carpeta de Drive", e);
@@ -126,84 +141,113 @@ function crearMapaFotos(folderId) {
   return mapa;
 }
 
-
 // ═══════════════════════════════════════════════════════════════
-// BLOQUE 2: SINCRONIZADOR DE PRECIOS (Lista Externa -> Hoja Maestra)
+// BLOQUE 2: SINCRONIZADOR DE CATÁLOGO (Precios -> Hoja Maestra)
 // ═══════════════════════════════════════════════════════════════
-/**
- * ── FUNCIÓN ESPEJO ──
- * Ejecuta esta función manualmente o configura un "Trigger" en Apps Script
- * para que corra cada noche automáticamente.
- */
-function sincronizarPrecios() {
+function sincronizarCatalogo() {
   try {
-    // 1. Leer la Lista Externa de Precios
-    const hojaExterna = SpreadsheetApp.openById(EXTERNAL_PRICE_LIST_ID).getSheets()[0];
-    const datosExternos = hojaExterna.getDataRange().getValues();
-    
-    // Suponiendo que en la lista externa: Col A = Referencia, Col F = precio de venta
-    const cabecerasExt = datosExternos[0];
-    const idxRefExt = cabecerasExt.indexOf("Referencia");
-    const idxPrecioExt = cabecerasExt.indexOf("precio de venta");
-    
-    if (idxRefExt === -1 || idxPrecioExt === -1) {
-      throw new Error("No se encontraron las columnas en la lista de precios externa.");
-    }
-
-    // Crear un mapa de precios [Referencia] -> [Precio]
-    const mapaPrecios = {};
-    for (let i = 1; i < datosExternos.length; i++) {
-      const ref = String(datosExternos[i][idxRefExt]).trim().toLowerCase();
-      let precioRaw = datosExternos[i][idxPrecioExt];
-      
-      // Limpiar símbolos de moneda o texto
-      let precioNum = Number(String(precioRaw).replace(/[^0-9.-]+/g,""));
-      
-      if (ref && !isNaN(precioNum)) {
-        mapaPrecios[ref] = precioNum;
-      }
-    }
-
-    // 2. Actualizar la Hoja Maestra (Data Hub)
     const hojaMaestra = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     const datosMaestros = hojaMaestra.getDataRange().getValues();
     const cabecerasM = datosMaestros[0];
     
-    const idxIdM = cabecerasM.indexOf("ID_Producto");
-    const idxPrecioPubM = cabecerasM.indexOf("Precio_Publico");
+    // Indices Hoja Maestra
+    const iIdM    = cabecerasM.indexOf("ID_Producto");
+    const iNomM   = cabecerasM.indexOf("Nombre");
+    const iDescM  = cabecerasM.indexOf("Descripción");
+    const iCatM   = cabecerasM.indexOf("Categoría");
+    const iPreM   = cabecerasM.indexOf("Precio_Publico");
+    const iVisM   = cabecerasM.indexOf("Visible");
+    const iStockM = cabecerasM.indexOf("Stock");
     
-    if (idxIdM === -1 || idxPrecioPubM === -1) {
-      throw new Error("Faltan columnas ID_Producto o Precio_Publico en hoja maestra.");
+    if (iIdM === -1 || iPreM === -1) throw new Error("Faltan columnas en hoja maestra.");
+
+    // Mapa de productos existentes en la maestra [ID -> IndiceFila]
+    const productosMaestra = {};
+    for (let i = 1; i < datosMaestros.length; i++) {
+      const id = String(datosMaestros[i][iIdM]).trim().toLowerCase();
+      if (id) productosMaestra[id] = i;
     }
 
-    // Se actualizan las filas una por una
-    // Para optimizar en hojas gigantes, se debería construir un array y hacer un solo setValues()
-    let valoresPrecioNuevos = [];
+    // Leer Lista Externa
+    const hojaExterna = SpreadsheetApp.openById(EXTERNAL_PRICE_LIST_ID).getSheets()[0];
+    const datosExternos = hojaExterna.getDataRange().getValues();
+    const cabecerasExt = datosExternos[0];
+    
+    // Indices Lista Externa
+    const iRefE    = cabecerasExt.indexOf("Referencia");
+    const iMetalE  = cabecerasExt.indexOf("Peso metal ");
+    const iCantE   = cabecerasExt.indexOf("Cantidad");
+    const iPiedraE = cabecerasExt.indexOf("Piedra ct");
+    const iDiamE   = cabecerasExt.indexOf("diamantes ct");
+    const iPrecioE = cabecerasExt.indexOf("precio de venta");
 
-    for (let i = 1; i < datosMaestros.length; i++) {
-      const idProducto = String(datosMaestros[i][idxIdM]).trim().toLowerCase();
-      let precioExistente = datosMaestros[i][idxPrecioPubM];
+    let filasNuevas = [];
+    let actualizaciones = 0;
+
+    for (let i = 1; i < datosExternos.length; i++) {
+      const rowExt = datosExternos[i];
+      const refRaw = rowExt[iRefE];
+      if (!refRaw) continue;
+
+      const ref = String(refRaw).trim();
+      const refLower = ref.toLowerCase();
       
-      // Si el código existe en el mapa de precios, usamos el nuevo precio
-      if (mapaPrecios[idProducto] !== undefined) {
-        valoresPrecioNuevos.push([mapaPrecios[idProducto]]);
+      // Limpieza de datos numéricos
+      let precioNum = Number(String(rowExt[iPrecioE]).replace(/[^0-9.-]+/g,""));
+      let cantidadNum = Number(rowExt[iCantE]) || 0;
+
+      // Generar descripción enriquecida
+      let descAuto = [];
+      if (rowExt[iMetalE]) descAuto.push(`Metal: ${rowExt[iMetalE]}`);
+      if (rowExt[iPiedraE]) descAuto.push(`Piedra: ${rowExt[iPiedraE]}`);
+      if (rowExt[iDiamE]) descAuto.push(`Diamantes: ${rowExt[iDiamE]}ct`);
+      const descripcionFinal = descAuto.join(" • ");
+
+      if (productosMaestra[refLower] !== undefined) {
+        // ACTUALIZAR PRODUCTO EXISTENTE
+        const rowIdx = productosMaestra[refLower];
+        const numFilaSheet = rowIdx + 1; // +1 porque los arrays son base 0
+        
+        // Sobrescribir siempre Precio y Stock
+        hojaMaestra.getRange(numFilaSheet, iPreM + 1).setValue(precioNum);
+        hojaMaestra.getRange(numFilaSheet, iStockM + 1).setValue(cantidadNum);
+        
+        // Si la descripción o nombre están vacíos, llenarlos
+        if (!datosMaestros[rowIdx][iNomM] && iNomM !== -1) {
+          hojaMaestra.getRange(numFilaSheet, iNomM + 1).setValue(ref);
+        }
+        if (!datosMaestros[rowIdx][iDescM] && iDescM !== -1 && descripcionFinal) {
+          hojaMaestra.getRange(numFilaSheet, iDescM + 1).setValue(descripcionFinal);
+        }
+        actualizaciones++;
+
       } else {
-        // Mantener el existente si no hay actualización
-        valoresPrecioNuevos.push([precioExistente]);
+        // CREAR PRODUCTO NUEVO
+        let nuevaFila = new Array(cabecerasM.length).fill("");
+        
+        if (iIdM !== -1) nuevaFila[iIdM] = ref;
+        if (iNomM !== -1) nuevaFila[iNomM] = ref;
+        if (iDescM !== -1) nuevaFila[iDescM] = descripcionFinal;
+        if (iCatM !== -1) nuevaFila[iCatM] = "Joyería"; // Categoría por defecto
+        if (iPreM !== -1) nuevaFila[iPreM] = precioNum;
+        if (iVisM !== -1) nuevaFila[iVisM] = "Sí"; // Visible por defecto
+        if (iStockM !== -1) nuevaFila[iStockM] = cantidadNum;
+        
+        filasNuevas.push(nuevaFila);
       }
     }
 
-    // 3. Escribir masivamente en la columna Precio_Publico (muy rápido)
-    // Asumiendo que Precio_Publico es la columna E (índice 4, columna número 5)
-    const numColumnaPrecio = idxPrecioPubM + 1;
-    hojaMaestra.getRange(2, numColumnaPrecio, valoresPrecioNuevos.length, 1).setValues(valoresPrecioNuevos);
+    // Insertar todas las filas nuevas al final de golpe
+    if (filasNuevas.length > 0) {
+      hojaMaestra.getRange(hojaMaestra.getLastRow() + 1, 1, filasNuevas.length, cabecerasM.length).setValues(filasNuevas);
+    }
     
-    SpreadsheetApp.getUi().alert("✅ Sincronización de precios completada con éxito.");
+    SpreadsheetApp.getUi().alert(`✅ Sincronización Completada.\n- Creados: ${filasNuevas.length} joyas nuevas.\n- Actualizados: ${actualizaciones} joyas.`);
 
   } catch (error) {
     console.error("Error en sincronización", error);
     try {
-      SpreadsheetApp.getUi().alert("❌ Error en sincronización: " + error.message);
-    } catch(e) { /* Si corre en trigger, el UI falla silenciosamente */ }
+      SpreadsheetApp.getUi().alert("❌ Error: " + error.message);
+    } catch(e) {}
   }
 }

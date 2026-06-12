@@ -781,6 +781,44 @@ h4 { font-size: var(--text-xl); }
   object-fit: cover;
 }
 
+.modal-media-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-gallery {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-background);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.modal-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery-thumb {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast), border var(--transition-fast);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.gallery-thumb:hover {
+  opacity: 0.8;
+}
+
+.gallery-thumb.active {
+  opacity: 1;
+  border-color: var(--color-primary);
+}
+
 .modal-details {
   padding: var(--space-xl) var(--space-xl) var(--space-2xl);
   display: flex;
