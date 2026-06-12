@@ -212,31 +212,9 @@ h4 { font-size: var(--text-xl); }
 }
 
 .brand-logo {
-  font-family: var(--font-heading);
-  font-size: clamp(1.375rem, 2.5vw, 1.75rem);
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
   position: relative;
-}
-
-.brand-logo::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform var(--transition-base);
-}
-
-.brand-logo:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
 }
 
 /* Header nav */

@@ -319,7 +319,7 @@ function createProductCard(product, index) {
   const mainImage = product.imagenes[0];
 
   const stockHTML = (product.stock !== null && product.stock <= 5 && product.stock > 0)
-    ? `<span class="product-badge" style="background: var(--color-primary);">Últimas ${product.stock}</span>`
+    ? `<span class="product-badge" style="background: var(--color-accent);">Últimas ${product.stock}</span>`
     : '';
 
   card.innerHTML = `
