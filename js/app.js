@@ -22,60 +22,18 @@ const CONFIG = {
   CACHE_DURATION_MS: 5 * 60 * 1000,
 };
 
-// ── DATOS DEMO (Respaldo visual) ──
-const DEMO_PRODUCTS = [
-  {
-    id: 'NM-001',
-    nombre: 'Anillo Esmeralda Minimal',
-    descripcion: 'Anillo delicado en oro de 14k con una esmeralda natural engastada en bisel.',
-    categoria: 'Anillos',
-    precioPublico: 1850,
-    visible: true,
-    badge: 'Nuevo',
-    imagenes: ['assets/product_ring.png']
-  },
-  {
-    id: 'NM-002',
-    nombre: 'Collar Gota de Oro',
-    descripcion: 'Cadena fina en oro de 18k con pendiente en forma de gota pulida.',
-    categoria: 'Collares',
-    precioPublico: 2450,
-    visible: true,
-    badge: null,
-    imagenes: ['assets/product_necklace.png']
-  },
-  {
-    id: 'NM-003',
-    nombre: 'Aretes Aro Perla',
-    descripcion: 'Aretes tipo aro en oro con perlas de agua dulce.',
-    categoria: 'Aretes',
-    precioPublico: 1290,
-    visible: true,
-    badge: 'Bestseller',
-    imagenes: ['assets/product_earrings.png']
-  },
-  {
-    id: 'NM-004',
-    nombre: 'Brazalete Geometría',
-    descripcion: 'Brazalete abierto en oro con detalles geométricos grabados a mano.',
-    categoria: 'Pulseras',
-    precioPublico: 1680,
-    visible: true,
-    badge: 'Nuevo',
-    imagenes: ['assets/product_bracelet.png']
-  }
-];
+// ── DATOS DEMO ELIMINADOS ──
+// La web ahora es 100% real y se alimenta exclusivamente de la hoja maestra y el servidor.
+
+// ── Categorías Iniciales (Fijas) ──
+const INITIAL_CATEGORIES = ['Collares', 'Dijes', 'Aretes', 'Sets'];
 
 // ── Mapeo de categorías a imágenes demo (fallback) ──
 const CATEGORY_IMAGE_FALLBACK = {
-  'Anillos':    'assets/product_ring.png',
   'Collares':   'assets/product_necklace.png',
+  'Dijes':      'assets/product_pendant.png',
   'Aretes':     'assets/product_earrings.png',
-  'Pulseras':   'assets/product_bracelet.png',
-  'Accesorios': 'assets/product_pendant.png',
-  'Calzado':    'assets/product_bracelet.png',
-  'Ropa':       'assets/product_necklace.png',
-  'General':    'assets/product_pendant.png',
+  'Sets':       'assets/product_necklace.png',
   '_default':   'assets/product_pendant.png'
 };
 
@@ -85,7 +43,7 @@ const state = {
   filteredProducts: [],
   activeCategory: 'all',
   modalOpen: false,
-  dataSource: 'demo',
+  dataSource: 'loading',
   sheetProducts: 0
 };
 
@@ -166,9 +124,9 @@ async function loadProducts() {
     return;
   }
 
-  state.products = DEMO_PRODUCTS;
-  state.dataSource = 'demo';
-  await new Promise(r => setTimeout(r, 600));
+  // Si todo falla, no hay demo. Catálogo vacío.
+  state.products = [];
+  state.dataSource = 'error';
   finishLoading();
 }
 
@@ -183,7 +141,6 @@ async function fetchFromAppsScript() {
     if (data.error) throw new Error(data.message);
     
     return data.map(item => {
-      // Validar array de imágenes
       let imgs = Array.isArray(item.imagenes) ? item.imagenes : [];
       if (item.imagen && imgs.length === 0) imgs.push(item.imagen);
       if (imgs.length === 0) imgs.push(CATEGORY_IMAGE_FALLBACK[item.categoria] || CATEGORY_IMAGE_FALLBACK._default);
@@ -280,7 +237,7 @@ function showDataSourceBadge() {
     'sheets': { text: `● Sheets (Sin Fotos Hijas) — ${state.sheetProducts} prod`, color: '#F59E0B' },
     'apps-script': { text: `● Sincronización Total (Drive) — ${state.sheetProducts} prod`, color: '#25D366' },
     'cache': { text: `● Caché (${state.sheetProducts} prod)`, color: '#E78A5E' },
-    'demo': { text: '● Demo', color: '#6B7A76' }
+    'error': { text: '● Catálogo Vacío / Error', color: '#EF4444' }
   };
 
   const info = labels[state.dataSource];
@@ -305,8 +262,14 @@ function buildCategoryFilters() {
   dom.categoriesContainer.innerHTML = '';
   dom.categoriesContainer.appendChild(allBtn);
 
-  const categories = [...new Set(state.products.map(p => p.categoria))];
-  categories.forEach(cat => {
+  // Unir categorías iniciales fijas con las que vengan de los productos
+  const productCategories = [...new Set(state.products.map(p => p.categoria))];
+  const finalCategories = [...new Set([...INITIAL_CATEGORIES, ...productCategories])];
+
+  finalCategories.forEach(cat => {
+    // Evitar crear botón para categorías vacías o nulas
+    if (!cat || cat.trim() === '') return;
+    
     const btn = document.createElement('button');
     btn.className = 'filter-btn';
     btn.dataset.category = cat;
