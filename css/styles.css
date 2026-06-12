@@ -58,7 +58,7 @@
   --container-max: 1280px;
   --container-gutter: 1.25rem;
   --grid-gap: 1rem;
-  --header-height: 64px;
+  --header-height: 80px;
 
   /* Effects */
   --radius-sm: 2px;
@@ -77,7 +77,7 @@
   :root {
     --container-gutter: 2rem;
     --grid-gap: 1.25rem;
-    --header-height: 72px;
+    --header-height: 96px;
   }
 }
 
@@ -85,7 +85,7 @@
   :root {
     --container-gutter: 3rem;
     --grid-gap: 1.5rem;
-    --header-height: 80px;
+    --header-height: 110px;
   }
 }
 
@@ -215,6 +215,25 @@ h4 { font-size: var(--text-xl); }
   display: inline-flex;
   align-items: center;
   position: relative;
+  height: 100%;
+}
+
+.brand-logo img {
+  max-height: 56px;
+  width: auto;
+  transition: max-height var(--transition-base);
+}
+
+@media screen and (min-width: 700px) {
+  .brand-logo img {
+    max-height: 68px;
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  .brand-logo img {
+    max-height: 80px;
+  }
 }
 
 /* Header nav */
