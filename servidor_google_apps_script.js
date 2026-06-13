@@ -112,20 +112,20 @@ function doGet() {
 
 /**
  * ── MÓDULO DE TEXTOS DINÁMICOS ──
- * Lee la pestaña "Textos" y devuelve un diccionario { "TXT-001": "texto...", ... }
+ * Lee la pestaña "TEXTO" y devuelve un diccionario { "TXT-001": "texto...", ... }
  * Si la pestaña no existe, devuelve un objeto vacío (la web usa sus valores por defecto).
  */
 function leerTextos(ss) {
   const textos = {};
   try {
-    const hojaTextos = ss.getSheetByName("Textos");
+    const hojaTextos = ss.getSheetByName("TEXTO");
     if (!hojaTextos) return textos; // No existe la pestaña, se usan los textos del HTML
 
     const datosTextos = hojaTextos.getDataRange().getValues();
     const cabeceras = datosTextos[0];
 
-    const iId    = cabeceras.indexOf("ID");
-    const iTexto = cabeceras.indexOf("Texto");
+    const iId    = cabeceras.indexOf("ID_Texto");
+    const iTexto = cabeceras.indexOf("Texto_ES");
 
     if (iId === -1 || iTexto === -1) return textos; // Columnas no encontradas
 
@@ -137,7 +137,7 @@ function leerTextos(ss) {
       }
     }
   } catch (e) {
-    console.error("Error leyendo pestaña Textos:", e);
+    console.error("Error leyendo pestaña TEXTO:", e);
   }
   return textos;
 }
