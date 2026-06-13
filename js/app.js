@@ -446,7 +446,19 @@ function hideLoader() { dom.loader.classList.add('hidden'); }
 // ═══════════════════════════════════════════════════════════════
 function aplicarTextos(textos) {
   if (!textos || Object.keys(textos).length === 0) return;
-  console.log(`📝 NAMNA: Aplicando ${Object.keys(textos).length} textos dinámicos...`);
+  
+  // Mostrar diagnóstico del servidor
+  if (textos._debug) {
+    console.log('🔍 NAMNA Debug Textos:', JSON.stringify(textos._debug, null, 2));
+  }
+
+  const ids = Object.keys(textos).filter(k => k !== '_debug');
+  if (ids.length === 0) {
+    console.warn('⚠️ NAMNA: No se recibieron textos dinámicos');
+    return;
+  }
+
+  console.log(`📝 NAMNA: Aplicando ${ids.length} textos dinámicos...`);
 
   document.querySelectorAll('[data-txt]').forEach(el => {
     const id = el.getAttribute('data-txt');

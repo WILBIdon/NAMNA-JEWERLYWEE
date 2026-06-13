@@ -116,30 +116,64 @@ function doGet() {
  * Si la pestaña no existe, devuelve un objeto vacío (la web usa sus valores por defecto).
  */
 function leerTextos(ss) {
-  const textos = {};
+  const resultado = { _debug: {} };
   try {
-    const hojaTextos = ss.getSheetByName("TEXTOS");
-    if (!hojaTextos) return textos; // No existe la pestaña, se usan los textos del HTML
+    // Debug: listar TODAS las pestañas del spreadsheet
+    const todasLasPestanas = ss.getSheets().map(s => s.getName());
+    resultado._debug.pestanas = todasLasPestanas;
+
+    // Intentar encontrar la pestaña probando varios nombres
+    let hojaTextos = null;
+    const nombresIntento = ["TEXTOS", "TEXTO", "Textos", "Texto", "textos", "texto"];
+    for (const nombre of nombresIntento) {
+      hojaTextos = ss.getSheetByName(nombre);
+      if (hojaTextos) {
+        resultado._debug.pestanaEncontrada = nombre;
+        break;
+      }
+    }
+
+    if (!hojaTextos) {
+      resultado._debug.error = "No se encontró ninguna pestaña de textos";
+      return resultado;
+    }
 
     const datosTextos = hojaTextos.getDataRange().getValues();
     const cabeceras = datosTextos[0];
+    resultado._debug.cabeceras = cabeceras.filter(c => c !== "");
 
-    const iId = cabeceras.indexOf("ID_Texto");
-    const iTexto = cabeceras.indexOf("Texto_ES");
+    // Buscar columnas con varios nombres posibles
+    let iId = cabeceras.indexOf("ID_Texto");
+    if (iId === -1) iId = cabeceras.indexOf("ID");
+    if (iId === -1) iId = cabeceras.indexOf("id_texto");
+    if (iId === -1) iId = cabeceras.indexOf("Id_Texto");
 
-    if (iId === -1 || iTexto === -1) return textos; // Columnas no encontradas
+    let iTexto = cabeceras.indexOf("Texto_ES");
+    if (iTexto === -1) iTexto = cabeceras.indexOf("Texto");
+    if (iTexto === -1) iTexto = cabeceras.indexOf("texto_es");
+    if (iTexto === -1) iTexto = cabeceras.indexOf("texto");
+
+    resultado._debug.columnaId = iId;
+    resultado._debug.columnaTexto = iTexto;
+    resultado._debug.totalFilas = datosTextos.length - 1;
+
+    if (iId === -1 || iTexto === -1) {
+      resultado._debug.error = "Columnas ID o Texto no encontradas";
+      return resultado;
+    }
 
     for (let i = 1; i < datosTextos.length; i++) {
       const id = String(datosTextos[i][iId]).trim();
       const texto = String(datosTextos[i][iTexto]).trim();
-      if (id && texto) {
-        textos[id] = texto;
+      if (id && texto && !id.startsWith("_")) {
+        resultado[id] = texto;
       }
     }
+    resultado._debug.textosLeidos = Object.keys(resultado).filter(k => k !== "_debug").length;
   } catch (e) {
-    console.error("Error leyendo pestaña TEXTO:", e);
+    resultado._debug.error = e.toString();
   }
-  return textos;
+  return resultado;
 }
 
 /**
