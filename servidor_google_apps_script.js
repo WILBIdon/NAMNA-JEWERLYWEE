@@ -9,7 +9,7 @@
  * ================================================================
  */
 
-const DRIVE_FOLDER_ID = "1LhBRO7GDiPh_ROtLF9ip6lnBxwz0MYyP";
+const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
 const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
 const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
 
@@ -18,7 +18,10 @@ const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?te
 // ═══════════════════════════════════════════════════════════════
 function doGet() {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // ── PRODUCTOS (Hoja activa / primera pestaña) ──
+    const sheet = ss.getSheets()[0];
     const data = sheet.getDataRange().getValues();
     
     const headers = data[0];
@@ -48,7 +51,8 @@ function doGet() {
       const idProducto = String(row[idx.id]).trim();
       if (!idProducto) continue; 
       
-      if (String(row[idx.visible]).trim().toLowerCase() !== "sí") continue;
+      const isVisible = String(row[idx.visible]).trim().toLowerCase();
+      if (isVisible !== "sí" && isVisible !== "si") continue;
 
       const precio = Number(row[idx.precioPub]) || 0;
       const stock  = Number(row[idx.stock]) || 0;
@@ -56,24 +60,19 @@ function doGet() {
       const cat    = row[idx.cat]    ? String(row[idx.cat]).trim()    : "Joyería";
       const desc   = row[idx.desc]   ? String(row[idx.desc]).trim()   : "";
 
-      // ── ASIGNACIÓN DE FOTOS (Principal e Hijas) ──
-      const fotosDrive = mapaFotos[idProducto.toLowerCase()];
+      // Quitamos espacios y puntos finales para hacer el match infalible
+      let searchKey = idProducto.toLowerCase().replace(/\.+$/, '');
+      const fotosDrive = mapaFotos[searchKey];
       let imagenes = [FALLBACK_IMAGE_URL];
 
       if (fotosDrive) {
         imagenes = [];
-        
-        // Foto principal (si existe, va primero)
         if (fotosDrive.principal) {
-          imagenes.push(`https://drive.google.com/uc?export=view&id=${fotosDrive.principal}&sz=w600`);
+          imagenes.push(`https://drive.google.com/thumbnail?id=${fotosDrive.principal}&sz=w800`);
         }
-        
-        // Fotos hijas
         fotosDrive.hijas.forEach(idHija => {
-          imagenes.push(`https://drive.google.com/uc?export=view&id=${idHija}&sz=w600`);
+          imagenes.push(`https://drive.google.com/thumbnail?id=${idHija}&sz=w800`);
         });
-
-        // Si no hay ninguna por algún motivo, poner fallback
         if (imagenes.length === 0) {
           imagenes.push(FALLBACK_IMAGE_URL);
         }
@@ -86,12 +85,22 @@ function doGet() {
         categoria:   cat,
         precio:      precio,
         stock:       stock,
-        imagenes:    imagenes // Ahora es un Array de imágenes
+        imagenes:    imagenes,
+        _debugKey:   searchKey,
+        _debugFound: !!fotosDrive
       });
     }
 
+    // ── TEXTOS DINÁMICOS (Pestaña "Textos") ──
+    const textos = leerTextos(ss);
+
     return ContentService
-      .createTextOutput(JSON.stringify(productosValidos))
+      .createTextOutput(JSON.stringify({
+        version: "3.0",
+        keysEncontradasEnDrive: Object.keys(mapaFotos),
+        productos: productosValidos,
+        textos: textos
+      }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
@@ -99,6 +108,38 @@ function doGet() {
       .createTextOutput(JSON.stringify({ error: true, message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * ── MÓDULO DE TEXTOS DINÁMICOS ──
+ * Lee la pestaña "Textos" y devuelve un diccionario { "TXT-001": "texto...", ... }
+ * Si la pestaña no existe, devuelve un objeto vacío (la web usa sus valores por defecto).
+ */
+function leerTextos(ss) {
+  const textos = {};
+  try {
+    const hojaTextos = ss.getSheetByName("Textos");
+    if (!hojaTextos) return textos; // No existe la pestaña, se usan los textos del HTML
+
+    const datosTextos = hojaTextos.getDataRange().getValues();
+    const cabeceras = datosTextos[0];
+
+    const iId    = cabeceras.indexOf("ID");
+    const iTexto = cabeceras.indexOf("Texto");
+
+    if (iId === -1 || iTexto === -1) return textos; // Columnas no encontradas
+
+    for (let i = 1; i < datosTextos.length; i++) {
+      const id    = String(datosTextos[i][iId]).trim();
+      const texto = String(datosTextos[i][iTexto]).trim();
+      if (id && texto) {
+        textos[id] = texto;
+      }
+    }
+  } catch (e) {
+    console.error("Error leyendo pestaña Textos:", e);
+  }
+  return textos;
 }
 
 /**
@@ -115,23 +156,28 @@ function crearMapaFotos(folderId) {
     while (archivos.hasNext()) {
       const archivo = archivos.next();
       const id = archivo.getId();
-      const nombreCompleto = archivo.getName(); // Ej: "N. Ruby D..jpg" o "N. Ruby D.-1.jpg"
+      const nombreCompleto = archivo.getName();
       
-      const nombreSinExt = nombreCompleto.split('.')[0].trim().toLowerCase();
+      // Obtener el nombre sin la extensión (soporta nombres con puntos)
+      let nombreSinExt = nombreCompleto.replace(/\.[a-zA-Z0-9]{3,4}$/, '');
+      nombreSinExt = nombreSinExt.trim().toLowerCase();
       
-      // Detectar si es una foto hija (termina en guión y un número, ej: "-1")
-      // Regex: quita "-1", "-2" del final para obtener el código base del producto
-      const baseCode = nombreSinExt.replace(/-\d+$/, '').trim();
+      const match = nombreSinExt.match(/-(\d+)$/);
+      const suffix = match ? match[1] : "";
+      
+      // Quitamos el sufijo y también eliminamos cualquier PUNTO final sobrante
+      let baseCode = nombreSinExt.replace(/-\d+$/, '').trim();
+      baseCode = baseCode.replace(/\.+$/, '').trim();
       
       if (!mapa[baseCode]) {
         mapa[baseCode] = { principal: null, hijas: [] };
       }
       
-      if (nombreSinExt === baseCode) {
-        // Es la foto principal
+      // Si no tiene número, o si el número es "1" o "01", es la foto principal
+      if (suffix === "" || suffix === "1" || suffix === "01") {
         mapa[baseCode].principal = id;
       } else {
-        // Es una foto hija
+        // Cualquier otro número (-2, -02, -3, etc.) es hija
         mapa[baseCode].hijas.push(id);
       }
     }

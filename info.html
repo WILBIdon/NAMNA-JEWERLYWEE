@@ -46,26 +46,26 @@
     <main class="info-container">
         <section id="about" class="info-section">
             <h1>Quiénes Somos</h1>
-            <p>En NAMNA Jewelry, creemos en la belleza de lo atemporal. Nuestras piezas son creadas con pasión, fusionando la maestría artesanal tradicional con diseños contemporáneos para dar vida a joyas únicas que cuentan historias.</p>
-            <p>Seleccionamos cuidadosamente nuestros metales y piedras preciosas, asegurando la más alta calidad y un origen ético. Cada anillo, collar y par de aretes está diseñado para realzar tu luz interior y acompañarte en los momentos más especiales de tu vida.</p>
+            <p data-txt="TXT-007">En NAMNA Jewelry, creemos en la belleza de lo atemporal. Nuestras piezas son creadas con pasión, fusionando la maestría artesanal tradicional con diseños contemporáneos para dar vida a joyas únicas que cuentan historias.</p>
+            <p data-txt="TXT-008">Seleccionamos cuidadosamente nuestros metales y piedras preciosas, asegurando la más alta calidad y un origen ético. Cada anillo, collar y par de aretes está diseñado para realzar tu luz interior y acompañarte en los momentos más especiales de tu vida.</p>
         </section>
 
         <section id="shipping" class="info-section">
             <h1>Políticas de Envío</h1>
-            <p>Realizamos envíos a nivel nacional e internacional a través de mensajería asegurada. Todos nuestros pedidos se procesan con el mayor cuidado y se envían en nuestro empaque premium distintivo para garantizar una experiencia de lujo desde el primer momento.</p>
-            <p><strong>Tiempos de entrega:</strong> Los pedidos nacionales tardan entre 2 a 5 días hábiles. Los pedidos internacionales pueden variar entre 7 y 14 días hábiles dependiendo de la aduana del país destino.</p>
+            <p data-txt="TXT-009">Realizamos envíos a nivel nacional e internacional a través de mensajería asegurada. Todos nuestros pedidos se procesan con el mayor cuidado y se envían en nuestro empaque premium distintivo para garantizar una experiencia de lujo desde el primer momento.</p>
+            <p data-txt="TXT-010"><strong>Tiempos de entrega:</strong> Los pedidos nacionales tardan entre 2 a 5 días hábiles. Los pedidos internacionales pueden variar entre 7 y 14 días hábiles dependiendo de la aduana del país destino.</p>
         </section>
 
         <section id="returns" class="info-section">
             <h1>Políticas de Devolución</h1>
-            <p>Tu satisfacción es nuestra máxima prioridad. Aceptamos cambios o devoluciones dentro de los primeros 14 días posteriores a la recepción de tu joya, siempre y cuando la pieza se encuentre en su estado original, sin signos de uso y con su empaque intacto.</p>
-            <p>Las piezas personalizadas o grabadas a medida no son elegibles para devolución. Para iniciar un proceso de cambio o devolución, por favor contacta a nuestro equipo directamente por WhatsApp y te guiaremos paso a paso.</p>
+            <p data-txt="TXT-011">Tu satisfacción es nuestra máxima prioridad. Aceptamos cambios o devoluciones dentro de los primeros 14 días posteriores a la recepción de tu joya, siempre y cuando la pieza se encuentre en su estado original, sin signos de uso y con su empaque intacto.</p>
+            <p data-txt="TXT-012">Las piezas personalizadas o grabadas a medida no son elegibles para devolución. Para iniciar un proceso de cambio o devolución, por favor contacta a nuestro equipo directamente por WhatsApp y te guiaremos paso a paso.</p>
         </section>
 
         <section id="sizing" class="info-section">
             <h1>Guía de Tallas</h1>
-            <p>Para asegurar que tu joya tenga el ajuste perfecto, recomendamos medir el diámetro interior de un anillo que ya tengas y te quede bien, o medir la circunferencia de tu dedo con un hilo suave.</p>
-            <p>Si tienes dudas sobre tu talla exacta, nuestro equipo de asesores en WhatsApp estará encantado de brindarte atención personalizada para encontrar la medida ideal de tu pieza NAMNA.</p>
+            <p data-txt="TXT-013">Para asegurar que tu joya tenga el ajuste perfecto, recomendamos medir el diámetro interior de un anillo que ya tengas y te quede bien, o medir la circunferencia de tu dedo con un hilo suave.</p>
+            <p data-txt="TXT-014">Si tienes dudas sobre tu talla exacta, nuestro equipo de asesores en WhatsApp estará encantado de brindarte atención personalizada para encontrar la medida ideal de tu pieza NAMNA.</p>
         </section>
     </main>
 
@@ -73,7 +73,7 @@
         <div class="footer-grid">
             <div class="footer-brand">
                 <h3 class="footer-brand-name">NAMNA</h3>
-                <p>Joyas únicas que iluminan tu esencia.</p>
+                <p data-txt="TXT-015">Joyas únicas que iluminan tu esencia.</p>
             </div>
             <div>
                 <h4 class="footer-heading">Contacto</h4>
@@ -84,8 +84,25 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 NAMNA Jewelry. Todos los derechos reservados.</p>
+            <p data-txt="TXT-016">&copy; 2026 NAMNA Jewelry. Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    <!-- Textos Dinámicos para info.html -->
+    <script>
+    (async function() {
+      try {
+        const API = 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec';
+        const res = await fetch(API);
+        const data = await res.json();
+        if (data.textos && typeof data.textos === 'object') {
+          document.querySelectorAll('[data-txt]').forEach(el => {
+            const id = el.getAttribute('data-txt');
+            if (data.textos[id]) el.textContent = data.textos[id];
+          });
+        }
+      } catch(e) { /* Si falla, se quedan los textos por defecto del HTML */ }
+    })();
+    </script>
 </body>
 </html>

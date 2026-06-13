@@ -140,6 +140,11 @@ async function fetchFromAppsScript() {
     const data = await response.json();
     if (data.error) throw new Error(data.message);
     
+    // ── Textos dinámicos desde la pestaña "Textos" ──
+    if (data.textos && typeof data.textos === 'object') {
+      aplicarTextos(data.textos);
+    }
+    
     const arrayData = data.productos ? data.productos : data;
     
     return arrayData.map(item => {
@@ -435,6 +440,22 @@ function handleWhatsAppOrder(productId, productName) {
 window.handleWhatsAppOrder = handleWhatsAppOrder;
 
 function hideLoader() { dom.loader.classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════════════════════
+// TEXTOS DINÁMICOS — Inyección desde Google Sheets
+// ═══════════════════════════════════════════════════════════════
+function aplicarTextos(textos) {
+  if (!textos || Object.keys(textos).length === 0) return;
+  console.log(`📝 NAMNA: Aplicando ${Object.keys(textos).length} textos dinámicos...`);
+
+  document.querySelectorAll('[data-txt]').forEach(el => {
+    const id = el.getAttribute('data-txt');
+    if (textos[id]) {
+      el.textContent = textos[id];
+    }
+  });
+}
+
 function initSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', function(e) {
