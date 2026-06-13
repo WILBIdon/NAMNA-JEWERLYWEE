@@ -23,20 +23,20 @@ function doGet() {
     // ── PRODUCTOS (Hoja activa / primera pestaña) ──
     const sheet = ss.getSheets()[0];
     const data = sheet.getDataRange().getValues();
-    
+
     const headers = data[0];
     if (!headers.includes("ID_Producto") || !headers.includes("Precio_Publico") || !headers.includes("Visible")) {
       throw new Error("Estructura de la hoja alterada. Faltan columnas críticas.");
     }
 
     const idx = {
-      id:        headers.indexOf("ID_Producto"),
-      nombre:    headers.indexOf("Nombre"),
-      desc:      headers.indexOf("Descripción"),
-      cat:       headers.indexOf("Categoría"),
+      id: headers.indexOf("ID_Producto"),
+      nombre: headers.indexOf("Nombre"),
+      desc: headers.indexOf("Descripción"),
+      cat: headers.indexOf("Categoría"),
       precioPub: headers.indexOf("Precio_Publico"),
-      visible:   headers.indexOf("Visible"),
-      stock:     headers.indexOf("Stock")
+      visible: headers.indexOf("Visible"),
+      stock: headers.indexOf("Stock")
     };
 
     // ── INDEXACIÓN EN MEMORIA (Fotos principales + Hijas) ──
@@ -47,18 +47,18 @@ function doGet() {
     // ── PROCESAMIENTO ──
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
-      
+
       const idProducto = String(row[idx.id]).trim();
-      if (!idProducto) continue; 
-      
+      if (!idProducto) continue;
+
       const isVisible = String(row[idx.visible]).trim().toLowerCase();
       if (isVisible !== "sí" && isVisible !== "si") continue;
 
       const precio = Number(row[idx.precioPub]) || 0;
-      const stock  = Number(row[idx.stock]) || 0;
+      const stock = Number(row[idx.stock]) || 0;
       const nombre = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
-      const cat    = row[idx.cat]    ? String(row[idx.cat]).trim()    : "Joyería";
-      const desc   = row[idx.desc]   ? String(row[idx.desc]).trim()   : "";
+      const cat = row[idx.cat] ? String(row[idx.cat]).trim() : "Joyería";
+      const desc = row[idx.desc] ? String(row[idx.desc]).trim() : "";
 
       // Quitamos espacios y puntos finales para hacer el match infalible
       let searchKey = idProducto.toLowerCase().replace(/\.+$/, '');
@@ -79,14 +79,14 @@ function doGet() {
       }
 
       productosValidos.push({
-        id:          idProducto,
-        nombre:      nombre,
+        id: idProducto,
+        nombre: nombre,
         descripcion: desc,
-        categoria:   cat,
-        precio:      precio,
-        stock:       stock,
-        imagenes:    imagenes,
-        _debugKey:   searchKey,
+        categoria: cat,
+        precio: precio,
+        stock: stock,
+        imagenes: imagenes,
+        _debugKey: searchKey,
         _debugFound: !!fotosDrive
       });
     }
@@ -112,25 +112,25 @@ function doGet() {
 
 /**
  * ── MÓDULO DE TEXTOS DINÁMICOS ──
- * Lee la pestaña "TEXTO" y devuelve un diccionario { "TXT-001": "texto...", ... }
+ * Lee la pestaña "TEXTOS" y devuelve un diccionario { "TXT-001": "texto...", ... }
  * Si la pestaña no existe, devuelve un objeto vacío (la web usa sus valores por defecto).
  */
 function leerTextos(ss) {
   const textos = {};
   try {
-    const hojaTextos = ss.getSheetByName("TEXTO");
+    const hojaTextos = ss.getSheetByName("TEXTOS");
     if (!hojaTextos) return textos; // No existe la pestaña, se usan los textos del HTML
 
     const datosTextos = hojaTextos.getDataRange().getValues();
     const cabeceras = datosTextos[0];
 
-    const iId    = cabeceras.indexOf("ID_Texto");
+    const iId = cabeceras.indexOf("ID_Texto");
     const iTexto = cabeceras.indexOf("Texto_ES");
 
     if (iId === -1 || iTexto === -1) return textos; // Columnas no encontradas
 
     for (let i = 1; i < datosTextos.length; i++) {
-      const id    = String(datosTextos[i][iId]).trim();
+      const id = String(datosTextos[i][iId]).trim();
       const texto = String(datosTextos[i][iTexto]).trim();
       if (id && texto) {
         textos[id] = texto;
@@ -152,27 +152,27 @@ function crearMapaFotos(folderId) {
   try {
     const folder = DriveApp.getFolderById(folderId);
     const archivos = folder.getFiles();
-    
+
     while (archivos.hasNext()) {
       const archivo = archivos.next();
       const id = archivo.getId();
       const nombreCompleto = archivo.getName();
-      
+
       // Obtener el nombre sin la extensión (soporta nombres con puntos)
       let nombreSinExt = nombreCompleto.replace(/\.[a-zA-Z0-9]{3,4}$/, '');
       nombreSinExt = nombreSinExt.trim().toLowerCase();
-      
+
       const match = nombreSinExt.match(/-(\d+)$/);
       const suffix = match ? match[1] : "";
-      
+
       // Quitamos el sufijo y también eliminamos cualquier PUNTO final sobrante
       let baseCode = nombreSinExt.replace(/-\d+$/, '').trim();
       baseCode = baseCode.replace(/\.+$/, '').trim();
-      
+
       if (!mapa[baseCode]) {
         mapa[baseCode] = { principal: null, hijas: [] };
       }
-      
+
       // Si no tiene número, o si el número es "1" o "01", es la foto principal
       if (suffix === "" || suffix === "1" || suffix === "01") {
         mapa[baseCode].principal = id;
@@ -181,7 +181,7 @@ function crearMapaFotos(folderId) {
         mapa[baseCode].hijas.push(id);
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.error("Error leyendo carpeta de Drive", e);
   }
   return mapa;
@@ -195,16 +195,16 @@ function sincronizarCatalogo() {
     const hojaMaestra = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     const datosMaestros = hojaMaestra.getDataRange().getValues();
     const cabecerasM = datosMaestros[0];
-    
+
     // Indices Hoja Maestra
-    const iIdM    = cabecerasM.indexOf("ID_Producto");
-    const iNomM   = cabecerasM.indexOf("Nombre");
-    const iDescM  = cabecerasM.indexOf("Descripción");
-    const iCatM   = cabecerasM.indexOf("Categoría");
-    const iPreM   = cabecerasM.indexOf("Precio_Publico");
-    const iVisM   = cabecerasM.indexOf("Visible");
+    const iIdM = cabecerasM.indexOf("ID_Producto");
+    const iNomM = cabecerasM.indexOf("Nombre");
+    const iDescM = cabecerasM.indexOf("Descripción");
+    const iCatM = cabecerasM.indexOf("Categoría");
+    const iPreM = cabecerasM.indexOf("Precio_Publico");
+    const iVisM = cabecerasM.indexOf("Visible");
     const iStockM = cabecerasM.indexOf("Stock");
-    
+
     if (iIdM === -1 || iPreM === -1) throw new Error("Faltan columnas en hoja maestra.");
 
     // Mapa de productos existentes en la maestra [ID -> IndiceFila]
@@ -218,13 +218,13 @@ function sincronizarCatalogo() {
     const hojaExterna = SpreadsheetApp.openById(EXTERNAL_PRICE_LIST_ID).getSheets()[0];
     const datosExternos = hojaExterna.getDataRange().getValues();
     const cabecerasExt = datosExternos[0];
-    
+
     // Indices Lista Externa
-    const iRefE    = cabecerasExt.indexOf("Referencia");
-    const iMetalE  = cabecerasExt.indexOf("Peso metal ");
-    const iCantE   = cabecerasExt.indexOf("Cantidad");
+    const iRefE = cabecerasExt.indexOf("Referencia");
+    const iMetalE = cabecerasExt.indexOf("Peso metal ");
+    const iCantE = cabecerasExt.indexOf("Cantidad");
     const iPiedraE = cabecerasExt.indexOf("Piedra ct");
-    const iDiamE   = cabecerasExt.indexOf("diamantes ct");
+    const iDiamE = cabecerasExt.indexOf("diamantes ct");
     const iPrecioE = cabecerasExt.indexOf("precio de venta");
 
     let filasNuevas = [];
@@ -237,9 +237,9 @@ function sincronizarCatalogo() {
 
       const ref = String(refRaw).trim();
       const refLower = ref.toLowerCase();
-      
+
       // Limpieza de datos numéricos
-      let precioNum = Number(String(rowExt[iPrecioE]).replace(/[^0-9.-]+/g,""));
+      let precioNum = Number(String(rowExt[iPrecioE]).replace(/[^0-9.-]+/g, ""));
       let cantidadNum = Number(rowExt[iCantE]) || 0;
 
       // Generar descripción enriquecida
@@ -253,11 +253,11 @@ function sincronizarCatalogo() {
         // ACTUALIZAR PRODUCTO EXISTENTE
         const rowIdx = productosMaestra[refLower];
         const numFilaSheet = rowIdx + 1; // +1 porque los arrays son base 0
-        
+
         // Sobrescribir siempre Precio y Stock
         hojaMaestra.getRange(numFilaSheet, iPreM + 1).setValue(precioNum);
         hojaMaestra.getRange(numFilaSheet, iStockM + 1).setValue(cantidadNum);
-        
+
         // Si la descripción o nombre están vacíos, llenarlos
         if (!datosMaestros[rowIdx][iNomM] && iNomM !== -1) {
           hojaMaestra.getRange(numFilaSheet, iNomM + 1).setValue(ref);
@@ -270,7 +270,7 @@ function sincronizarCatalogo() {
       } else {
         // CREAR PRODUCTO NUEVO
         let nuevaFila = new Array(cabecerasM.length).fill("");
-        
+
         if (iIdM !== -1) nuevaFila[iIdM] = ref;
         if (iNomM !== -1) nuevaFila[iNomM] = ref;
         if (iDescM !== -1) nuevaFila[iDescM] = descripcionFinal;
@@ -278,7 +278,7 @@ function sincronizarCatalogo() {
         if (iPreM !== -1) nuevaFila[iPreM] = precioNum;
         if (iVisM !== -1) nuevaFila[iVisM] = "Sí"; // Visible por defecto
         if (iStockM !== -1) nuevaFila[iStockM] = cantidadNum;
-        
+
         filasNuevas.push(nuevaFila);
       }
     }
@@ -287,13 +287,13 @@ function sincronizarCatalogo() {
     if (filasNuevas.length > 0) {
       hojaMaestra.getRange(hojaMaestra.getLastRow() + 1, 1, filasNuevas.length, cabecerasM.length).setValues(filasNuevas);
     }
-    
+
     SpreadsheetApp.getUi().alert(`✅ Sincronización Completada.\n- Creados: ${filasNuevas.length} joyas nuevas.\n- Actualizados: ${actualizaciones} joyas.`);
 
   } catch (error) {
     console.error("Error en sincronización", error);
     try {
       SpreadsheetApp.getUi().alert("❌ Error: " + error.message);
-    } catch(e) {}
+    } catch (e) { }
   }
 }
