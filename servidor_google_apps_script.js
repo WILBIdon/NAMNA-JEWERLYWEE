@@ -124,7 +124,7 @@ function leerTextos(ss) {
 
     // Intentar encontrar la pestaña probando varios nombres
     let hojaTextos = null;
-    const nombresIntento = ["TEXTOS", "TEXTO", "Textos", "Texto", "textos", "texto"];
+    const nombresIntento = ["TEXTOS", "TEXTO", "Textos", "Texto", "textos", "texto", "Texto_ES"];
     for (const nombre of nombresIntento) {
       hojaTextos = ss.getSheetByName(nombre);
       if (hojaTextos) {
