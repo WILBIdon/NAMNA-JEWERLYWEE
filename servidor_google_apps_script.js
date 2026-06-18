@@ -327,7 +327,78 @@ function sincronizarCatalogo() {
   } catch (error) {
     console.error("Error en sincronización", error);
     try {
-      SpreadsheetApp.getUi().alert("❌ Error: " + error.message);
+      try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e){}
     } catch (e) { }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLOQUE 3: AUTO-CATEGORIZAR (rellena columna Categoría)
+// ═══════════════════════════════════════════════════════════════
+/**
+ * Rellena automáticamente la columna "Categoría" según el prefijo del ID_Producto:
+ *   N. → Necklace
+ *   E. → Earrings
+ * La última letra del ID indica el color: D=Diamond, Y=Yellow, R=Red
+ * 
+ * Cómo usar: En Apps Script → Ejecutar → autoCategorizar
+ */
+function autoCategorizar() {
+  try {
+    const hoja = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const datos = hoja.getDataRange().getValues();
+    const cabeceras = datos[0];
+
+    const iId  = cabeceras.indexOf("ID_Producto");
+    const iCat = cabeceras.indexOf("Categoría");
+
+    if (iId === -1 || iCat === -1) {
+      SpreadsheetApp.getUi().alert("❌ No se encontraron columnas ID_Producto o Categoría.");
+      return;
+    }
+
+    // Mapa de prefijos → categoría
+    const PREFIJOS = {
+      "n.": "Necklace",
+      "e.": "Earrings",
+    };
+
+    let actualizados = 0;
+    let omitidos = 0;
+
+    for (let i = 1; i < datos.length; i++) {
+      const idRaw = String(datos[i][iId]).trim();
+      if (!idRaw) continue;
+
+      const idLower = idRaw.toLowerCase();
+      let categoriaAsignada = null;
+
+      for (const [prefijo, cat] of Object.entries(PREFIJOS)) {
+        if (idLower.startsWith(prefijo)) {
+          categoriaAsignada = cat;
+          break;
+        }
+      }
+
+      if (categoriaAsignada) {
+        // Solo actualiza si la celda está vacía
+        const catActual = String(datos[i][iCat]).trim();
+        if (!catActual) {
+          hoja.getRange(i + 1, iCat + 1).setValue(categoriaAsignada);
+          actualizados++;
+        } else {
+          omitidos++;
+        }
+      }
+    }
+
+    SpreadsheetApp.getUi().alert(
+      `✅ Auto-categorización completa.\n` +
+      `- Actualizados: ${actualizados} productos\n` +
+      `- Omitidos (ya tenían categoría): ${omitidos}`
+    );
+
+  } catch (error) {
+    try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e) {}
   }
 }

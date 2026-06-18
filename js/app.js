@@ -26,10 +26,13 @@ const CONFIG = {
 // La web ahora es 100% real y se alimenta exclusivamente de la hoja maestra y el servidor.
 
 // ── Categorías Iniciales (Fijas) ──
-const INITIAL_CATEGORIES = ['Collares', 'Dijes', 'Aretes', 'Sets'];
+// Convención: N. = Necklace | E. = Earrings | última letra = color (D=Diamond, Y=Yellow, R=Red)
+const INITIAL_CATEGORIES = ['Necklace', 'Earrings'];
 
 // ── Mapeo de categorías a imágenes demo (fallback) ──
 const CATEGORY_IMAGE_FALLBACK = {
+  'Necklace':   'assets/product_necklace.png',
+  'Earrings':   'assets/product_earrings.png',
   'Collares':   'assets/product_necklace.png',
   'Dijes':      'assets/product_pendant.png',
   'Aretes':     'assets/product_earrings.png',
