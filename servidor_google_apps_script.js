@@ -11,16 +11,19 @@
  * ================================================================
  */
 
-const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
+const DRIVE_FOLDER_ID        = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
+const MASTER_SHEET_ID        = "1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc"; // ← Hoja Maestra
 const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
-const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
+const FALLBACK_IMAGE_URL     = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
 
 // ═══════════════════════════════════════════════════════════════
 // BLOQUE 1: LA API WEB (Sirve los datos al catálogo)
 // ═══════════════════════════════════════════════════════════════
 function doGet() {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    // IMPORTANTE: openById() es necesario cuando se ejecuta como API web.
+    // getActiveSpreadsheet() solo funciona desde el editor, no en producción.
+    const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
 
     // ── PRODUCTOS (Hoja activa / primera pestaña) ──
     const sheet = ss.getSheets()[0];
