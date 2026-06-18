@@ -231,7 +231,7 @@ function crearMapaFotos(folderId) {
 // ═══════════════════════════════════════════════════════════════
 function sincronizarCatalogo() {
   try {
-    const hojaMaestra = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const hojaMaestra = SpreadsheetApp.openById(MASTER_SHEET_ID).getSheets()[0];
     const datosMaestros = hojaMaestra.getDataRange().getValues();
     const cabecerasM = datosMaestros[0];
 
@@ -350,7 +350,7 @@ function sincronizarCatalogo() {
  */
 function autoCategorizar() {
   try {
-    const hoja = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const hoja = SpreadsheetApp.openById(MASTER_SHEET_ID).getSheets()[0];
     const datos = hoja.getDataRange().getValues();
     const cabeceras = datos[0];
 
