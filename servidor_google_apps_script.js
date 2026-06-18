@@ -1,11 +1,13 @@
 /**
  * ================================================================
  * NAMNA JEWERLYWEE — Servidor Seguro Avanzado (Google Apps Script)
- * 
- * MOTOR DE SINCRONIZACIÓN INTELIGENTE (Fase 1.5):
- * 1. Módulo Drive: Indexa fotos principales y fotos hijas (-1, -2).
- * 2. Módulo Sincronizador: Alimenta la Hoja Maestra desde la Lista 
- *    Externa, llenando columnas vacías y creando nuevos productos.
+ * v1.6 — Junio 2026
+ *
+ * BLOQUES:
+ * 1. doGet()           → API Web: sirve productos + fotos + textos
+ * 2. sincronizarCatalogo() → Sincroniza Lista Externa → Hoja Maestra
+ * 3. autoCategorizar() → Rellena Categoría según prefijo del ID
+ *    (N. = Necklace | E. = Earrings)
  * ================================================================
  */
 
