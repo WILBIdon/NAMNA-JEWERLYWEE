@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAMNA — Panel de Control</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── CSS Variables (heredadas del sistema NAMNA) ── */
+    :root {
+      --color-primary:    #3B4643;
+      --color-bg:         #F3ECE3;
+      --color-bg-dark:    #E8DDD0;
+      --color-accent:     #E78A5E;
+      --color-accent-lt:  #F0A882;
+      --color-text:       #3B4643;
+      --color-muted:      #6B7A76;
+      --color-border:     #DDD5CB;
+      --color-white:      #FFFFFF;
+      --color-success:    #2E7D5E;
+      --color-warning:    #B45309;
+      --color-error:      #C0392B;
+      --color-info:       #1D5B8E;
+      --font-heading:     'Cormorant Garamond', Georgia, serif;
+      --font-body:        'DM Sans', 'Helvetica Neue', sans-serif;
+      --font-mono:        'JetBrains Mono', 'Courier New', monospace;
+      --radius:           10px;
+      --shadow:           0 4px 24px rgba(59,70,67,0.10);
+      --shadow-lg:        0 12px 48px rgba(59,70,67,0.18);
+      --transition:       0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: var(--color-primary);
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .topbar-logo {
+      height: 36px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.92;
+    }
+    .topbar-label {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      border-left: 1px solid rgba(255,255,255,0.2);
+      padding-left: 0.75rem;
+      margin-left: 0.1rem;
+    }
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .topbar-nav a {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .topbar-nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .topbar-nav a.active { background: var(--color-accent); color: #fff; }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.06em;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #25D366;
+      box-shadow: 0 0 0 2px rgba(37,211,102,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* ── Layout ── */
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .page-header h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+      margin-bottom: 0.35rem;
+    }
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Section Title ── */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-heading h2 {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+    }
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    /* ── Grid ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2.5rem; }
+    @media (min-width: 700px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    .grid-3 { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2.5rem; }
+    @media (min-width: 600px)  { .grid-3 { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1000px) { .grid-3 { grid-template-columns: 1fr 1fr 1fr; } }
+
+    /* ── Link Card ── */
+    .link-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .link-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--color-accent));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .link-card:hover {
+      border-color: transparent;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
+    }
+    .link-card:hover::before { opacity: 1; }
+    .link-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--icon-bg, rgba(231,138,94,0.12));
+      margin-bottom: 0.25rem;
+    }
+    .link-card-icon svg { width: 20px; height: 20px; }
+    .link-card-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+    }
+    .link-card-title {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--color-primary);
+      line-height: 1.3;
+    }
+    .link-card-desc {
+      font-size: 0.8125rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .link-card-url {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-muted);
+      background: var(--color-bg);
+      border-radius: 4px;
+      padding: 0.3rem 0.6rem;
+      word-break: break-all;
+      line-height: 1.4;
+      border: 1px solid var(--color-border);
+      cursor: text;
+      user-select: all;
+      transition: background var(--transition);
+    }
+    .link-card-url:hover { background: var(--color-bg-dark); }
+    .link-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+      flex-wrap: wrap;
+    }
+    .btn-sm {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: #2C3432; }
+    .btn-accent  { background: var(--color-accent);  color: #fff; }
+    .btn-accent:hover  { background: #D4754A; }
+    .btn-ghost   { background: transparent; color: var(--color-primary); border: 1.5px solid var(--color-border); }
+    .btn-ghost:hover   { border-color: var(--color-primary); }
+    .btn-green   { background: #25D366; color: #fff; }
+    .btn-green:hover   { background: #1eb55a; }
+
+    /* ── Script Block ── */
+    .script-section { margin-bottom: 2.5rem; }
+    .script-box {
+      background: #1C2022;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .script-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: #252B2E;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .script-header-left { display: flex; align-items: center; gap: 0.5rem; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-r { background: #FF5F57; }
+    .dot-y { background: #FEBC2E; }
+    .dot-g { background: #28C840; }
+    .script-filename {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      margin-left: 0.5rem;
+    }
+    .copy-btn {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      padding: 0.35rem 0.75rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .copy-btn.copied { color: #28C840; border-color: #28C840; }
+    .script-body {
+      padding: 1.5rem 1.25rem;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .script-body::-webkit-scrollbar { width: 5px; height: 5px; }
+    .script-body::-webkit-scrollbar-track { background: transparent; }
+    .script-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+    .script-body pre {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: #E2E8F0;
+      white-space: pre;
+      tab-size: 2;
+    }
+    /* Syntax highlight (básico) */
+    .kw  { color: #C792EA; }
+    .str { color: #C3E88D; }
+    .num { color: #F78C6C; }
+    .cmt { color: #546E7A; font-style: italic; }
+    .fn  { color: #82AAFF; }
+    .const { color: #FFCB6B; }
+    .prop { color: #F07178; }
+
+    /* ── Info Cards ── */
+    .info-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+    @media (min-width: 600px) { .info-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 900px) { .info-grid { grid-template-columns: repeat(4, 1fr); } }
+    .info-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .info-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--bar-color, var(--color-accent));
+    }
+    .info-card-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    .info-card-value {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--color-primary);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    .info-card-value.big {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Alert ── */
+    .alert {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      font-size: 0.8375rem;
+      line-height: 1.55;
+    }
+    .alert svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; }
+    .alert-info    { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+    .alert-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.825rem; }
+    th {
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      padding: 0.85rem 1.2rem;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+    }
+    td {
+      padding: 0.8rem 1.2rem;
+      border-bottom: 1px solid rgba(221,213,203,0.5);
+      color: var(--color-text);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(243,236,227,0.5); }
+    .badge {
+      display: inline-block;
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .badge-green  { background: #D1FAE5; color: #065F46; }
+    .badge-orange { background: #FEF3C7; color: #92400E; }
+    .badge-blue   { background: #DBEAFE; color: #1E40AF; }
+    .badge-gray   { background: #F3F4F6; color: #6B7280; }
+
+    /* ── Footer ── */
+    .admin-footer {
+      border-top: 1px solid var(--color-border);
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .admin-footer p { font-size: 0.78rem; color: var(--color-muted); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.7rem 1.4rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top Bar ── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="Logo-namna.png" alt="NAMNA" class="topbar-logo" />
+      <span class="topbar-label">Panel de Control</span>
+    </div>
+    <nav class="topbar-nav">
+      <a href="index.html">🛍 Tienda</a>
+      <a href="info.html">ℹ️ Info</a>
+      <a href="admin.html" class="active">⚙️ Admin</a>
+    </nav>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      Sistema activo
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <h1>Panel de Control</h1>
+      <p>Accesos directos, configuración y scripts del catálogo NAMNA Jewelry.</p>
+    </div>
+
+    <!-- ── Datos clave ── -->
+    <div class="section-heading"><h2>Identificadores clave</h2></div>
+    <div class="info-grid">
+      <div class="info-card" style="--bar-color:#25D366">
+        <div class="info-card-label">Apps Script URL</div>
+        <div class="info-card-value" id="apps-script-url" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'URL copiada')">
+          AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC
+        </div>
+      </div>
+      <div class="info-card" style="--bar-color:#E78A5E">
+        <div class="info-card-label">Sheet ID (Hoja Maestra)</div>
+        <div class="info-card-value" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'Sheet ID copiado')">
+          1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc
+        </div>
+      </div>
+      <div class="info-card" style="--bar-color:#3B4643">
+        <div class="info-card-label">Drive Folder ID</div>
+        <div class="info-card-value" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'Folder ID copiado')">
+          1U0PAfAUyimmUvDojxNygvhYYXtrteSuF
+        </div>
+      </div>
+      <div class="info-card" style="--bar-color:#1D5B8E">
+        <div class="info-card-label">Lista Externa (Precios)</div>
+        <div class="info-card-value" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'ID copiado')">
+          1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Enlaces rápidos ── -->
+    <div class="section-heading"><h2>Enlaces principales</h2></div>
+    <div class="alert alert-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Haz clic en cualquier tarjeta para abrir el enlace en una nueva pestaña. Los campos de URL son seleccionables para copiar.
+    </div>
+    <div class="grid-3">
+
+      <!-- Google Sheets Maestra -->
+      <a class="link-card" href="https://docs.google.com/spreadsheets/d/1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc/edit" target="_blank" style="--card-accent:#25D366; --icon-bg:rgba(37,211,102,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <span class="link-card-label">Google Sheets</span>
+        <span class="link-card-title">Hoja Maestra de Productos</span>
+        <p class="link-card-desc">Catálogo principal con ID, nombre, categoría, precio, stock y visibilidad.</p>
+        <code class="link-card-url" onclick="event.preventDefault()">spreadsheets/d/1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-primary">Abrir Hoja ↗</span>
+        </div>
+      </a>
+
+      <!-- Google Drive -->
+      <a class="link-card" href="https://drive.google.com/drive/folders/1U0PAfAUyimmUvDojxNygvhYYXtrteSuF" target="_blank" style="--card-accent:#4285F4; --icon-bg:rgba(66,133,244,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="1.8"><polygon points="1 6 1 22 8 13 15 22 22 6 15 13 8 4"/></svg>
+        </div>
+        <span class="link-card-label">Google Drive</span>
+        <span class="link-card-title">Carpeta de Fotos</span>
+        <p class="link-card-desc">Carpeta con imágenes de productos. Nombrar: <code style="font-family:var(--font-mono);font-size:0.75em">ID_Producto.jpg</code> o <code style="font-family:var(--font-mono);font-size:0.75em">ID_Producto-2.jpg</code> para fotos hijas.</p>
+        <code class="link-card-url" onclick="event.preventDefault()">drive/folders/1U0PAfAUyimmUvDojxNygvhYYXtrteSuF</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-primary">Abrir Drive ↗</span>
+        </div>
+      </a>
+
+      <!-- Apps Script -->
+      <a class="link-card" href="https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec" target="_blank" style="--card-accent:#E78A5E; --icon-bg:rgba(231,138,94,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E78A5E" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <span class="link-card-label">Apps Script API</span>
+        <span class="link-card-title">Endpoint del Catálogo</span>
+        <p class="link-card-desc">API que devuelve productos + fotos Drive + textos dinámicos en JSON.</p>
+        <code class="link-card-url" onclick="event.preventDefault()">macros/s/AKfycbxAhAWbr…/exec</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-accent">Ver API ↗</span>
+          <button class="btn-sm btn-ghost" onclick="event.preventDefault(); testAPI()">Probar</button>
+        </div>
+      </a>
+
+      <!-- Apps Script Editor -->
+      <a class="link-card" href="https://script.google.com/home" target="_blank" style="--card-accent:#F59E0B; --icon-bg:rgba(245,158,11,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <span class="link-card-label">Google Apps Script</span>
+        <span class="link-card-title">Editor del Servidor</span>
+        <p class="link-card-desc">Edita el código del servidor: <code style="font-family:var(--font-mono);font-size:0.75em">servidor_google_apps_script.js</code></p>
+        <code class="link-card-url" onclick="event.preventDefault()">script.google.com/home</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-primary">Abrir Editor ↗</span>
+        </div>
+      </a>
+
+      <!-- Lista de precios externa -->
+      <a class="link-card" href="https://docs.google.com/spreadsheets/d/1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y/edit" target="_blank" style="--card-accent:#1D5B8E; --icon-bg:rgba(29,91,142,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1D5B8E" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <span class="link-card-label">Google Sheets</span>
+        <span class="link-card-title">Lista Externa de Precios</span>
+        <p class="link-card-desc">Fuente externa para sincronización automática. Columnas: Referencia, Precio de venta, Cantidad.</p>
+        <code class="link-card-url" onclick="event.preventDefault()">spreadsheets/d/1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-primary">Abrir Lista ↗</span>
+        </div>
+      </a>
+
+      <!-- WhatsApp -->
+      <a class="link-card" href="https://wa.me/4917670201873" target="_blank" style="--card-accent:#25D366; --icon-bg:rgba(37,211,102,0.1)">
+        <div class="link-card-icon">
+          <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <span class="link-card-label">WhatsApp</span>
+        <span class="link-card-title">Contacto de Ventas</span>
+        <p class="link-card-desc">Número configurado para pedidos desde el catálogo: <strong>+49 176 70201873</strong></p>
+        <code class="link-card-url" onclick="event.preventDefault()">wa.me/4917670201873</code>
+        <div class="link-card-actions">
+          <span class="btn-sm btn-green">Abrir WhatsApp ↗</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ── Estructura de Hojas ── -->
+    <div class="section-heading"><h2>Estructura requerida de las hojas</h2></div>
+    <div class="alert alert-warning">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Los nombres de columna deben ser <strong>exactos</strong>. El servidor valida que existan <code style="font-family:var(--font-mono)">ID_Producto</code>, <code style="font-family:var(--font-mono)">Precio_Publico</code> y <code style="font-family:var(--font-mono)">Visible</code>.
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Columna (nombre exacto)</th>
+            <th>Tipo</th>
+            <th>Obligatorio</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">ID_Producto</code></td>
+            <td>Texto</td>
+            <td><span class="badge badge-orange">Sí</span></td>
+            <td>Clave única del producto. Debe coincidir con el nombre de archivo en Drive.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Nombre</code></td>
+            <td>Texto</td>
+            <td><span class="badge badge-green">Sí</span></td>
+            <td>Nombre visible en el catálogo.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Descripción</code></td>
+            <td>Texto</td>
+            <td><span class="badge badge-gray">No</span></td>
+            <td>Texto largo mostrado en el modal del producto.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Categoría</code></td>
+            <td>Texto</td>
+            <td><span class="badge badge-gray">No</span></td>
+            <td>Filtra en la barra: Collares, Dijes, Aretes, Sets…</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Precio_Publico</code></td>
+            <td>Número</td>
+            <td><span class="badge badge-orange">Sí</span></td>
+            <td>Precio en EUR sin símbolo. Ej: <code style="font-family:var(--font-mono)">120</code></td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Visible</code></td>
+            <td>Texto</td>
+            <td><span class="badge badge-orange">Sí</span></td>
+            <td>Escribe <code style="font-family:var(--font-mono)">Sí</code> para publicar o <code style="font-family:var(--font-mono)">No</code> para ocultar.</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono);font-size:0.8em">Stock</code></td>
+            <td>Número</td>
+            <td><span class="badge badge-gray">No</span></td>
+            <td>Unidades disponibles. Si es ≤5 y >0 aparece badge "Últimas N".</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Convención de fotos ── -->
+    <div class="section-heading"><h2>Convención de nombres en Drive</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre de archivo</th>
+            <th>Rol</th>
+            <th>Ejemplo ID_Producto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="font-family:var(--font-mono)">n. ruby d..jpg</code></td>
+            <td><span class="badge badge-green">Foto principal</span></td>
+            <td><code style="font-family:var(--font-mono)">N. Ruby D.</code></td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono)">n. ruby d.-2.jpg</code></td>
+            <td><span class="badge badge-blue">Foto hija 1</span></td>
+            <td>Misma pieza, ángulo 2</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono)">n. ruby d.-3.jpg</code></td>
+            <td><span class="badge badge-blue">Foto hija 2</span></td>
+            <td>Misma pieza, ángulo 3</td>
+          </tr>
+          <tr>
+            <td><code style="font-family:var(--font-mono)">aretes-001.png</code></td>
+            <td><span class="badge badge-green">Foto principal</span></td>
+            <td><code style="font-family:var(--font-mono)">Aretes-001</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Script: servidor ── -->
+    <div class="script-section">
+      <div class="section-heading"><h2>Script: Servidor Google Apps Script</h2></div>
+      <div class="alert alert-success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Pega este código en el editor de Apps Script vinculado a tu Hoja Maestra. Luego haz clic en <strong>Implementar → Nueva implementación → Aplicación web</strong>.
+      </div>
+      <div class="script-box">
+        <div class="script-header">
+          <div class="script-header-left">
+            <span class="dot dot-r"></span>
+            <span class="dot dot-y"></span>
+            <span class="dot dot-g"></span>
+            <span class="script-filename">servidor_google_apps_script.js</span>
+          </div>
+          <button class="copy-btn" id="copy-server-btn" onclick="copyScript('server-code', 'copy-server-btn')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+        </div>
+        <div class="script-body">
+          <pre id="server-code">const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
+const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
+const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
+
+function doGet() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0];
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+
+    if (!headers.includes("ID_Producto") || !headers.includes("Precio_Publico") || !headers.includes("Visible")) {
+      throw new Error("Estructura de la hoja alterada. Faltan columnas críticas.");
+    }
+
+    const idx = {
+      id:       headers.indexOf("ID_Producto"),
+      nombre:   headers.indexOf("Nombre"),
+      desc:     headers.indexOf("Descripción"),
+      cat:      headers.indexOf("Categoría"),
+      precioPub:headers.indexOf("Precio_Publico"),
+      visible:  headers.indexOf("Visible"),
+      stock:    headers.indexOf("Stock")
+    };
+
+    const mapaFotos = crearMapaFotos(DRIVE_FOLDER_ID);
+    const productosValidos = [];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const idProducto = String(row[idx.id]).trim();
+      if (!idProducto) continue;
+
+      const isVisible = String(row[idx.visible]).trim().toLowerCase();
+      if (isVisible !== "sí" && isVisible !== "si") continue;
+
+      const precio = Number(row[idx.precioPub]) || 0;
+      const stock  = Number(row[idx.stock]) || 0;
+      const nombre = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
+      const cat    = row[idx.cat]    ? String(row[idx.cat]).trim()    : "Joyería";
+      const desc   = row[idx.desc]   ? String(row[idx.desc]).trim()   : "";
+
+      let searchKey = idProducto.toLowerCase().replace(/\.+$/, '');
+      const fotosDrive = mapaFotos[searchKey];
+      let imagenes = [FALLBACK_IMAGE_URL];
+
+      if (fotosDrive) {
+        imagenes = [];
+        if (fotosDrive.principal) {
+          imagenes.push(`https://drive.google.com/thumbnail?id=${fotosDrive.principal}&sz=w800`);
+        }
+        fotosDrive.hijas.forEach(idHija => {
+          imagenes.push(`https://drive.google.com/thumbnail?id=${idHija}&sz=w800`);
+        });
+        if (imagenes.length === 0) imagenes.push(FALLBACK_IMAGE_URL);
+      }
+
+      productosValidos.push({ id: idProducto, nombre, descripcion: desc, categoria: cat, precio, stock, imagenes });
+    }
+
+    const textos = leerTextos(ss);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ version: "3.0", productos: productosValidos, textos }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: true, message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function crearMapaFotos(folderId) {
+  const mapa = {};
+  try {
+    const folder = DriveApp.getFolderById(folderId);
+    const archivos = folder.getFiles();
+    while (archivos.hasNext()) {
+      const archivo = archivos.next();
+      const id = archivo.getId();
+      let nombreSinExt = archivo.getName().replace(/\.[a-zA-Z0-9]{3,4}$/, '').trim().toLowerCase();
+      const match = nombreSinExt.match(/-(\d+)$/);
+      const suffix = match ? match[1] : "";
+      let baseCode = nombreSinExt.replace(/-\d+$/, '').trim().replace(/\.+$/, '').trim();
+      if (!mapa[baseCode]) mapa[baseCode] = { principal: null, hijas: [] };
+      if (suffix === "" || suffix === "1" || suffix === "01") {
+        mapa[baseCode].principal = id;
+      } else {
+        mapa[baseCode].hijas.push(id);
+      }
+    }
+  } catch (e) { console.error("Error leyendo Drive", e); }
+  return mapa;
+}
+
+function leerTextos(ss) {
+  const resultado = {};
+  try {
+    let hojaTextos = null;
+    for (const nombre of ["TEXTOS","Textos","textos","TEXTO","Texto"]) {
+      hojaTextos = ss.getSheetByName(nombre);
+      if (hojaTextos) break;
+    }
+    if (!hojaTextos) return resultado;
+    const datos = hojaTextos.getDataRange().getValues();
+    const cab = datos[0];
+    let iId  = cab.indexOf("ID_Texto"); if (iId  === -1) iId  = cab.indexOf("ID");
+    let iTxt = cab.indexOf("Texto_ES"); if (iTxt === -1) iTxt = cab.indexOf("Texto");
+    if (iId === -1 || iTxt === -1) return resultado;
+    for (let i = 1; i < datos.length; i++) {
+      const id  = String(datos[i][iId]).trim();
+      const txt = String(datos[i][iTxt]).trim();
+      if (id && txt && !id.startsWith("_")) resultado[id] = txt;
+    }
+  } catch (e) { console.error("Error leyendo textos", e); }
+  return resultado;
+}
+
+function sincronizarCatalogo() {
+  try {
+    const hojaMaestra = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const datosMaestros = hojaMaestra.getDataRange().getValues();
+    const cabecerasM = datosMaestros[0];
+    const iIdM  = cabecerasM.indexOf("ID_Producto");
+    const iNomM = cabecerasM.indexOf("Nombre");
+    const iDescM = cabecerasM.indexOf("Descripción");
+    const iCatM = cabecerasM.indexOf("Categoría");
+    const iPreM = cabecerasM.indexOf("Precio_Publico");
+    const iVisM = cabecerasM.indexOf("Visible");
+    const iStockM = cabecerasM.indexOf("Stock");
+    if (iIdM === -1 || iPreM === -1) throw new Error("Faltan columnas en hoja maestra.");
+
+    const productosMaestra = {};
+    for (let i = 1; i < datosMaestros.length; i++) {
+      const id = String(datosMaestros[i][iIdM]).trim().toLowerCase();
+      if (id) productosMaestra[id] = i;
+    }
+
+    const hojaExterna = SpreadsheetApp.openById(EXTERNAL_PRICE_LIST_ID).getSheets()[0];
+    const datosExternos = hojaExterna.getDataRange().getValues();
+    const cabecerasExt = datosExternos[0];
+    const iRefE   = cabecerasExt.indexOf("Referencia");
+    const iMetalE = cabecerasExt.indexOf("Peso metal ");
+    const iCantE  = cabecerasExt.indexOf("Cantidad");
+    const iPiedraE = cabecerasExt.indexOf("Piedra ct");
+    const iDiamE  = cabecerasExt.indexOf("diamantes ct");
+    const iPrecioE = cabecerasExt.indexOf("precio de venta");
+
+    let filasNuevas = [], actualizaciones = 0;
+
+    for (let i = 1; i < datosExternos.length; i++) {
+      const rowExt = datosExternos[i];
+      const refRaw = rowExt[iRefE];
+      if (!refRaw) continue;
+      const ref = String(refRaw).trim();
+      const refLower = ref.toLowerCase();
+      let precioNum = Number(String(rowExt[iPrecioE]).replace(/[^0-9.-]+/g,""));
+      let cantidadNum = Number(rowExt[iCantE]) || 0;
+      let descAuto = [];
+      if (rowExt[iMetalE]) descAuto.push(`Metal: ${rowExt[iMetalE]}`);
+      if (rowExt[iPiedraE]) descAuto.push(`Piedra: ${rowExt[iPiedraE]}`);
+      if (rowExt[iDiamE]) descAuto.push(`Diamantes: ${rowExt[iDiamE]}ct`);
+      const descripcionFinal = descAuto.join(" • ");
+
+      if (productosMaestra[refLower] !== undefined) {
+        const numFilaSheet = productosMaestra[refLower] + 1;
+        hojaMaestra.getRange(numFilaSheet, iPreM + 1).setValue(precioNum);
+        hojaMaestra.getRange(numFilaSheet, iStockM + 1).setValue(cantidadNum);
+        if (!datosMaestros[productosMaestra[refLower]][iNomM] && iNomM !== -1) hojaMaestra.getRange(numFilaSheet, iNomM + 1).setValue(ref);
+        if (!datosMaestros[productosMaestra[refLower]][iDescM] && iDescM !== -1 && descripcionFinal) hojaMaestra.getRange(numFilaSheet, iDescM + 1).setValue(descripcionFinal);
+        actualizaciones++;
+      } else {
+        let nuevaFila = new Array(cabecerasM.length).fill("");
+        if (iIdM !== -1) nuevaFila[iIdM] = ref;
+        if (iNomM !== -1) nuevaFila[iNomM] = ref;
+        if (iDescM !== -1) nuevaFila[iDescM] = descripcionFinal;
+        if (iCatM !== -1) nuevaFila[iCatM] = "Joyería";
+        if (iPreM !== -1) nuevaFila[iPreM] = precioNum;
+        if (iVisM !== -1) nuevaFila[iVisM] = "Sí";
+        if (iStockM !== -1) nuevaFila[iStockM] = cantidadNum;
+        filasNuevas.push(nuevaFila);
+      }
+    }
+
+    if (filasNuevas.length > 0) {
+      hojaMaestra.getRange(hojaMaestra.getLastRow() + 1, 1, filasNuevas.length, cabecerasM.length).setValues(filasNuevas);
+    }
+
+    SpreadsheetApp.getUi().alert(`✅ Sincronización completa.\n- Creados: ${filasNuevas.length}\n- Actualizados: ${actualizaciones}`);
+
+  } catch (error) {
+    try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e){}
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Script: app.js config ── -->
+    <div class="script-section">
+      <div class="section-heading"><h2>Configuración del Catálogo (js/app.js)</h2></div>
+      <div class="alert alert-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Este bloque ya está en <code style="font-family:var(--font-mono)">js/app.js</code>. Si cambias la URL del Apps Script o el Sheet ID, actualízalo aquí.
+      </div>
+      <div class="script-box">
+        <div class="script-header">
+          <div class="script-header-left">
+            <span class="dot dot-r"></span>
+            <span class="dot dot-y"></span>
+            <span class="dot dot-g"></span>
+            <span class="script-filename">js/app.js — Bloque CONFIG</span>
+          </div>
+          <button class="copy-btn" id="copy-config-btn" onclick="copyScript('config-code', 'copy-config-btn')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+        </div>
+        <div class="script-body">
+          <pre id="config-code">const CONFIG = {
+  // ── URL del servidor Apps Script (OBLIGATORIO para fotos múltiples desde Drive)
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec',
+
+  // ── Acceso directo a la Hoja Maestra (Respaldo si falla Apps Script)
+  SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
+
+  // ── Número de WhatsApp para pedidos (formato internacional, sin +)
+  WHATSAPP_NUMBER: '4917670201873',
+
+  CURRENCY:         'EUR',
+  LOCALE:           'es-ES',
+  CACHE_DURATION_MS: 5 * 60 * 1000,  // 5 minutos de caché en sesión
+};</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Test API ── -->
+    <div class="script-section">
+      <div class="section-heading"><h2>Prueba de API en vivo</h2></div>
+      <div class="script-box">
+        <div class="script-header">
+          <div class="script-header-left">
+            <span class="dot dot-r"></span>
+            <span class="dot dot-y"></span>
+            <span class="dot dot-g"></span>
+            <span class="script-filename">Respuesta de la API</span>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="copy-btn" id="test-api-run-btn" onclick="testAPI()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Ejecutar
+            </button>
+            <button class="copy-btn" id="copy-result-btn" onclick="copyScript('api-result', 'copy-result-btn')" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copiar
+            </button>
+          </div>
+        </div>
+        <div class="script-body">
+          <pre id="api-result" style="color:rgba(255,255,255,0.3);font-style:italic">// Haz clic en "Ejecutar" para probar la conexión con la API…</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="admin-footer">
+      <p>© 2026 NAMNA Jewelry — Panel de Administración</p>
+      <p>Motor: Apps Script v3.0 · Última revisión: Junio 2026</p>
+    </div>
+
+  </div><!-- /page-wrapper -->
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script>
+    // ── URL de la API ──
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec';
+
+    // ── Toast ──
+    function showToast(msg, duration = 2500) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    // ── Copiar texto genérico ──
+    function copyText(text, msg) {
+      navigator.clipboard.writeText(text.trim()).then(() => showToast('✓ ' + msg)).catch(() => showToast('❌ No se pudo copiar'));
+    }
+
+    // ── Copiar contenido de un <pre> ──
+    function copyScript(preId, btnId) {
+      const pre = document.getElementById(preId);
+      const btn = document.getElementById(btnId);
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copiado`;
+        showToast('✓ Código copiado al portapapeles');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`;
+        }, 3000);
+      });
+    }
+
+    // ── Probar API ──
+    async function testAPI() {
+      const el = document.getElementById('api-result');
+      const btn = document.getElementById('test-api-run-btn');
+      const copyBtn = document.getElementById('copy-result-btn');
+      el.style.color = 'rgba(255,255,255,0.4)';
+      el.textContent = '⏳ Conectando con la API…';
+      btn.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite">⟳</span> Cargando`;
+
+      const style = document.createElement('style');
+      style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(style);
+
+      try {
+        const t0 = performance.now();
+        const res = await fetch(API_URL, { signal: AbortSignal.timeout(12000) });
+        const ms = Math.round(performance.now() - t0);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const pretty = JSON.stringify(data, null, 2);
+        el.style.color = '#C3E88D';
+        el.textContent = `// ✅ Respuesta OK en ${ms}ms\n\n${pretty}`;
+        copyBtn.disabled = false;
+        showToast(`✓ API OK — ${(data.productos || []).length} productos · ${ms}ms`);
+      } catch (err) {
+        el.style.color = '#F07178';
+        el.textContent = `// ❌ Error: ${err.message}\n\n// Verifica:\n// 1. La URL del Apps Script está implementada como "Aplicación web"\n// 2. Acceso configurado en "Cualquier persona"\n// 3. No hay errores en el script`;
+        showToast('❌ Error al conectar con la API');
+      }
+
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Ejecutar`;
+    }
+  </script>
+
+</body>
+</html>

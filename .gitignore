@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Archivos temporales generados por herramientas
+gemini-code-*.md
+*.tmp
+*.log
