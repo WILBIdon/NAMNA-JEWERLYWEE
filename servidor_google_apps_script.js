@@ -11,10 +11,10 @@
  * ================================================================
  */
 
-const DRIVE_FOLDER_ID        = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
-const MASTER_SHEET_ID        = "1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc"; // ← Hoja Maestra
+const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
+const MASTER_SHEET_ID = "1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc"; // ← Hoja Maestra
 const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
-const FALLBACK_IMAGE_URL     = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
+const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
 
 // ═══════════════════════════════════════════════════════════════
 // BLOQUE 1: LA API WEB (Sirve los datos al catálogo)
@@ -332,7 +332,7 @@ function sincronizarCatalogo() {
   } catch (error) {
     console.error("Error en sincronización", error);
     try {
-      try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e){}
+      try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch (e) { }
     } catch (e) { }
   }
 }
@@ -354,7 +354,7 @@ function autoCategorizar() {
     const datos = hoja.getDataRange().getValues();
     const cabeceras = datos[0];
 
-    const iId  = cabeceras.indexOf("ID_Producto");
+    const iId = cabeceras.indexOf("ID_Producto");
     const iCat = cabeceras.indexOf("Categoría");
 
     if (iId === -1 || iCat === -1) {
@@ -404,6 +404,6 @@ function autoCategorizar() {
     );
 
   } catch (error) {
-    try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e) {}
+    try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch (e) { }
   }
 }
