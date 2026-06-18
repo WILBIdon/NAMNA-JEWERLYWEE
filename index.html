@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAMNA — Joyería Artesanal</title>
+
+    <meta name="description" content="Descubre piezas únicas de joyería artesanal. Anillos, collares, aretes y pulseras diseñados con materiales premium y piedras naturales.">
+    <meta name="theme-color" content="#3B4643">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="NAMNA — Joyería Artesanal">
+    <meta property="og:description" content="Piezas únicas de joyería artesanal con piedras naturales.">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Announcement Bar -->
+    <div class="announcement-bar" id="announcement-bar" data-txt="TXT-001">
+        Envío gratis en pedidos mayores a €999 &mdash; Piezas únicas hechas a mano
+    </div>
+
+    <!-- Header -->
+    <header class="main-header" id="main-header">
+        <div class="header-container">
+            <!-- Mobile menu -->
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- Logo -->
+            <a href="#" class="brand-logo" id="brand-logo">
+                <img src="Logo-namna.png" alt="NAMNA" />
+            </a>
+
+            <!-- Desktop nav -->
+            <nav class="header-nav" id="header-nav">
+                <a href="#catalogo">Colección</a>
+                <a href="#nuevos">Novedades</a>
+                <a href="info.html#about">Quiénes Somos</a>
+                <a href="admin.html" style="opacity:0.5;font-size:0.65rem">⚙️ Admin</a>
+            </nav>
+
+            <!-- Header actions -->
+            <div class="header-actions">
+                <button class="header-icon-btn" id="search-btn" aria-label="Buscar">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button class="header-icon-btn" id="wishlist-btn" aria-label="Favoritos">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+        <img src="assets/hero_jewelry.png" alt="NAMNA Joyería" class="hero-bg" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <p class="hero-eyebrow" data-txt="TXT-002">Alta Joyería</p>
+            <h1 class="hero-title" data-txt="TXT-003">Elegancia Atemporal</h1>
+            <p class="hero-subtitle" data-txt="TXT-004">
+                Descubre nuestra exclusiva colección de joyería fina. Cada pieza es una obra de arte diseñada para iluminar tu esencia y acompañarte para siempre.
+            </p>
+            <a href="#catalogo" class="hero-cta">
+                <span data-txt="TXT-005">Explorar Colección</span>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+    </section>
+
+    <!-- Category Filters -->
+    <nav class="categories-nav" id="categories-nav">
+        <div id="categories-container" class="filters-scroll">
+            <button class="filter-btn active" data-category="all">Todos</button>
+        </div>
+    </nav>
+
+    <!-- Catalog Section -->
+    <main class="catalog-section" id="catalogo">
+        <div class="section-header">
+            <h2 class="section-title" data-txt="TXT-006">Nuestra Colección</h2>
+            <span class="product-count" id="product-count"></span>
+        </div>
+
+        <!-- Loader -->
+        <div id="catalog-loader" class="loader">
+            <div class="loader-spinner"></div>
+            <span>Cargando piezas...</span>
+        </div>
+
+        <!-- Products Grid -->
+        <section id="products-grid" class="products-grid"></section>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content">
+            <button class="close-modal-btn" id="close-modal-btn" aria-label="Cerrar">&times;</button>
+            <div class="modal-inner" id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer" id="contacto">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3 class="footer-brand-name">NAMNA</h3>
+                <p data-txt="TXT-015">Joyas únicas que iluminan tu esencia.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+                    </a>
+                    <a href="#" class="social-icon" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                    </a>
+                    <a href="#" class="social-icon" aria-label="Pinterest">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.2 2.6 7.8 6.3 9.3-.1-.8-.2-2 0-2.9.2-.8 1.3-5.4 1.3-5.4s-.3-.7-.3-1.6c0-1.5.9-2.6 2-2.6.9 0 1.4.7 1.4 1.5 0 .9-.6 2.3-.9 3.6-.3 1.1.5 2 1.5 2 1.8 0 3.2-1.9 3.2-4.7 0-2.5-1.8-4.2-4.3-4.2-2.9 0-4.7 2.2-4.7 4.5 0 .9.3 1.8.8 2.3.1.1.1.2.1.3-.1.3-.3 1-.3 1.1 0 .2-.1.2-.3.1-1.3-.6-2.1-2.4-2.1-3.9 0-3.2 2.3-6.1 6.7-6.1 3.5 0 6.2 2.5 6.2 5.9 0 3.5-2.2 6.3-5.2 6.3-1 0-2-.5-2.3-1.1 0 0-.5 1.9-.6 2.4-.2.9-.8 2-1.2 2.7.9.3 1.8.4 2.8.4 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Tienda</h4>
+                <ul class="footer-links">
+                    <li><a href="#catalogo">Colección Completa</a></li>
+                    <li><a href="#">Anillos</a></li>
+                    <li><a href="#">Collares</a></li>
+                    <li><a href="#">Aretes</a></li>
+                    <li><a href="#">Pulseras</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Información</h4>
+                <ul class="footer-links">
+                    <li><a href="info.html#about">Quiénes Somos</a></li>
+                    <li><a href="info.html#shipping">Políticas de Envío</a></li>
+                    <li><a href="info.html#returns">Políticas de Devolución</a></li>
+                    <li><a href="info.html#sizing">Guía de Tallas</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Contacto</h4>
+                <ul class="footer-links">
+                    <li><a href="mailto:hola@namna.com">hola@namna.com</a></li>
+                    <li><a href="https://wa.me/4917670201873" target="_blank">WhatsApp</a></li>
+                    <li><a href="https://instagram.com" target="_blank">Instagram DM</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p data-txt="TXT-019">&copy; 2026 NAMNA Jewelry. Todos los derechos reservados.</p>
+            <p>Hecho a mano con ♡</p>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/4917670201873" target="_blank" rel="noopener" class="whatsapp-float" id="whatsapp-btn" aria-label="Contactar por WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+
+    <script src="js/app.js"></script>
+
+</body>
+</html>
