@@ -6,6 +6,10 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** seo: actualización de meta descripciones y etiquetas geo-regionales (España y Europa) en `index.html` e `info.html`.
+- **Reciente** feat: inyector de traducciones (script) optimizado para actualizar en lote los textos ES y EN enfocados a envíos para toda España y Europa.
+- **Reciente** feat: internacionalización completa (i18n) con soporte ES/EN, guardado en localStorage y cambio dinámico sin recargar página.
+- **Reciente** feat: integración de Google Drive (`Site_Assets`) para cargar dinámicamente imágenes decorativas (hero, banners de info) en lugar de assets locales.
 - **Reciente** security: escudo anti-clonación (shield.js) — bloqueo de clic derecho, selección de texto, atajos de teclado, arrastre de imágenes, detección de DevTools, protección anti-iframe y advertencia en consola.
 - **Reciente** security: headers de seguridad (X-Frame-Options DENY, CSP frame-ancestors none, referrer policy).
 - **Reciente** security: cambiar contraseña del admin a nueva clave.
