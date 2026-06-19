@@ -6,6 +6,9 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** security: escudo anti-clonación (shield.js) — bloqueo de clic derecho, selección de texto, atajos de teclado, arrastre de imágenes, detección de DevTools, protección anti-iframe y advertencia en consola.
+- **Reciente** security: headers de seguridad (X-Frame-Options DENY, CSP frame-ancestors none, referrer policy).
+- **Reciente** security: cambiar contraseña del admin a nueva clave.
 - **Reciente** feat: rediseño completo de info.html con hero visual, secciones con íconos, formulario de contacto a WhatsApp y diseño premium.
 - **Reciente** feat: sección de Novedades (últimos 4 productos de la tabla) con carrusel horizontal y badge "Nuevo".
 - **Reciente** seo: Schema.org JSON-LD (JewelryStore), Open Graph completo, Twitter Card, canonical URL y meta robots mejorados en index.html.
