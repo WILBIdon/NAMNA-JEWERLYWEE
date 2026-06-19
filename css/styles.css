@@ -1001,10 +1001,16 @@ body.mobile-menu-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
+  padding: 0;
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+
+@media screen and (min-width: 700px) {
+  .modal-overlay {
+    padding: var(--space-md);
+  }
 }
 
 .modal-overlay.active {
@@ -1015,16 +1021,24 @@ body.mobile-menu-open {
 .modal-content {
   position: relative;
   width: 100%;
-  max-width: 900px;
-  height: 90vh;
-  max-height: 90vh;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--color-white);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   box-shadow: var(--shadow-modal);
   overflow: hidden;
   transform: translateY(20px) scale(0.97);
   transition: transform var(--transition-base);
   display: flex;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-content {
+    max-width: 900px;
+    height: 85vh;
+    max-height: 85vh;
+    border-radius: var(--radius-md);
+  }
 }
 
 .modal-overlay.active .modal-content {
@@ -1045,12 +1059,21 @@ body.mobile-menu-open {
   }
 }
 
+/* ── Mobile: image takes ~42% of screen, details take rest ── */
 .modal-media-container {
-  flex: 1 1 50%;
+  flex: 0 0 42%;
+  max-height: 42%;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-media-container {
+    flex: 1 1 50%;
+    max-height: none;
+  }
 }
 
 .modal-image-wrapper {
@@ -1084,12 +1107,12 @@ body.mobile-menu-open {
 
 .zoom-hint {
   position: absolute;
-  bottom: 1rem;
-  right: 1rem;
+  bottom: 0.5rem;
+  right: 0.5rem;
   background: rgba(255,255,255,0.7);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1099,9 +1122,18 @@ body.mobile-menu-open {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+@media screen and (min-width: 700px) {
+  .zoom-hint {
+    bottom: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+  }
+}
+
 .zoom-hint svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: var(--color-primary);
   stroke-width: 1.5;
   fill: none;
@@ -1119,26 +1151,39 @@ body.mobile-menu-open {
 
 .modal-gallery {
   display: flex;
-  gap: var(--space-xs);
-  padding: var(--space-sm);
+  gap: 4px;
+  padding: 6px;
   background: var(--color-background);
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  flex-shrink: 0;
 }
 .modal-gallery::-webkit-scrollbar {
   display: none;
 }
 
 .gallery-thumb {
-  width: 60px;
-  height: 80px;
+  width: 44px;
+  height: 56px;
   object-fit: cover;
   cursor: pointer;
   opacity: 0.5;
   transition: opacity var(--transition-fast), border var(--transition-fast);
   border: 1.5px solid transparent;
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+@media screen and (min-width: 700px) {
+  .gallery-thumb {
+    width: 60px;
+    height: 80px;
+  }
+  .modal-gallery {
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+  }
 }
 
 .gallery-thumb:hover {
@@ -1150,12 +1195,13 @@ body.mobile-menu-open {
   border-color: var(--color-primary);
 }
 
+/* ── Details panel — fills remaining space ── */
 .modal-details {
-  flex: 1 1 50%;
-  padding: var(--space-xl);
+  flex: 1 1 auto;
+  padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
@@ -1163,66 +1209,113 @@ body.mobile-menu-open {
 
 @media screen and (min-width: 700px) {
   .modal-details {
+    flex: 1 1 50%;
     padding: var(--space-2xl);
+    justify-content: center;
   }
 }
 
 .modal-category {
   font-family: var(--font-body);
-  font-size: var(--text-xs);
+  font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-accent);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 0.25rem;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-category {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-sm);
+  }
 }
 
 .modal-title {
   font-family: var(--font-heading);
-  font-size: clamp(var(--text-2xl), 3vw, var(--text-3xl));
+  font-size: clamp(1.25rem, 4vw, var(--text-2xl));
   font-weight: 400;
   letter-spacing: 0.1em;
   color: var(--color-primary);
-  margin-bottom: var(--space-md);
+  margin-bottom: 0.35rem;
+  line-height: 1.15;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-title {
+    font-size: clamp(var(--text-2xl), 3vw, var(--text-3xl));
+    margin-bottom: var(--space-md);
+  }
 }
 
 .modal-price {
   font-family: var(--font-body);
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 500;
   color: var(--color-primary);
-  margin-bottom: var(--space-lg);
-  padding-bottom: var(--space-lg);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-border);
 }
 
+@media screen and (min-width: 700px) {
+  .modal-price {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+  }
+}
+
 .modal-description {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
-  line-height: 1.5;
-  margin-bottom: var(--space-md);
-  overflow-y: auto; /* Permitir scroll interno solo si el texto es muy largo, para evitar que se rompa, pero el contenedor principal no tendrá scroll */
-  flex: 1 1 auto;
+  line-height: 1.45;
+  margin-bottom: 0.5rem;
+  overflow-y: auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 4.5em;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-description {
+    font-size: var(--text-base);
+    line-height: 1.5;
+    margin-bottom: var(--space-md);
+    max-height: none;
+    flex: 1 1 auto;
+  }
 }
 
 .modal-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   font-family: var(--font-body);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: var(--button-letter-spacing);
   text-transform: uppercase;
   color: var(--color-white);
   background: var(--color-primary);
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   width: 100%;
   position: relative;
   overflow: hidden;
   transition: background var(--transition-base);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+@media screen and (min-width: 700px) {
+  .modal-cta {
+    font-size: var(--text-sm);
+    padding: 1rem 2rem;
+    gap: var(--space-sm);
+  }
 }
 
 .modal-cta:hover {
@@ -1230,20 +1323,27 @@ body.mobile-menu-open {
 }
 
 .modal-cta svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   stroke: currentColor;
   stroke-width: 1.5;
   fill: none;
 }
 
+@media screen and (min-width: 700px) {
+  .modal-cta svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 /* Close button */
 .close-modal-btn {
   position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  width: 40px;
-  height: 40px;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1252,10 +1352,20 @@ body.mobile-menu-open {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 10;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--color-primary);
   transition: background var(--transition-fast), transform var(--transition-fast);
   line-height: 1;
+}
+
+@media screen and (min-width: 700px) {
+  .close-modal-btn {
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
 }
 
 .close-modal-btn:hover {

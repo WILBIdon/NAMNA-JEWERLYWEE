@@ -6,6 +6,7 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** style: optimizar ventana de producto para móvil — ocupa 100% de pantalla sin scroll, imagen al 42%, detalles compactos con tipografía reducida, botón CTA fijo al fondo; en desktop se mantiene el layout lado a lado.
 - **Reciente** fix: implementar funcionalidad completa del menú hamburguesa en móvil en `index.html` e `info.html` — panel de navegación lateral con overlay, animación del botón (☰→✕), links con transiciones escalonadas, cierre al tocar overlay/Escape/link, y botón de WhatsApp en el pie del menú.
 - **Reciente** feat: buscador inteligente (Smart Search) a pantalla completa con atajos a páginas de índice (contacto, envíos).
 - **Reciente** feat: lista de deseos (Wishlist/Favoritos) guardada en `localStorage` con panel lateral y opción de pedir carrito por WhatsApp.
