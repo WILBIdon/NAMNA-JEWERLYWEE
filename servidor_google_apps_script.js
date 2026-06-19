@@ -374,7 +374,7 @@ function inyectarTextosIngles() {
   }
   
   if (!hoja) {
-    SpreadsheetApp.getUi().alert("No encontré la pestaña de Textos.");
+    console.error("No encontré la pestaña de Textos.");
     return;
   }
   
@@ -386,7 +386,7 @@ function inyectarTextosIngles() {
   const iEs = cabeceras.findIndex(c => c && (c.toString().toUpperCase().includes("TEXTO_ES") || c === "Texto" || c === "texto"));
   
   if (iId === -1 || iEs === -1) {
-    SpreadsheetApp.getUi().alert("No encontré las columnas ID y Texto_ES.");
+    console.error("No encontré las columnas ID y Texto_ES.");
     return;
   }
   
@@ -478,5 +478,5 @@ function inyectarTextosIngles() {
   // Escribir todo de golpe (súper rápido, evita timeout)
   hoja.getRange(1, 1, datos.length, colCount).setValues(datos);
   
-  SpreadsheetApp.getUi().alert(`✅ Textos inyectados!\n- Textos en inglés agregados/actualizados: ${actualizados}\n- Textos nuevos completos añadidos: ${añadidos}`);
+  console.log(`✅ Textos inyectados!\n- Textos en inglés agregados/actualizados: ${actualizados}\n- Textos nuevos completos añadidos: ${añadidos}`);
 }
