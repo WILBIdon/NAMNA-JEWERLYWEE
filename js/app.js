@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initHeader() {
+  if (!dom.header) return;
   window.addEventListener('scroll', () => {
     if (window.pageYOffset > 50) {
       dom.header.classList.add('scrolled');
@@ -358,12 +359,12 @@ function finishLoading() {
 }
 
 // ── Novedades: últimos 4 productos añadidos ──
-function renderNuevos() {
+function renderNuevos(products = state.products) {
   if (!dom.nuevosGrid) return;
   dom.nuevosGrid.innerHTML = '';
 
   // Los últimos productos de la tabla son los más recientes
-  const nuevos = state.products.slice(-4).reverse();
+  const nuevos = products.slice(-4).reverse();
 
   if (nuevos.length === 0) {
     dom.nuevosGrid.closest('.nuevos-section').style.display = 'none';
@@ -419,7 +420,9 @@ function showDataSourceBadge() {
 // SISTEMA VISUAL
 // ═══════════════════════════════════════════════════════════════
 function buildCategoryFilters() {
+  if (!dom.categoriesContainer) return;
   const allBtn = dom.categoriesContainer.querySelector('[data-category="all"]');
+  if (!allBtn) return;
   dom.categoriesContainer.innerHTML = '';
   dom.categoriesContainer.appendChild(allBtn);
 
@@ -446,6 +449,7 @@ function buildCategoryFilters() {
 }
 
 function filterByCategory(category) {
+  if (!dom.categoriesContainer) return;
   state.activeCategory = category;
   dom.categoriesContainer.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.category === category);
@@ -455,15 +459,16 @@ function filterByCategory(category) {
 }
 
 function renderProducts() {
+  if (!dom.productsGrid) return;
   dom.productsGrid.innerHTML = '';
   
   if (state.filteredProducts.length === 0) {
-    dom.productCount.textContent = `0 ${t('pieces')}`;
+    if (dom.productCount) dom.productCount.textContent = `0 ${t('pieces')}`;
     dom.productsGrid.innerHTML = `<div class="empty-state"><h3>${t('emptyCategory')}</h3></div>`;
     return;
   }
 
-  dom.productCount.textContent = `${state.filteredProducts.length} ${state.filteredProducts.length !== 1 ? t('pieces') : t('piece')}`;
+  if (dom.productCount) dom.productCount.textContent = `${state.filteredProducts.length} ${state.filteredProducts.length !== 1 ? t('pieces') : t('piece')}`;
 
   state.filteredProducts.forEach((product, index) => {
     dom.productsGrid.appendChild(createProductCard(product, index));
@@ -517,6 +522,7 @@ function observeCards() {
 
 // ── Modal con Galería de Fotos Hijas ──
 function initModal() {
+  if (!dom.closeModalBtn || !dom.modal) return;
   dom.closeModalBtn.addEventListener('click', closeModal);
   dom.modal.addEventListener('click', (e) => { if (e.target === dom.modal) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.modalOpen) closeModal(); });
@@ -598,7 +604,9 @@ function handleWhatsAppOrder(productId, productName) {
 }
 window.handleWhatsAppOrder = handleWhatsAppOrder;
 
-function hideLoader() { dom.loader.classList.add('hidden'); }
+function hideLoader() {
+  if (dom.loader) dom.loader.classList.add('hidden');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // TEXTOS DINÁMICOS — Inyección desde Google Sheets

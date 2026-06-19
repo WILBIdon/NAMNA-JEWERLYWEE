@@ -480,22 +480,10 @@
         window.open(`https://wa.me/4917670201873?text=${texto}`, '_blank');
         return false;
     }
-
-    // ── Textos Dinámicos desde Google Sheets ──
-    (async function() {
-      try {
-        const API = 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec';
-        const res = await fetch(API);
-        const data = await res.json();
-        if (data.textos && typeof data.textos === 'object') {
-          document.querySelectorAll('[data-txt]').forEach(el => {
-            const id = el.getAttribute('data-txt');
-            if (data.textos[id]) el.textContent = data.textos[id];
-          });
-        }
-      } catch(e) { /* Si falla, se quedan los textos por defecto del HTML */ }
-    })();
     </script>
+    
+    <!-- Lógica principal de la App (i18n, textos dinámicos, Drive Images) -->
+    <script src="js/app.js" defer></script>
 
     <!-- Security Shield -->
     <script src="js/shield.js"></script>
