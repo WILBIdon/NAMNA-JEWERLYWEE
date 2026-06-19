@@ -48,7 +48,7 @@ const state = {
   modalOpen: false,
   dataSource: 'loading',
   sheetProducts: 0,
-  lang: localStorage.getItem('namna_lang') || (navigator.language.startsWith('es') ? 'es' : 'en'),
+  lang: localStorage.getItem('namna_lang') || 'en',
   textos_es: {},
   textos_en: {},
   siteImages: {}
@@ -105,6 +105,22 @@ const dom = {
   langToggleBtns: document.querySelectorAll('.lang-toggle')
 };
 
+// ── Sincronización Inmediata del Idioma (Evita parpadeos) ──
+(function() {
+  const cachedStr = sessionStorage.getItem('namna_catalog');
+  if (cachedStr) {
+    try {
+      const cached = JSON.parse(cachedStr);
+      if (cached.textos_es) state.textos_es = cached.textos_es;
+      if (cached.textos_en) state.textos_en = cached.textos_en;
+    } catch(e) {}
+  }
+  // Ejecuta la traducción en cuanto el DOM está listo
+  document.addEventListener('DOMContentLoaded', () => {
+    updateTranslations();
+  });
+})();
+
 // ── Initialize ──
 document.addEventListener('DOMContentLoaded', () => {
   initI18n();
@@ -112,7 +128,36 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProducts();
   initModal();
   initSmoothScroll();
+  
+  if (!localStorage.getItem('namna_lang') && navigator.language.startsWith('es')) {
+    showLanguageRecommendation();
+  }
 });
+
+function showLanguageRecommendation() {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--color-primary);color:#fff;padding:12px 24px;border-radius:30px;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.2);display:flex;align-items:center;gap:15px;font-family:var(--font-body);font-size:14px;animation:fadeSlideUp 0.5s ease-out;';
+  banner.innerHTML = `
+    <span>¿Prefieres ver el sitio en Español? 🇪🇸</span>
+    <button style="background:var(--color-accent);color:#fff;border:none;padding:6px 12px;border-radius:20px;cursor:pointer;font-weight:600;">Cambiar a ES</button>
+    <button style="background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;">&times;</button>
+  `;
+  document.body.appendChild(banner);
+  
+  const btns = banner.querySelectorAll('button');
+  btns[0].addEventListener('click', () => {
+    state.lang = 'es';
+    localStorage.setItem('namna_lang', 'es');
+    updateTranslations();
+    state.activeCategory = 'all';
+    buildCategoryFilters();
+    renderProducts();
+    renderNuevos();
+    banner.remove();
+  });
+  btns[1].addEventListener('click', () => banner.remove());
+  setTimeout(() => { if (banner.parentNode) banner.remove() }, 10000);
+}
 
 function initHeader() {
   if (!dom.header) return;
@@ -345,7 +390,7 @@ function initI18n() {
 function updateTranslations() {
   // Update lang toggles text
   document.querySelectorAll('#current-lang').forEach(el => {
-    el.textContent = state.lang.toUpperCase();
+    el.textContent = state.lang === 'es' ? '🇪🇸 ES' : '🇬🇧 EN';
   });
   
   // Update HTML lang attribute
