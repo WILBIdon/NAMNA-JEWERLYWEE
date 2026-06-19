@@ -97,12 +97,16 @@ function doGet() {
     // ── TEXTOS DINÁMICOS (Pestaña "Textos") ──
     const textos = leerTextos(ss);
 
+    // ── IMÁGENES DEL SITIO (Carpeta Site_Assets) ──
+    const imagenesSitio = leerImagenesSitio(DRIVE_FOLDER_ID);
+
     return ContentService
       .createTextOutput(JSON.stringify({
-        version: "3.0",
+        version: "3.1",
         keysEncontradasEnDrive: Object.keys(mapaFotos),
         productos: productosValidos,
-        textos: textos
+        textos: textos,
+        imagenesSitio: imagenesSitio
       }))
       .setMimeType(ContentService.MimeType.JSON);
 
@@ -119,13 +123,16 @@ function doGet() {
  * Si la pestaña no existe, devuelve un objeto vacío (la web usa sus valores por defecto).
  */
 function leerTextos(ss) {
-  const resultado = { _debug: {} };
+  const resultado = {
+    es: {},
+    en: {},
+    _debug: {}
+  };
+  
   try {
-    // Debug: listar TODAS las pestañas del spreadsheet
     const todasLasPestanas = ss.getSheets().map(s => s.getName());
     resultado._debug.pestanas = todasLasPestanas;
 
-    // Intentar encontrar la pestaña probando varios nombres
     let hojaTextos = null;
     const nombresIntento = ["TEXTOS", "TEXTO", "Textos", "Texto", "textos", "texto", "Texto_ES"];
     for (const nombre of nombresIntento) {
@@ -145,34 +152,42 @@ function leerTextos(ss) {
     const cabeceras = datosTextos[0];
     resultado._debug.cabeceras = cabeceras.filter(c => c !== "");
 
-    // Buscar columnas con varios nombres posibles
     let iId = cabeceras.indexOf("ID_Texto");
     if (iId === -1) iId = cabeceras.indexOf("ID");
     if (iId === -1) iId = cabeceras.indexOf("id_texto");
     if (iId === -1) iId = cabeceras.indexOf("Id_Texto");
 
-    let iTexto = cabeceras.indexOf("Texto_ES");
-    if (iTexto === -1) iTexto = cabeceras.indexOf("Texto");
-    if (iTexto === -1) iTexto = cabeceras.indexOf("texto_es");
-    if (iTexto === -1) iTexto = cabeceras.indexOf("texto");
+    let iTextoES = cabeceras.indexOf("Texto_ES");
+    if (iTextoES === -1) iTextoES = cabeceras.indexOf("Texto");
+    if (iTextoES === -1) iTextoES = cabeceras.indexOf("texto_es");
+    if (iTextoES === -1) iTextoES = cabeceras.indexOf("texto");
+
+    let iTextoEN = cabeceras.indexOf("Texto_EN");
+    if (iTextoEN === -1) iTextoEN = cabeceras.indexOf("texto_en");
 
     resultado._debug.columnaId = iId;
-    resultado._debug.columnaTexto = iTexto;
+    resultado._debug.columnaTextoES = iTextoES;
+    resultado._debug.columnaTextoEN = iTextoEN;
     resultado._debug.totalFilas = datosTextos.length - 1;
 
-    if (iId === -1 || iTexto === -1) {
-      resultado._debug.error = "Columnas ID o Texto no encontradas";
+    if (iId === -1 || iTextoES === -1) {
+      resultado._debug.error = "Columnas ID o Texto_ES no encontradas";
       return resultado;
     }
 
     for (let i = 1; i < datosTextos.length; i++) {
       const id = String(datosTextos[i][iId]).trim();
-      const texto = String(datosTextos[i][iTexto]).trim();
-      if (id && texto && !id.startsWith("_")) {
-        resultado[id] = texto;
+      const textoES = String(datosTextos[i][iTextoES]).trim();
+      const textoEN = iTextoEN !== -1 ? String(datosTextos[i][iTextoEN]).trim() : "";
+      
+      if (id && !id.startsWith("_")) {
+        if (textoES) resultado.es[id] = textoES;
+        // Si no hay traducción, usamos español como fallback
+        resultado.en[id] = textoEN ? textoEN : textoES;
       }
     }
-    resultado._debug.textosLeidos = Object.keys(resultado).filter(k => k !== "_debug").length;
+    resultado._debug.textosLeidosES = Object.keys(resultado.es).length;
+    resultado._debug.textosLeidosEN = Object.keys(resultado.en).length;
   } catch (e) {
     resultado._debug.error = e.toString();
   }
@@ -309,4 +324,36 @@ function autoCategorizar() {
   } catch (error) {
     try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch (e) { }
   }
+}
+
+/**
+ * ── MÓDULO IMÁGENES DEL SITIO ──
+ * Busca la carpeta "Site_Assets" dentro de la carpeta principal
+ * y devuelve un mapa con los nombres de archivo (sin extensión) y sus URLs.
+ */
+function leerImagenesSitio(folderId) {
+  const imagenes = {};
+  try {
+    const parentFolder = DriveApp.getFolderById(folderId);
+    const folders = parentFolder.getFoldersByName("Site_Assets");
+    
+    if (folders.hasNext()) {
+      const siteAssetsFolder = folders.next();
+      const files = siteAssetsFolder.getFiles();
+      
+      while (files.hasNext()) {
+        const file = files.next();
+        const mime = file.getMimeType();
+        
+        // Solo procesar imágenes
+        if (mime.includes('image/')) {
+          let name = file.getName().replace(/\.[a-zA-Z0-9]{3,4}$/, '').toLowerCase().trim();
+          imagenes[name] = `https://drive.google.com/thumbnail?id=${file.getId()}&sz=w1200`;
+        }
+      }
+    }
+  } catch (e) {
+    imagenes._error = e.toString();
+  }
+  return imagenes;
 }

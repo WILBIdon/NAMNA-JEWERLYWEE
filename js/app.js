@@ -47,8 +47,49 @@ const state = {
   activeCategory: 'all',
   modalOpen: false,
   dataSource: 'loading',
-  sheetProducts: 0
+  sheetProducts: 0,
+  lang: localStorage.getItem('namna_lang') || (navigator.language.startsWith('es') ? 'es' : 'en'),
+  textos_es: {},
+  textos_en: {},
+  siteImages: {}
 };
+
+// ── i18n Dictionary for JS Strings ──
+const i18n = {
+  es: {
+    quickView: 'Vista Rápida',
+    emptyCategory: 'No hay piezas en esta categoría',
+    askPrice: 'Consultar precio',
+    onlyLeft: '⚡ Solo quedan {n} unidades',
+    outOfStock: 'Agotado temporalmente',
+    orderWhatsApp: 'Pedir por WhatsApp',
+    code: 'Código',
+    newBadge: 'Nuevo',
+    whatsappMessage: '¡Hola! Me interesa la pieza "{name}" (Código: {id}). ¿Podrían darme más información?',
+    piece: 'pieza',
+    pieces: 'piezas'
+  },
+  en: {
+    quickView: 'Quick View',
+    emptyCategory: 'No items in this category',
+    askPrice: 'Inquire Price',
+    onlyLeft: '⚡ Only {n} units left',
+    outOfStock: 'Temporarily out of stock',
+    orderWhatsApp: 'Order via WhatsApp',
+    code: 'Code',
+    newBadge: 'New',
+    whatsappMessage: 'Hello! I am interested in the piece "{name}" (Code: {id}). Could you provide more information?',
+    piece: 'piece',
+    pieces: 'pieces'
+  }
+};
+function t(key, params = {}) {
+  let str = i18n[state.lang][key] || key;
+  for (const [k, v] of Object.entries(params)) {
+    str = str.replace(`{${k}}`, v);
+  }
+  return str;
+}
 
 // ── DOM References ──
 const dom = {
@@ -60,11 +101,13 @@ const dom = {
   modal: document.getElementById('product-modal'),
   modalBody: document.getElementById('modal-body'),
   closeModalBtn: document.getElementById('close-modal-btn'),
-  nuevosGrid: document.getElementById('nuevos-grid')
+  nuevosGrid: document.getElementById('nuevos-grid'),
+  langToggleBtns: document.querySelectorAll('.lang-toggle')
 };
 
 // ── Initialize ──
 document.addEventListener('DOMContentLoaded', () => {
+  initI18n();
   initHeader();
   loadProducts();
   initModal();
@@ -144,9 +187,18 @@ async function fetchFromAppsScript() {
     const data = await response.json();
     if (data.error) throw new Error(data.message);
     
-    // ── Textos dinámicos desde la pestaña "Textos" ──
-    if (data.textos && typeof data.textos === 'object') {
-      aplicarTextos(data.textos);
+    // ── Textos e Imágenes del Sitio ──
+    if (data.textos) {
+      if (data.textos.es) state.textos_es = data.textos.es;
+      if (data.textos.en) state.textos_en = data.textos.en;
+      // Compatibilidad con la versión anterior que enviaba objeto plano
+      if (!data.textos.es && typeof data.textos === 'object') state.textos_es = data.textos;
+      updateTranslations();
+    }
+    
+    if (data.imagenesSitio) {
+      state.siteImages = data.imagenesSitio;
+      applySiteImages();
     }
     
     const arrayData = data.productos ? data.productos : data;
@@ -218,18 +270,82 @@ async function fetchFromGoogleSheets() {
   }
 }
 
-function saveToCache(products) {
+function saveToCache(data) {
   try {
-    sessionStorage.setItem('namna_cache', JSON.stringify({ data: products, timestamp: Date.now() }));
-  } catch (e) {}
+    const cacheData = { timestamp: Date.now(), items: data, textos_es: state.textos_es, textos_en: state.textos_en, siteImages: state.siteImages };
+    sessionStorage.setItem('namna_catalog', JSON.stringify(cacheData));
+  } catch (e) {
+    console.warn('⚠️ No se pudo guardar en caché:', e);
+  }
 }
 
 function loadFromCache() {
   try {
-    const cached = JSON.parse(sessionStorage.getItem('namna_cache'));
-    if (Date.now() - cached.timestamp < CONFIG.CACHE_DURATION_MS && cached.data?.length > 0) return cached.data;
+    const cached = sessionStorage.getItem('namna_catalog');
+    if (!cached) return null;
+    const parsed = JSON.parse(cached);
+    if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION_MS) {
+      sessionStorage.removeItem('namna_catalog');
+      return null;
+    }
+    if (parsed.textos_es) state.textos_es = parsed.textos_es;
+    if (parsed.textos_en) state.textos_en = parsed.textos_en;
+    if (parsed.siteImages) state.siteImages = parsed.siteImages;
+    updateTranslations();
+    applySiteImages();
+    return parsed.items;
+  } catch (e) {
     return null;
-  } catch (e) { return null; }
+  }
+}
+
+// ── i18n Logic ──
+function initI18n() {
+  dom.langToggleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.lang = state.lang === 'es' ? 'en' : 'es';
+      localStorage.setItem('namna_lang', state.lang);
+      updateTranslations();
+      renderProducts();
+      renderNuevos();
+    });
+  });
+}
+
+function updateTranslations() {
+  // Update lang toggles text
+  document.querySelectorAll('#current-lang').forEach(el => {
+    el.textContent = state.lang.toUpperCase();
+  });
+  
+  // Update HTML lang attribute
+  document.documentElement.lang = state.lang;
+  
+  // Translate data-txt elements
+  const currentTextos = state.lang === 'es' ? state.textos_es : state.textos_en;
+  if (currentTextos) {
+    document.querySelectorAll('[data-txt]').forEach(el => {
+      const id = el.getAttribute('data-txt');
+      if (currentTextos[id]) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.placeholder = currentTextos[id];
+        } else {
+          el.textContent = currentTextos[id];
+        }
+      }
+    });
+  }
+}
+
+// ── Site Images Logic ──
+function applySiteImages() {
+  if (!state.siteImages) return;
+  document.querySelectorAll('img[data-site-img]').forEach(img => {
+    const key = img.getAttribute('data-site-img');
+    if (state.siteImages[key]) {
+      img.src = state.siteImages[key];
+    }
+  });
 }
 
 function finishLoading() {
@@ -260,7 +376,7 @@ function renderNuevos() {
     card.style.animationDelay = `${index * 0.12}s`;
     card.innerHTML = `
       <div class="nuevos-card-image">
-        <span class="product-badge">Nuevo</span>
+        <span class="product-badge">${t('newBadge')}</span>
         <img src="${product.imagenes[0]}" alt="${product.nombre}" loading="lazy" />
       </div>
       <div class="nuevos-card-info">
@@ -340,12 +456,14 @@ function filterByCategory(category) {
 
 function renderProducts() {
   dom.productsGrid.innerHTML = '';
-  dom.productCount.textContent = `${state.filteredProducts.length} pieza${state.filteredProducts.length !== 1 ? 's' : ''}`;
-
+  
   if (state.filteredProducts.length === 0) {
-    dom.productsGrid.innerHTML = `<div class="empty-state"><h3>No hay piezas en esta categoría</h3></div>`;
+    dom.productCount.textContent = `0 ${t('pieces')}`;
+    dom.productsGrid.innerHTML = `<div class="empty-state"><h3>${t('emptyCategory')}</h3></div>`;
     return;
   }
+
+  dom.productCount.textContent = `${state.filteredProducts.length} ${state.filteredProducts.length !== 1 ? t('pieces') : t('piece')}`;
 
   state.filteredProducts.forEach((product, index) => {
     dom.productsGrid.appendChild(createProductCard(product, index));
@@ -369,7 +487,7 @@ function createProductCard(product, index) {
     <div class="product-card-image">
       ${stockHTML}
       <img src="${mainImage}" alt="${product.nombre}" loading="lazy" />
-      <button class="quick-view-btn" aria-label="Vista rápida">Vista Rápida</button>
+      <button class="quick-view-btn" aria-label="${t('quickView')}">${t('quickView')}</button>
     </div>
     <div class="product-card-info">
       <p class="product-card-category">${product.categoria}</p>
@@ -382,7 +500,7 @@ function createProductCard(product, index) {
 }
 
 function formatPrice(amount) {
-  return (!amount || amount <= 0) ? 'Consultar precio' : `€${amount.toLocaleString(CONFIG.LOCALE)}`;
+  return (!amount || amount <= 0) ? t('askPrice') : `€${amount.toLocaleString(CONFIG.LOCALE)}`;
 }
 
 function observeCards() {
@@ -410,9 +528,9 @@ function openModal(product) {
   let stockInfo = '';
   if (product.stock !== null) {
     if (product.stock > 0 && product.stock <= 10) {
-      stockInfo = `<p style="color: var(--color-accent); font-size: var(--text-sm); font-weight: 500;">⚡ Solo quedan ${product.stock} unidades</p>`;
+      stockInfo = `<p style="color: var(--color-accent); font-size: var(--text-sm); font-weight: 500;">${t('onlyLeft', {n: product.stock})}</p>`;
     } else if (product.stock <= 0) {
-      stockInfo = `<p style="color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 500;">Agotado temporalmente</p>`;
+      stockInfo = `<p style="color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 500;">${t('outOfStock')}</p>`;
     }
   }
 
@@ -444,10 +562,10 @@ function openModal(product) {
       ${product.descripcion ? `<p class="modal-description">${product.descripcion}</p>` : ''}
       <button class="modal-cta" onclick="handleWhatsAppOrder('${product.id}', '${product.nombre}')">
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" fill="currentColor"/></svg>
-        Pedir por WhatsApp
+        ${t('orderWhatsApp')}
       </button>
       <p style="text-align: center; margin-top: var(--space-sm); font-size: var(--text-xs); color: var(--color-text-muted);">
-        Código: ${product.id}
+        ${t('code')}: ${product.id}
       </p>
     </div>
   `;
@@ -475,7 +593,7 @@ function closeModal() {
 }
 
 function handleWhatsAppOrder(productId, productName) {
-  const message = encodeURIComponent(`¡Hola! Me interesa la pieza "${productName}" (Código: ${productId}). ¿Podrían darme más información?`);
+  const message = encodeURIComponent(t('whatsappMessage', {name: productName, id: productId}));
   window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${message}`, '_blank');
 }
 window.handleWhatsAppOrder = handleWhatsAppOrder;
@@ -485,28 +603,11 @@ function hideLoader() { dom.loader.classList.add('hidden'); }
 // ═══════════════════════════════════════════════════════════════
 // TEXTOS DINÁMICOS — Inyección desde Google Sheets
 // ═══════════════════════════════════════════════════════════════
+// La función aplicarTextos anterior se elimina porque updateTranslations hace ese trabajo
 function aplicarTextos(textos) {
-  if (!textos || Object.keys(textos).length === 0) return;
-  
-  // Mostrar diagnóstico del servidor
-  if (textos._debug) {
-    console.log('🔍 NAMNA Debug Textos:', JSON.stringify(textos._debug, null, 2));
-  }
-
-  const ids = Object.keys(textos).filter(k => k !== '_debug');
-  if (ids.length === 0) {
-    console.warn('⚠️ NAMNA: No se recibieron textos dinámicos');
-    return;
-  }
-
-  console.log(`📝 NAMNA: Aplicando ${ids.length} textos dinámicos...`);
-
-  document.querySelectorAll('[data-txt]').forEach(el => {
-    const id = el.getAttribute('data-txt');
-    if (textos[id]) {
-      el.textContent = textos[id];
-    }
-  });
+  // Solo se mantiene como compatibilidad por si algo más lo llamaba
+  if (textos && !state.textos_es) state.textos_es = textos;
+  updateTranslations();
 }
 
 function initSmoothScroll() {

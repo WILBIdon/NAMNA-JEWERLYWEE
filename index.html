@@ -106,14 +106,17 @@
 
             <!-- Desktop nav -->
             <nav class="header-nav" id="header-nav">
-                <a href="#catalogo">Colección</a>
-                <a href="#nuevos">Novedades</a>
-                <a href="info.html#about">Quiénes Somos</a>
+                <a href="#catalogo" data-txt="TXT-020">Colección</a>
+                <a href="#nuevos" data-txt="TXT-021">Novedades</a>
+                <a href="info.html#about" data-txt="TXT-022">Quiénes Somos</a>
                 <a href="#" onclick="event.preventDefault(); if(prompt('Contraseña:')==='Junio2026') window.location.href='admin.html';" style="opacity:0.5; font-size:0.65rem">⚙️ Admin</a>
             </nav>
 
             <!-- Header actions -->
             <div class="header-actions">
+                <button class="header-icon-btn lang-toggle" id="lang-toggle-btn" aria-label="Cambiar idioma">
+                    <span id="current-lang">ES</span>
+                </button>
                 <button class="header-icon-btn" id="search-btn" aria-label="Buscar">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
@@ -126,7 +129,7 @@
 
     <!-- Hero Section -->
     <section class="hero-section" id="hero">
-        <img src="assets/hero_jewelry.png" alt="NAMNA Joyería" class="hero-bg" loading="eager">
+        <img src="assets/hero_jewelry.png" alt="NAMNA Joyería" class="hero-bg" loading="eager" data-site-img="hero_main">
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <p class="hero-eyebrow" data-txt="TXT-002">Alta Joyería</p>
@@ -146,8 +149,8 @@
     <!-- Novedades Section -->
     <section class="nuevos-section" id="nuevos">
         <div class="section-header">
-            <h2 class="section-title">Novedades</h2>
-            <span class="nuevos-badge">Recién llegados</span>
+            <h2 class="section-title" data-txt="TXT-023">Novedades</h2>
+            <span class="nuevos-badge" data-txt="TXT-024">Recién llegados</span>
         </div>
         <div class="nuevos-scroll" id="nuevos-grid">
             <!-- Filled by JS -->
@@ -157,7 +160,7 @@
     <!-- Category Filters -->
     <nav class="categories-nav" id="categories-nav">
         <div id="categories-container" class="filters-scroll">
-            <button class="filter-btn active" data-category="all">Todos</button>
+            <button class="filter-btn active" data-category="all" data-txt="TXT-025">Todos</button>
         </div>
     </nav>
 
@@ -169,9 +172,9 @@
         </div>
 
         <!-- Loader -->
-        <div id="catalog-loader" class="loader">
-            <div class="loader-spinner"></div>
-            <span>Cargando piezas...</span>
+        <div id="catalog-loader" class="loader-container">
+            <div class="spinner"></div>
+            <span data-txt="TXT-026">Cargando piezas...</span>
         </div>
 
         <!-- Products Grid -->
@@ -206,39 +209,35 @@
             </div>
 
             <div>
-                <h4 class="footer-heading">Tienda</h4>
+                <h4 class="footer-heading" data-txt="TXT-027">Tienda</h4>
                 <ul class="footer-links">
-                    <li><a href="#catalogo">Colección Completa</a></li>
-                    <li><a href="#">Anillos</a></li>
-                    <li><a href="#">Collares</a></li>
-                    <li><a href="#">Aretes</a></li>
-                    <li><a href="#">Pulseras</a></li>
+                    <li><a href="#catalogo" data-txt="TXT-028">Colección Completa</a></li>
+                    <li><a href="#nuevos" data-txt="TXT-021">Novedades</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="footer-heading">Información</h4>
+                <h4 class="footer-heading" data-txt="TXT-029">Información</h4>
                 <ul class="footer-links">
-                    <li><a href="info.html#about">Quiénes Somos</a></li>
-                    <li><a href="info.html#shipping">Políticas de Envío</a></li>
-                    <li><a href="info.html#returns">Políticas de Devolución</a></li>
-                    <li><a href="info.html#sizing">Guía de Tallas</a></li>
+                    <li><a href="info.html#about" data-txt="TXT-022">Quiénes Somos</a></li>
+                    <li><a href="info.html#shipping" data-txt="TXT-030">Envíos</a></li>
+                    <li><a href="info.html#returns" data-txt="TXT-031">Devoluciones</a></li>
+                    <li><a href="info.html#sizing" data-txt="TXT-032">Guía de Tallas</a></li>
                 </ul>
             </div>
 
             <div>
-                <h4 class="footer-heading">Contacto</h4>
+                <h4 class="footer-heading" data-txt="TXT-033">Contacto</h4>
                 <ul class="footer-links">
                     <li><a href="mailto:hola@namna.com">hola@namna.com</a></li>
                     <li><a href="https://wa.me/4917670201873" target="_blank">WhatsApp</a></li>
-                    <li><a href="https://instagram.com" target="_blank">Instagram DM</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="footer-bottom">
             <p data-txt="TXT-019">&copy; 2026 NAMNA Jewelry. Todos los derechos reservados.</p>
-            <p>Hecho a mano con ♡</p>
+            <p data-txt="TXT-034">Hecho a mano con ♡</p>
         </div>
     </footer>
 
