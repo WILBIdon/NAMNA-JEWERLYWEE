@@ -393,8 +393,11 @@ function openModal(product) {
 
   dom.modalBody.innerHTML = `
     <div class="modal-media-container">
-      <div class="modal-image-wrapper">
+      <div class="modal-image-wrapper" onclick="this.classList.toggle('fullscreen')">
         <img id="modal-main-image" src="${product.imagenes[0]}" alt="${product.nombre}" />
+        <div class="zoom-hint">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </div>
       </div>
       ${galleryHTML}
     </div>

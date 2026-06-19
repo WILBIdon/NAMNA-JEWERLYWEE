@@ -6,6 +6,7 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** feat: añadir función de zoom a pantalla completa (Lightbox) con lupa en la imagen del producto para facilitar pinch-to-zoom en móviles.
 - **Reciente** style: restaurar visibilidad del botón admin manteniendo la contraseña.
 - **Reciente** style: ajustar ventana de producto (modal) para acoplarse a la pantalla sin scroll interno.
 - **Reciente** feat: ordenar imágenes del carrusel por número de sufijo (-1, -2, etc) y excluir imágenes que terminan en punto.
