@@ -6,6 +6,12 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** feat: rediseño completo de info.html con hero visual, secciones con íconos, formulario de contacto a WhatsApp y diseño premium.
+- **Reciente** feat: sección de Novedades (últimos 4 productos de la tabla) con carrusel horizontal y badge "Nuevo".
+- **Reciente** seo: Schema.org JSON-LD (JewelryStore), Open Graph completo, Twitter Card, canonical URL y meta robots mejorados en index.html.
+- **Reciente** seo: Schema.org AboutPage y meta tags SEO en info.html.
+- **Reciente** seo: crear sitemap.xml, robots.txt y llms.txt para buscadores e IA.
+- **Reciente** feat: imagen hero generada para la página de información.
 - **Reciente** feat: añadir función de zoom a pantalla completa (Lightbox) con lupa en la imagen del producto para facilitar pinch-to-zoom en móviles.
 - **Reciente** style: restaurar visibilidad del botón admin manteniendo la contraseña.
 - **Reciente** style: ajustar ventana de producto (modal) para acoplarse a la pantalla sin scroll interno.

@@ -59,7 +59,8 @@ const dom = {
   productCount: document.getElementById('product-count'),
   modal: document.getElementById('product-modal'),
   modalBody: document.getElementById('modal-body'),
-  closeModalBtn: document.getElementById('close-modal-btn')
+  closeModalBtn: document.getElementById('close-modal-btn'),
+  nuevosGrid: document.getElementById('nuevos-grid')
 };
 
 // ── Initialize ──
@@ -235,8 +236,42 @@ function finishLoading() {
   state.filteredProducts = [...state.products];
   buildCategoryFilters();
   renderProducts();
+  renderNuevos();
   hideLoader();
   showDataSourceBadge();
+}
+
+// ── Novedades: últimos 4 productos añadidos ──
+function renderNuevos() {
+  if (!dom.nuevosGrid) return;
+  dom.nuevosGrid.innerHTML = '';
+
+  // Los últimos productos de la tabla son los más recientes
+  const nuevos = state.products.slice(-4).reverse();
+
+  if (nuevos.length === 0) {
+    dom.nuevosGrid.closest('.nuevos-section').style.display = 'none';
+    return;
+  }
+
+  nuevos.forEach((product, index) => {
+    const card = document.createElement('article');
+    card.className = 'nuevos-card';
+    card.style.animationDelay = `${index * 0.12}s`;
+    card.innerHTML = `
+      <div class="nuevos-card-image">
+        <span class="product-badge">Nuevo</span>
+        <img src="${product.imagenes[0]}" alt="${product.nombre}" loading="lazy" />
+      </div>
+      <div class="nuevos-card-info">
+        <p class="nuevos-card-category">${product.categoria}</p>
+        <h3 class="nuevos-card-name">${product.nombre}</h3>
+        <p class="nuevos-card-price">${formatPrice(product.precioPublico)}</p>
+      </div>
+    `;
+    card.addEventListener('click', () => openModal(product));
+    dom.nuevosGrid.appendChild(card);
+  });
 }
 
 function showDataSourceBadge() {

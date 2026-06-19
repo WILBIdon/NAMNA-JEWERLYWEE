@@ -1,0 +1,8 @@
+# NAMNA Jewelry — robots.txt
+# https://wilbidon.github.io/NAMNA-JEWERLYWEE/
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://wilbidon.github.io/NAMNA-JEWERLYWEE/sitemap.xml
