@@ -368,8 +368,16 @@ function loadFromCache() {
     if (parsed.textos_en) state.textos_en = parsed.textos_en;
     if (parsed.siteImages) state.siteImages = parsed.siteImages;
     updateTranslations();
+    updateTranslations();
     applySiteImages();
-    return parsed.items;
+    // Re-attach getters that were lost during JSON.stringify
+    return parsed.items.map(obj => {
+      Object.defineProperties(obj, {
+        descripcion: { get: () => state.lang === 'en' ? obj._descripcion_en : obj._descripcion_es, enumerable: true },
+        categoria: { get: () => state.lang === 'en' ? obj._categoria_en : obj._categoria_es, enumerable: true }
+      });
+      return obj;
+    });
   } catch (e) {
     return null;
   }
@@ -562,7 +570,7 @@ function createProductCard(product, index) {
   const mainImage = product.imagenes[0];
 
   const stockHTML = (product.stock !== null && product.stock <= 5 && product.stock > 0)
-    ? `<span class="product-badge" style="background: var(--color-accent);">Últimas ${product.stock}</span>`
+    ? `<span class="product-badge" style="background: var(--color-accent);">${t('onlyLeft', {n: product.stock}).replace('⚡ ', '')}</span>`
     : '';
 
   const isWished = state.wishlist.includes(product.id);
