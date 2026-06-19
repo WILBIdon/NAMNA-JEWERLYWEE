@@ -209,16 +209,30 @@ async function fetchFromAppsScript() {
       if (item.imagen && imgs.length === 0) imgs.push(item.imagen);
       if (imgs.length === 0) imgs.push(CATEGORY_IMAGE_FALLBACK[item.categoria] || CATEGORY_IMAGE_FALLBACK._default);
 
-      return {
+      const cat_es = item.categoria_es || item.categoria || 'Joyería';
+      const cat_en = item.categoria_en || item.categoria || 'Jewelry';
+      const desc_es = item.descripcion_es || item.descripcion || '';
+      const desc_en = item.descripcion_en || item.descripcion || '';
+      
+      const obj = {
         id: item.id || `PROD-${Date.now()}`,
         nombre: item.nombre || 'Producto sin nombre',
-        descripcion: item.descripcion || '',
-        categoria: item.categoria || 'Joyería',
+        _descripcion_es: desc_es,
+        _descripcion_en: desc_en,
+        _categoria_es: cat_es,
+        _categoria_en: cat_en,
         precioPublico: Number(item.precio) || 0,
         stock: Number(item.stock) || null,
         visible: true,
         imagenes: imgs
       };
+      
+      Object.defineProperties(obj, {
+        descripcion: { get: () => state.lang === 'en' ? obj._descripcion_en : obj._descripcion_es, enumerable: true },
+        categoria: { get: () => state.lang === 'en' ? obj._categoria_en : obj._categoria_es, enumerable: true }
+      });
+      
+      return obj;
     });
   } catch (err) {
     clearTimeout(timeout);
@@ -252,17 +266,30 @@ async function fetchFromGoogleSheets() {
       const visible = String(getValue('Visible') || '').trim().toLowerCase();
       if (visible !== 'sí' && visible !== 'si') continue;
 
-      const cat = getValue('Categoría') || 'Joyería';
-      productos.push({
+      const cat_es = String(getValue('Categoría Es') || getValue('Categoría') || 'Joyería').trim();
+      const cat_en = String(getValue('Categoría En') || 'Jewelry').trim();
+      const desc_es = String(getValue('Descripción Es') || getValue('Descripción') || '').trim();
+      const desc_en = String(getValue('Descripción En') || '').trim();
+
+      const obj = {
         id: String(id).trim(),
         nombre: String(getValue('Nombre') || 'Producto sin nombre').trim(),
-        descripcion: String(getValue('Descripción') || '').trim(),
-        categoria: String(cat).trim(),
+        _descripcion_es: desc_es,
+        _descripcion_en: desc_en,
+        _categoria_es: cat_es,
+        _categoria_en: cat_en,
         precioPublico: Number(getValue('Precio_Publico')) || 0,
         stock: Number(getValue('Stock')) || null,
         visible: true,
-        imagenes: [CATEGORY_IMAGE_FALLBACK[cat] || CATEGORY_IMAGE_FALLBACK._default] // Sheets API can't read Drive
+        imagenes: [CATEGORY_IMAGE_FALLBACK[cat_es] || CATEGORY_IMAGE_FALLBACK._default] // Sheets API can't read Drive
+      };
+      
+      Object.defineProperties(obj, {
+        descripcion: { get: () => state.lang === 'en' ? obj._descripcion_en : obj._descripcion_es, enumerable: true },
+        categoria: { get: () => state.lang === 'en' ? obj._categoria_en : obj._categoria_es, enumerable: true }
       });
+      
+      productos.push(obj);
     }
     return productos;
   } catch (err) {
@@ -307,6 +334,8 @@ function initI18n() {
       state.lang = state.lang === 'es' ? 'en' : 'es';
       localStorage.setItem('namna_lang', state.lang);
       updateTranslations();
+      state.activeCategory = 'all'; // Reset filter when lang changes
+      buildCategoryFilters();
       renderProducts();
       renderNuevos();
     });

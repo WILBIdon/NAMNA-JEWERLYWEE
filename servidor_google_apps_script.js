@@ -33,13 +33,15 @@ function doGet() {
     }
 
     const idx = {
-      id: headers.indexOf("ID_Producto"),
-      nombre: headers.indexOf("Nombre"),
-      desc: headers.indexOf("Descripción"),
-      cat: headers.indexOf("Categoría"),
-      precioPub: headers.indexOf("Precio_Publico"),
-      visible: headers.indexOf("Visible"),
-      stock: headers.indexOf("Stock")
+      id: headers.findIndex(h => h === "ID_Producto"),
+      nombre: headers.findIndex(h => h === "Nombre"),
+      desc_es: headers.findIndex(h => h === "Descripción Es" || h === "Descripción"),
+      desc_en: headers.findIndex(h => h === "Descripción En"),
+      cat_es: headers.findIndex(h => h === "Categoría Es" || h === "Categoría"),
+      cat_en: headers.findIndex(h => h === "Categoría En"),
+      precioPub: headers.findIndex(h => h === "Precio_Publico"),
+      visible: headers.findIndex(h => h === "Visible"),
+      stock: headers.findIndex(h => h === "Stock")
     };
 
     // ── INDEXACIÓN EN MEMORIA (Fotos principales + Hijas) ──
@@ -60,8 +62,10 @@ function doGet() {
       const precio = Number(row[idx.precioPub]) || 0;
       const stock = Number(row[idx.stock]) || 0;
       const nombre = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
-      const cat = row[idx.cat] ? String(row[idx.cat]).trim() : "Joyería";
-      const desc = row[idx.desc] ? String(row[idx.desc]).trim() : "";
+      const cat_es = idx.cat_es > -1 && row[idx.cat_es] ? String(row[idx.cat_es]).trim() : "Joyería";
+      const cat_en = idx.cat_en > -1 && row[idx.cat_en] ? String(row[idx.cat_en]).trim() : "Jewelry";
+      const desc_es = idx.desc_es > -1 && row[idx.desc_es] ? String(row[idx.desc_es]).trim() : "";
+      const desc_en = idx.desc_en > -1 && row[idx.desc_en] ? String(row[idx.desc_en]).trim() : "";
 
       // Quitamos espacios y puntos finales para hacer el match infalible
       let searchKey = idProducto.toLowerCase().replace(/\.+$/, '');
@@ -84,8 +88,10 @@ function doGet() {
       productosValidos.push({
         id: idProducto,
         nombre: nombre,
-        descripcion: desc,
-        categoria: cat,
+        descripcion_es: desc_es,
+        descripcion_en: desc_en,
+        categoria_es: cat_es,
+        categoria_en: cat_en,
         precio: precio,
         stock: stock,
         imagenes: imagenes,
@@ -478,4 +484,65 @@ function inyectarTextosIngles() {
   hoja.getRange(1, 1, datos.length, colCount).setValues(datos);
   
   console.log(`✅ Textos inyectados!\n- Textos en inglés agregados/actualizados: ${actualizados}\n- Textos nuevos completos añadidos: ${añadidos}`);
+}
+
+/**
+ * ── FUNCIÓN DE AYUDA (EJECUTAR MANUALMENTE) ──
+ * Traduce las categorías y descripciones de la hoja de productos.
+ */
+function inyectarTraduccionesProductos() {
+  const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  const hoja = ss.getSheets()[0]; // La primera pestaña asumiendo que son los productos
+  
+  const datos = hoja.getDataRange().getValues();
+  const cabeceras = datos[0];
+  
+  const iDescEs = cabeceras.findIndex(h => h === "Descripción Es" || h === "Descripción");
+  const iDescEn = cabeceras.findIndex(h => h === "Descripción En");
+  const iCatEs = cabeceras.findIndex(h => h === "Categoría Es" || h === "Categoría");
+  const iCatEn = cabeceras.findIndex(h => h === "Categoría En");
+  
+  if (iDescEs === -1 || iDescEn === -1 || iCatEs === -1 || iCatEn === -1) {
+    console.error("Faltan las columnas 'Descripción Es', 'Descripción En', 'Categoría Es' o 'Categoría En'.");
+    return;
+  }
+  
+  // Diccionario de traducciones para los productos existentes
+  const traducciones = {
+    "Necklace": { cat_es: "Collar", cat_en: "Necklace" },
+    "Earrings": { cat_es: "Aretes", cat_en: "Earrings" },
+    "Elegante pieza de joyería fina en metal (0.71g), coronada por un vibrante rubí de 0.20 quilates y destellos sutiles de diamantes (0.05 ct).": "Elegant piece of fine metal jewelry (0.71g), crowned by a vibrant 0.20-carat ruby and subtle sparkles of diamonds (0.05 ct).",
+    "Exquisito diseño elaborado con 0.85g de metal precioso, iluminado mágicamente por 7 brillantes diamantes que suman 0.13 quilates.": "Exquisite design crafted with 0.85g of precious metal, magically illuminated by 7 brilliant diamonds totaling 0.13 carats.",
+    "Delicada pieza con motivos florales en 0.70g de metal, engastada meticulosamente con 7 diamantes luminosos (0.10 quilates en total).": "Delicate piece with floral motifs in 0.70g of metal, meticulously set with 7 luminous diamonds (0.10 total carats).",
+    "Diseño romántico y atemporal en metal de 0.70g, sutilmente acentuado por un delicado diamante de 0.02 quilates.": "Romantic and timeless design in 0.70g metal, subtly accentuated by a delicate 0.02-carat diamond.",
+    "Pieza de encanto celestial en 0.70g de metal, resplandeciendo con el brillo enigmático de sus diamantes (0.05 ct).": "Piece of celestial charm in 0.70g of metal, shining with the enigmatic brilliance of its diamonds (0.05 ct).",
+    "Clásico y majestuoso solitario fabricado con 1.59g de metal precioso, destacando un espectacular diamante central de 0.20 quilates.": "Classic and majestic solitaire crafted with 1.59g of precious metal, highlighting a spectacular 0.20-carat central diamond.",
+    "Pieza magistral de lujo absoluto en platino (PT 2.11g), deslumbrando con un conjunto de 10 diamantes que suman 0.76 quilates de brillo puro.": "Masterful piece of absolute luxury in platinum (PT 2.11g), dazzling with a set of 10 diamonds totaling 0.76 carats of pure brilliance.",
+    "Encantadora pieza minimalista de 0.28g, diseñada para evocar romanticismo, elegancia sutil y sofisticación diaria.": "Charming minimalist piece of 0.28g, designed to evoke romance, subtle elegance, and daily sophistication.",
+    "Impresionante diseño de alta joyería, protagonizado por un majestuoso juego de diamantes de 1.20 quilates que regala destellos inigualables.": "Stunning high-jewelry design, featuring a majestic set of 1.20-carat diamonds that deliver unmatched sparkles.",
+    "Elegante joya de diseño exclusivo, acentuada a la perfección con 3 diamantes que suman 0.44 quilates, aportando un toque de lujo sofisticado.": "Elegant jewel of exclusive design, perfectly accentuated with 3 diamonds totaling 0.44 carats, providing a touch of sophisticated luxury."
+  };
+  
+  let actualizados = 0;
+  
+  for (let i = 1; i < datos.length; i++) {
+    const descEs = String(datos[i][iDescEs]).trim();
+    const catEs = String(datos[i][iCatEs]).trim();
+    
+    // Categorías
+    if (catEs && traducciones[catEs] && traducciones[catEs].cat_es) {
+      datos[i][iCatEs] = traducciones[catEs].cat_es;
+      datos[i][iCatEn] = traducciones[catEs].cat_en;
+      actualizados++;
+    }
+    
+    // Descripciones
+    if (descEs && traducciones[descEs] && !datos[i][iDescEn]) {
+      datos[i][iDescEn] = traducciones[descEs];
+      actualizados++;
+    }
+  }
+  
+  hoja.getRange(1, 1, datos.length, cabeceras.length).setValues(datos);
+  console.log(`✅ Traducciones de productos inyectadas: ${actualizados} celdas actualizadas.`);
 }
