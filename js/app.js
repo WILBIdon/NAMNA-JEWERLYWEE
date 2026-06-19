@@ -27,7 +27,7 @@ const CONFIG = {
 
 // ── Categorías Iniciales (Fijas) ──
 // Convención: N. = Necklace | E. = Earrings | última letra = color (D=Diamond, Y=Yellow, R=Red)
-const INITIAL_CATEGORIES = ['Necklace', 'Earrings'];
+
 
 // ── Mapeo de categorías a imágenes demo (fallback) ──
 const CATEGORY_IMAGE_FALLBACK = {
@@ -457,7 +457,7 @@ function buildCategoryFilters() {
 
   // Unir categorías iniciales fijas con las que vengan de los productos
   const productCategories = [...new Set(state.products.map(p => p.categoria))];
-  const finalCategories = [...new Set([...INITIAL_CATEGORIES, ...productCategories])];
+  const finalCategories = productCategories;
 
   finalCategories.forEach(cat => {
     // Evitar crear botón para categorías vacías o nulas
