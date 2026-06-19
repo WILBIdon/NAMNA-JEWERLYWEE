@@ -199,24 +199,40 @@ function crearMapaFotos(folderId) {
       let nombreSinExt = nombreCompleto.replace(/\.[a-zA-Z0-9]{3,4}$/, '');
       nombreSinExt = nombreSinExt.trim().toLowerCase();
 
+      // EXCLUSIÓN: Si termina en punto (antes de la extensión), se ignora
+      if (nombreSinExt.endsWith('.')) {
+        continue;
+      }
+
       const match = nombreSinExt.match(/-(\d+)$/);
-      const suffix = match ? match[1] : "";
+      // Usamos 0 para fotos sin sufijo, así se ordenan primero
+      const suffixNum = match ? parseInt(match[1], 10) : 0;
 
       // Quitamos el sufijo y también eliminamos cualquier PUNTO final sobrante
       let baseCode = nombreSinExt.replace(/-\d+$/, '').trim();
       baseCode = baseCode.replace(/\.+$/, '').trim();
 
       if (!mapa[baseCode]) {
-        mapa[baseCode] = { principal: null, hijas: [] };
+        mapa[baseCode] = { lista: [] };
       }
 
-      // Si no tiene número, o si el número es "1" o "01", es la foto principal
-      if (suffix === "" || suffix === "1" || suffix === "01") {
-        mapa[baseCode].principal = id;
+      mapa[baseCode].lista.push({ id: id, num: suffixNum });
+    }
+
+    // Ahora ordenamos y asignamos principal y múltiples hijas
+    for (const key in mapa) {
+      const item = mapa[key];
+      // Ordenar ascendentemente por el número (-1, -2, -3...)
+      item.lista.sort((a, b) => a.num - b.num);
+
+      if (item.lista.length > 0) {
+        item.principal = item.lista[0].id;
+        item.hijas = item.lista.slice(1).map(x => x.id);
       } else {
-        // Cualquier otro número (-2, -02, -3, etc.) es hija
-        mapa[baseCode].hijas.push(id);
+        item.principal = null;
+        item.hijas = [];
       }
+      delete item.lista; // Limpiar propiedad temporal
     }
   } catch (e) {
     console.error("Error leyendo carpeta de Drive", e);
