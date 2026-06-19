@@ -6,6 +6,11 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** feat: buscador inteligente (Smart Search) a pantalla completa con atajos a páginas de índice (contacto, envíos).
+- **Reciente** feat: lista de deseos (Wishlist/Favoritos) guardada en `localStorage` con panel lateral y opción de pedir carrito por WhatsApp.
+- **Reciente** UX: configuración de inglés por defecto, banner sugeridor de idioma según IP (navigator) y sincronización de traducciones sin parpadeos.
+- **Reciente** fix: arreglar descripciones bilingües y traducciones dinámicas que se perdían al pasar por la memoria caché.
+- **Reciente** style: optimización de CSS para el loader centralizado y banderas en el botón de idiomas.
 - **Reciente** seo: actualización de meta descripciones y etiquetas geo-regionales (España y Europa) en `index.html` e `info.html`.
 - **Reciente** feat: inyector de traducciones (script) optimizado para actualizar en lote los textos ES y EN enfocados a envíos para toda España y Europa.
 - **Reciente** feat: internacionalización completa (i18n) con soporte ES/EN, guardado en localStorage y cambio dinámico sin recargar página.
