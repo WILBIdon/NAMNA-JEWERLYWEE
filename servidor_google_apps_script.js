@@ -399,7 +399,7 @@ function inyectarTextosIngles() {
   
   // El diccionario completo
   const NUEVOS_TEXTOS = [
-    { id: "TXT-001", es: "Envío gratis en pedidos superiores a €999 — Piezas únicas hechas a mano", en: "Free shipping on orders over €999 — Unique handmade pieces" },
+    { id: "TXT-001", es: "Envío gratis en pedidos superiores a €999 a toda España y Europa — Piezas únicas hechas a mano", en: "Free shipping on orders over €999 to all of Spain and Europe — Unique handmade pieces" },
     { id: "TXT-002", es: "Alta Joyería", en: "Fine Jewelry" },
     { id: "TXT-003", es: "Elegancia Atemporal", en: "Timeless Elegance" },
     { id: "TXT-004", es: "Descubre nuestra exclusiva colección de joyería fina. Cada pieza es una obra de arte diseñada para iluminar tu esencia y acompañarte para siempre.", en: "Discover our exclusive fine jewelry collection. Each piece is a work of art designed to illuminate your essence." },
@@ -407,8 +407,8 @@ function inyectarTextosIngles() {
     { id: "TXT-006", es: "Nuestra Colección", en: "Our Collection" },
     { id: "TXT-007", es: "En NAMNA Jewelry, creemos en la belleza de lo atemporal. Nuestras piezas son creadas con pasión, fusionando la maestría artesanal tradicional con diseños contemporáneos para dar vida a joyas únicas que cuentan historias.", en: "At NAMNA Jewelry, we believe in the beauty of the timeless. Our pieces are crafted with passion, blending traditional craftsmanship with contemporary design." },
     { id: "TXT-008", es: "Seleccionamos cuidadosamente nuestros metales y piedras preciosas, asegurando la más alta calidad y un origen ético. Cada anillo, collar y par de aretes está diseñado para realzar tu luz interior y acompañarte en los momentos más especiales de tu vida.", en: "We carefully select our metals and gemstones, ensuring the highest quality and ethical sourcing. Each piece is designed to enhance your inner light." },
-    { id: "TXT-009", es: "Realizamos envíos a nivel nacional e internacional a través de mensajería asegurada. Todos nuestros pedidos se procesan con el mayor cuidado y se envían en nuestro empaque premium distintivo para garantizar una experiencia de lujo desde el primer momento.", en: "We ship nationally and internationally through insured courier. All orders are processed with care in our distinctive premium packaging." },
-    { id: "TXT-010", es: "Tiempos de entrega: Los pedidos nacionales tardan entre 2 a 5 días hábiles. Los pedidos internacionales pueden variar entre 7 y 14 días hábiles dependiendo de la aduana del país destino.", en: "Delivery times: National orders take 2-5 business days. International orders may vary between 7-14 business days." },
+    { id: "TXT-009", es: "Realizamos envíos rápidos a toda España y Europa a través de mensajería asegurada. Todos nuestros pedidos se procesan con el mayor cuidado y se envían en nuestro empaque premium distintivo para garantizar una experiencia de lujo.", en: "We ship quickly to all of Spain and Europe through insured courier. All orders are processed with care in our distinctive premium packaging to ensure a luxury experience." },
+    { id: "TXT-010", es: "Tiempos de entrega: Los envíos dentro de España tardan entre 2 a 5 días hábiles. Los envíos al resto de Europa pueden variar entre 5 y 10 días hábiles.", en: "Delivery times: Orders within Spain take 2-5 business days. Orders to the rest of Europe may vary between 5-10 business days." },
     { id: "TXT-011", es: "Tu satisfacción es nuestra máxima prioridad. Aceptamos cambios o devoluciones dentro de los primeros 14 días posteriores a la recepción de tu joya, siempre y cuando la pieza se encuentre en su estado original, sin signos de uso y con su empaque intacto.", en: "Your satisfaction is our top priority. We accept returns within 14 days, as long as the piece is in its original condition." },
     { id: "TXT-012", es: "Las piezas personalizadas o grabadas a medida no son elegibles para devolución. Para iniciar un proceso de cambio o devolución, por favor contacta a nuestro equipo directamente por WhatsApp y te guiaremos paso a paso.", en: "Custom or engraved pieces are not eligible for returns. To start a return, contact our team via WhatsApp." },
     { id: "TXT-013", es: "Para asegurar que tu joya tenga el ajuste perfecto, recomendamos medir el diámetro interior de un anillo que ya tengas y te quede bien, o medir la circunferencia de tu dedo con un hilo suave.", en: "To ensure a perfect fit, we recommend measuring the inner diameter of a ring you already own." },
@@ -454,11 +454,10 @@ function inyectarTextosIngles() {
   for (const item of NUEVOS_TEXTOS) {
     if (filasExistentes[item.id]) {
       const rowIndex = filasExistentes[item.id] - 1; // 0-indexed for array
-      // Solo actualiza si está vacío
-      if (!datos[rowIndex][iEn]) {
-        datos[rowIndex][iEn] = item.en;
-        actualizados++;
-      }
+      // Sobrescribir ambos para asegurar que la web se actualice con los textos de España/Europa
+      datos[rowIndex][iEs] = item.es;
+      datos[rowIndex][iEn] = item.en;
+      actualizados++;
     } else {
       const newRow = new Array(cabeceras.length).fill("");
       newRow[iId] = item.id;
