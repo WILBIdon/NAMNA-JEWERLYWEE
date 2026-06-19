@@ -6,7 +6,7 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
-- **Reciente** fix: implementar funcionalidad completa del menú hamburguesa en móvil — panel de navegación lateral con overlay, animación del botón (☰→✕), links con transiciones escalonadas, cierre al tocar overlay/Escape/link, y botón de WhatsApp en el pie del menú.
+- **Reciente** fix: implementar funcionalidad completa del menú hamburguesa en móvil en `index.html` e `info.html` — panel de navegación lateral con overlay, animación del botón (☰→✕), links con transiciones escalonadas, cierre al tocar overlay/Escape/link, y botón de WhatsApp en el pie del menú.
 - **Reciente** feat: buscador inteligente (Smart Search) a pantalla completa con atajos a páginas de índice (contacto, envíos).
 - **Reciente** feat: lista de deseos (Wishlist/Favoritos) guardada en `localStorage` con panel lateral y opción de pedir carrito por WhatsApp.
 - **Reciente** UX: configuración de inglés por defecto, banner sugeridor de idioma según IP (navigator) y sincronización de traducciones sin parpadeos.

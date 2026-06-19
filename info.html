@@ -303,6 +303,13 @@
     <!-- Header -->
     <header class="main-header" id="header">
         <div class="header-container">
+            <!-- Mobile menu -->
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             <a href="index.html" class="brand-logo">
                 <img src="Logo-namna.png" alt="NAMNA" />
             </a>
@@ -320,6 +327,28 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Panel -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    <nav class="mobile-nav-panel" id="mobile-nav-panel" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <img src="Logo-namna.png" alt="NAMNA" />
+            <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Cerrar menú">&times;</button>
+        </div>
+        <div class="mobile-nav-links">
+            <a href="index.html#catalogo" data-txt="TXT-020">Colección</a>
+            <a href="index.html#nuevos" data-txt="TXT-021">Novedades</a>
+            <a href="#about" data-txt="TXT-022">Nosotros</a>
+            <a href="#shipping" data-txt="TXT-030">Envíos</a>
+            <a href="#contacto" data-txt="TXT-033">Contacto</a>
+        </div>
+        <div class="mobile-nav-footer">
+            <a href="https://wa.me/4917670201873" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" fill="currentColor"/></svg>
+                WhatsApp
+            </a>
+        </div>
+    </nav>
 
     <!-- Hero -->
     <section class="info-hero" id="about">
