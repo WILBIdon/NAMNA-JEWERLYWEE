@@ -6,6 +6,8 @@
 ## Cambios Recientes
 
 ### Últimas actualizaciones
+- **Reciente** style: restaurar visibilidad del botón admin manteniendo la contraseña.
+- **Reciente** style: ajustar ventana de producto (modal) para acoplarse a la pantalla sin scroll interno.
 - **Reciente** feat: ordenar imágenes del carrusel por número de sufijo (-1, -2, etc) y excluir imágenes que terminan en punto.
 - **`2e07578`** fix: remover bandera -s de npx serve para evitar redirección de info.html a index.html
 - **`88c196e`** fix: asegurar que la versión con diagnósticos automáticos se suba correctamente

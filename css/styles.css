@@ -739,6 +739,7 @@ h4 { font-size: var(--text-xl); }
   position: relative;
   width: 100%;
   max-width: 900px;
+  height: 90vh;
   max-height: 90vh;
   background: var(--color-white);
   border-radius: var(--radius-md);
@@ -746,6 +747,7 @@ h4 { font-size: var(--text-xl); }
   overflow: hidden;
   transform: translateY(20px) scale(0.97);
   transition: transform var(--transition-base);
+  display: flex;
 }
 
 .modal-overlay.active .modal-content {
@@ -753,34 +755,41 @@ h4 { font-size: var(--text-xl); }
 }
 
 .modal-inner {
-  display: grid;
-  grid-template-columns: 1fr;
-  max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 @media screen and (min-width: 700px) {
   .modal-inner {
-    grid-template-columns: 1fr 1fr;
-    overflow-y: hidden;
+    flex-direction: row;
   }
 }
 
+.modal-media-container {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
 .modal-image-wrapper {
-  aspect-ratio: 3 / 4;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   background: var(--color-background-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-.modal-media-container {
-  display: flex;
-  flex-direction: column;
+  object-fit: contain;
 }
 
 .modal-gallery {
@@ -817,17 +826,19 @@ h4 { font-size: var(--text-xl); }
 }
 
 .modal-details {
-  padding: var(--space-xl) var(--space-xl) var(--space-2xl);
+  flex: 1 1 50%;
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 @media screen and (min-width: 700px) {
   .modal-details {
-    padding: var(--space-2xl) var(--space-2xl) var(--space-3xl);
-    overflow-y: auto;
-    max-height: 90vh;
+    padding: var(--space-2xl);
   }
 }
 
@@ -863,8 +874,10 @@ h4 { font-size: var(--text-xl); }
 .modal-description {
   font-size: var(--text-base);
   color: var(--color-text-muted);
-  line-height: 1.75;
-  margin-bottom: var(--space-xl);
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+  overflow-y: auto; /* Permitir scroll interno solo si el texto es muy largo, para evitar que se rompa, pero el contenedor principal no tendrá scroll */
+  flex: 1 1 auto;
 }
 
 .modal-cta {
