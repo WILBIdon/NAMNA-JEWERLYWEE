@@ -51,7 +51,8 @@ const state = {
   lang: localStorage.getItem('namna_lang') || 'en',
   textos_es: {},
   textos_en: {},
-  siteImages: {}
+  siteImages: {},
+  wishlist: JSON.parse(localStorage.getItem('namna_wishlist') || '[]')
 };
 
 // ── i18n Dictionary for JS Strings ──
@@ -128,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProducts();
   initModal();
   initSmoothScroll();
+  initSearch();
+  initWishlist();
   
   if (!localStorage.getItem('namna_lang') && navigator.language.startsWith('es')) {
     showLanguageRecommendation();
@@ -562,9 +565,15 @@ function createProductCard(product, index) {
     ? `<span class="product-badge" style="background: var(--color-accent);">Últimas ${product.stock}</span>`
     : '';
 
+  const isWished = state.wishlist.includes(product.id);
+  const heartIconHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+
   card.innerHTML = `
     <div class="product-card-image">
       ${stockHTML}
+      <button class="wishlist-heart-btn ${isWished ? 'active' : ''}" data-id="${product.id}" aria-label="Favorito">
+        ${heartIconHTML}
+      </button>
       <img src="${mainImage}" alt="${product.nombre}" loading="lazy" />
       <button class="quick-view-btn" aria-label="${t('quickView')}">${t('quickView')}</button>
     </div>
@@ -574,7 +583,9 @@ function createProductCard(product, index) {
       <p class="product-card-price">${formatPrice(product.precioPublico)}</p>
     </div>
   `;
-  card.addEventListener('click', () => openModal(product));
+  card.querySelector('.product-card-image > img').addEventListener('click', () => openModal(product));
+  card.querySelector('.quick-view-btn').addEventListener('click', (e) => { e.stopPropagation(); openModal(product); });
+  card.querySelector('.wishlist-heart-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleWishlist(product.id, e.currentTarget); });
   return card;
 }
 
@@ -702,3 +713,190 @@ function initSmoothScroll() {
     });
   });
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SMART SEARCH
+// ═══════════════════════════════════════════════════════════════
+function initSearch() {
+  const searchBtn = document.getElementById('search-btn');
+  const overlay = document.getElementById('search-overlay');
+  const closeBtn = document.getElementById('close-search-btn');
+  const input = document.getElementById('search-input');
+  const resultsDiv = document.getElementById('search-results');
+  
+  if (!searchBtn || !overlay) return;
+
+  const closeSearch = () => {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+    input.value = '';
+    resultsDiv.innerHTML = '';
+  };
+
+  searchBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+    input.focus();
+  });
+  
+  closeBtn.addEventListener('click', closeSearch);
+  
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    resultsDiv.innerHTML = '';
+    if (!q) return;
+
+    // Static Index Links
+    const staticLinks = [
+      { keys: ['contacto', 'contact'], url: 'info.html#contacto', title: state.lang==='es'?'Contacto':'Contact' },
+      { keys: ['nosotros', 'about', 'who', 'quien'], url: 'info.html#about', title: state.lang==='es'?'Quiénes Somos':'About Us' },
+      { keys: ['envio', 'envío', 'shipping', 'delivery', 'tallas', 'size'], url: 'info.html', title: state.lang==='es'?'Info de Envíos y Tallas':'Shipping & Sizing' }
+    ];
+    
+    let html = '';
+    
+    staticLinks.forEach(link => {
+      if (link.keys.some(k => k.includes(q) || q.includes(k))) {
+        html += `<a href="${link.url}" class="search-result-item" onclick="document.getElementById('search-overlay').classList.remove('active');">
+          <div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:var(--color-bg);border-radius:var(--radius-sm);"><svg style="width:24px;height:24px;stroke:var(--color-primary);fill:none;" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="search-result-info"><span class="search-result-name">${link.title}</span><span class="search-result-cat">Página</span></div>
+        </a>`;
+      }
+    });
+
+    // Product search
+    const results = state.products.filter(p => 
+      p.nombre.toLowerCase().includes(q) || 
+      p.id.toLowerCase().includes(q) || 
+      p._descripcion_es.toLowerCase().includes(q) || 
+      p._descripcion_en.toLowerCase().includes(q) ||
+      p._categoria_es.toLowerCase().includes(q) ||
+      p._categoria_en.toLowerCase().includes(q)
+    ).slice(0, 8); // top 8 results
+    
+    results.forEach(p => {
+      html += `<div class="search-result-item" onclick="document.getElementById('search-overlay').classList.remove('active'); window.openModalById('${p.id}')">
+        <img src="${p.imagenes[0]}" class="search-result-img" />
+        <div class="search-result-info">
+          <span class="search-result-name">${p.nombre}</span>
+          <span class="search-result-cat">${p.categoria} - ${formatPrice(p.precioPublico)}</span>
+        </div>
+      </div>`;
+    });
+    
+    if (html === '') html = `<p style="padding:20px;text-align:center;color:var(--color-text-muted);">No se encontraron resultados</p>`;
+    resultsDiv.innerHTML = html;
+  });
+}
+
+window.openModalById = function(id) {
+  const p = state.products.find(x => x.id === id);
+  if (p) openModal(p);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// WISHLIST (FAVORITOS)
+// ═══════════════════════════════════════════════════════════════
+function initWishlist() {
+  const btn = document.getElementById('wishlist-btn');
+  const drawer = document.getElementById('wishlist-drawer');
+  const overlay = document.getElementById('wishlist-drawer-overlay');
+  const closeBtn = document.getElementById('close-drawer-btn');
+  
+  if (!btn || !drawer) return;
+  updateWishlistBadge();
+
+  const closeDrawer = () => {
+    drawer.classList.remove('active');
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  btn.addEventListener('click', () => {
+    renderWishlistDrawer();
+    drawer.classList.add('active');
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+  });
+
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+}
+
+function toggleWishlist(id, btnElement) {
+  const idx = state.wishlist.indexOf(id);
+  if (idx > -1) {
+    state.wishlist.splice(idx, 1);
+    btnElement.classList.remove('active');
+  } else {
+    state.wishlist.push(id);
+    btnElement.classList.add('active');
+    // Pequeña animación de rebote extra
+    btnElement.style.transform = 'scale(1.2)';
+    setTimeout(() => btnElement.style.transform = '', 200);
+  }
+  localStorage.setItem('namna_wishlist', JSON.stringify(state.wishlist));
+  updateWishlistBadge();
+}
+
+function updateWishlistBadge() {
+  const badge = document.getElementById('wishlist-badge');
+  if (!badge) return;
+  if (state.wishlist.length > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = state.wishlist.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderWishlistDrawer() {
+  const body = document.getElementById('wishlist-body');
+  if (!body) return;
+  
+  if (state.wishlist.length === 0) {
+    body.innerHTML = `<div class="wishlist-empty">${state.lang === 'es' ? 'Aún no tienes joyas guardadas.' : 'No saved jewelry yet.'}</div>`;
+    return;
+  }
+  
+  let html = '';
+  state.wishlist.forEach(id => {
+    const p = state.products.find(x => x.id === id);
+    if (!p) return;
+    html += `
+      <div class="search-result-item" style="position:relative;">
+        <img src="${p.imagenes[0]}" class="search-result-img" onclick="window.openModalById('${p.id}')" />
+        <div class="search-result-info" onclick="window.openModalById('${p.id}')" style="flex:1;">
+          <span class="search-result-name">${p.nombre}</span>
+          <span class="search-result-cat">${p.categoria} - ${formatPrice(p.precioPublico)}</span>
+        </div>
+        <button onclick="window.removeWishlistItem('${p.id}')" style="background:none;border:none;color:var(--color-text-muted);font-size:24px;cursor:pointer;padding:0 10px;">&times;</button>
+      </div>
+    `;
+  });
+  body.innerHTML = html;
+}
+
+window.removeWishlistItem = function(id) {
+  const idx = state.wishlist.indexOf(id);
+  if (idx > -1) {
+    state.wishlist.splice(idx, 1);
+    localStorage.setItem('namna_wishlist', JSON.stringify(state.wishlist));
+    updateWishlistBadge();
+    renderWishlistDrawer();
+    // Actualizar también el botón en la grid si está visible
+    document.querySelectorAll(`.wishlist-heart-btn[data-id="${id}"]`).forEach(b => b.classList.remove('active'));
+  }
+};
+
+window.handleWishlistWhatsAppOrder = function() {
+  if (state.wishlist.length === 0) return;
+  const items = state.wishlist.map(id => {
+    const p = state.products.find(x => x.id === id);
+    return p ? `- ${p.nombre} (${p.id})` : id;
+  }).join('%0A');
+  
+  const greeting = state.lang === 'es' ? '¡Hola! Me interesan las siguientes piezas de mi lista de favoritos:' : 'Hello! I am interested in the following pieces from my wishlist:';
+  const message = encodeURIComponent(greeting) + '%0A' + items;
+  window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${message}`, '_blank');
+};
