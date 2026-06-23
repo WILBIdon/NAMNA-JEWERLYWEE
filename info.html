@@ -74,7 +74,7 @@
         .info-hero-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(59,70,67,0.35) 0%, rgba(59,70,67,0.65) 100%);
+            background: linear-gradient(180deg, rgba(20,25,20,0.1) 0%, rgba(20,25,20,0.3) 100%);
         }
         .info-hero-content {
             position: relative;
@@ -82,6 +82,7 @@
             text-align: center;
             color: var(--color-white);
             padding: 0 var(--container-gutter);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
         .info-hero-content h1 {
             font-family: var(--font-heading);
@@ -357,8 +358,7 @@
         <img src="assets/info_hero.png" alt="Colección de joyería NAMNA sobre fondo de lino" loading="eager" data-site-img="hero_info">
         <div class="info-hero-overlay"></div>
         <div class="info-hero-content">
-            <h1 data-txt="TXT-035">Nuestra Historia</h1>
-            <p data-txt="TXT-036">Donde la artesanía se encuentra con la elegancia atemporal</p>
+            <h1 data-txt="TXT-035">NUESTRA HISTORIA</h1>
         </div>
     </section>
 
@@ -380,8 +380,8 @@
             </div>
         </article>
 
-        <!-- Políticas de Envío -->
-        <article class="info-card reverse" id="shipping">
+        <!-- Políticas de Envío y Devolución -->
+        <article class="info-card reverse" id="shipping-returns">
             <div class="info-card-visual">
                 <img src="assets/product_earrings.png" alt="Aretes premium NAMNA" loading="lazy" data-site-img="info_card_2">
             </div>
@@ -389,34 +389,26 @@
                 <div class="info-card-icon">
                     <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                 </div>
-                <h2 data-txt="TXT-037">Políticas de Envío</h2>
+                <h2 data-txt="TXT-037">Políticas de Envío y Devoluciones</h2>
                 <p data-txt="TXT-009">Realizamos envíos a nivel nacional e internacional a través de mensajería asegurada. Todos nuestros pedidos se procesan con el mayor cuidado y se envían en nuestro empaque premium distintivo para garantizar una experiencia de lujo desde el primer momento.</p>
                 <p data-txt="TXT-010"><strong>Tiempos de entrega:</strong> Los pedidos nacionales tardan entre 2 a 5 días hábiles. Los pedidos internacionales pueden variar entre 7 y 14 días hábiles dependiendo de la aduana del país destino.</p>
+                
+                <h3 style="font-family: var(--font-heading); font-size: var(--text-lg); margin-top: var(--space-sm); color: var(--color-primary);" data-txt="TXT-038">Devoluciones</h3>
+                <p data-txt="TXT-011">Tu satisfacción es nuestra máxima prioridad. Aceptamos cambios o devoluciones dentro de los primeros 14 días posteriores a la recepción de tu joya, siempre y cuando la pieza se encuentre en su estado original, sin signos de uso y con su empaque intacto.</p>
+                <p data-txt="TXT-012">Las piezas personalizadas o grabadas a medida no son elegibles para devolución. Para iniciar un proceso de cambio o devolución, por favor contacta a nuestro equipo directamente por WhatsApp y te guiaremos paso a paso.</p>
             </div>
         </article>
 
-        <!-- Políticas de Devolución -->
-        <article class="info-section-simple" id="returns">
+        <!-- Garantía -->
+        <article class="info-section-simple" id="warranty">
             <div class="info-section-header">
                 <div class="info-card-icon">
-                    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                 </div>
-                <h2 data-txt="TXT-038">Políticas de Devolución</h2>
+                <h2>Garantía</h2>
             </div>
-            <p data-txt="TXT-011">Tu satisfacción es nuestra máxima prioridad. Aceptamos cambios o devoluciones dentro de los primeros 14 días posteriores a la recepción de tu joya, siempre y cuando la pieza se encuentre en su estado original, sin signos de uso y con su empaque intacto.</p>
-            <p data-txt="TXT-012">Las piezas personalizadas o grabadas a medida no son elegibles para devolución. Para iniciar un proceso de cambio o devolución, por favor contacta a nuestro equipo directamente por WhatsApp y te guiaremos paso a paso.</p>
-        </article>
-
-        <!-- Guía de Tallas -->
-        <article class="info-section-simple" id="sizing">
-            <div class="info-section-header">
-                <div class="info-card-icon">
-                    <svg viewBox="0 0 24 24"><line x1="19.5" y1="2" x2="2" y2="19.5"/><line x1="2" y1="2" x2="2" y2="19.5"/><line x1="2" y1="19.5" x2="19.5" y2="19.5"/><line x1="5" y1="16.5" x2="5" y2="19.5"/><line x1="8" y1="13.5" x2="8" y2="19.5"/><line x1="11" y1="10.5" x2="11" y2="19.5"/><line x1="14" y1="7.5" x2="14" y2="19.5"/></svg>
-                </div>
-                <h2 data-txt="TXT-039">Guía de Tallas</h2>
-            </div>
-            <p data-txt="TXT-013">Para asegurar que tu joya tenga el ajuste perfecto, recomendamos medir el diámetro interior de un anillo que ya tengas y te quede bien, o medir la circunferencia de tu dedo con un hilo suave.</p>
-            <p data-txt="TXT-014">Si tienes dudas sobre tu talla exacta, nuestro equipo de asesores en WhatsApp estará encantado de brindarte atención personalizada para encontrar la medida ideal de tu pieza NAMNA.</p>
+            <p>Nuestras joyas están diseñadas para durar toda la vida. Ofrecemos una garantía contra defectos de fabricación. Si tu pieza presenta algún problema de calidad que no sea resultado del uso natural o mal manejo, nos haremos cargo de repararla o reemplazarla.</p>
+            <p>Para activar tu garantía o realizar una consulta sobre el cuidado de tu joya, comunícate a través de nuestro WhatsApp oficial.</p>
         </article>
 
         <!-- Formulario de Contacto -->
