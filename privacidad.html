@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Política de Privacidad y Habeas Data — NAMNA Jewelry</title>
+    <title>Política de Privacidad / Privacy Policy — NAMNA Jewelry</title>
 
-    <meta name="description" content="Política de privacidad y protección de datos personales (Habeas Data) de NAMNA Jewelry.">
+    <meta name="description" content="Política de privacidad y protección de datos personales de NAMNA Jewelry / Privacy Policy and Data Protection.">
     <meta name="robots" content="noindex, follow">
 
     <!-- Fonts -->
@@ -49,6 +49,10 @@
         .legal-content strong {
             color: var(--color-primary);
         }
+
+        /* Language Toggle Magic for this specific page */
+        html[lang="es"] .lang-en { display: none !important; }
+        html[lang="en"] .lang-es { display: none !important; }
     </style>
 </head>
 <body>
@@ -60,57 +64,110 @@
                 <img src="Logo-namna.png" alt="NAMNA" />
             </a>
             <div class="header-actions" style="position: absolute; right: var(--container-gutter);">
-                <a href="index.html" class="header-icon-btn" style="font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase;">← Volver</a>
+                <button class="header-icon-btn lang-toggle" id="lang-toggle-btn" aria-label="Cambiar idioma" style="margin-right: 15px;">
+                    <span id="current-lang">ES</span>
+                </button>
+                <a href="index.html" class="header-icon-btn" style="font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase;">
+                    <span class="lang-es">← Volver</span>
+                    <span class="lang-en">← Back</span>
+                </a>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="legal-main">
-        <h1 class="legal-title">Política de Privacidad y Habeas Data</h1>
-        
-        <div class="legal-content">
-            <p><strong>Fecha de última actualización:</strong> Junio de 2026</p>
+        <!-- Spanish Content -->
+        <div class="lang-es">
+            <h1 class="legal-title">Política de Privacidad y Habeas Data</h1>
+            
+            <div class="legal-content">
+                <p><strong>Fecha de última actualización:</strong> Junio de 2026</p>
 
-            <h2>1. Identificación del Responsable del Tratamiento</h2>
-            <p><strong>NAMNA Jewelry</strong> (en adelante, "la Empresa"), con correo electrónico de contacto <strong>hola@namna.com</strong>, es responsable del tratamiento de los datos personales recabados a través del sitio web <code>www.namnafine.com</code> y nuestros canales de atención vía WhatsApp.</p>
+                <h2>1. Identificación del Responsable del Tratamiento</h2>
+                <p><strong>NAMNA Jewelry</strong> (en adelante, "la Empresa"), con correo electrónico de contacto <strong>namnafine@gmail.com</strong>, es responsable del tratamiento de los datos personales recabados a través del sitio web <code>www.namnafine.com</code> y nuestros canales de atención vía WhatsApp.</p>
 
-            <h2>2. Finalidad del Tratamiento de Datos</h2>
-            <p>Sus datos personales (nombre, correo electrónico, número de teléfono y dirección de envío) serán utilizados exclusivamente para las siguientes finalidades:</p>
-            <ul>
-                <li>Procesamiento, envío y seguimiento de pedidos de joyería.</li>
-                <li>Comunicación directa vía WhatsApp o correo electrónico relacionada con el soporte al cliente, consultas de stock o estado de envíos.</li>
-                <li>Cumplimiento de obligaciones legales y fiscales.</li>
-            </ul>
+                <h2>2. Finalidad del Tratamiento de Datos</h2>
+                <p>Sus datos personales (nombre, correo electrónico, número de teléfono y dirección de envío) serán utilizados exclusivamente para las siguientes finalidades:</p>
+                <ul>
+                    <li>Procesamiento, envío y seguimiento de pedidos de joyería.</li>
+                    <li>Comunicación directa vía WhatsApp o correo electrónico relacionada con el soporte al cliente, consultas de stock o estado de envíos.</li>
+                    <li>Cumplimiento de obligaciones legales y fiscales.</li>
+                </ul>
 
-            <h2>3. Derechos de los Titulares (Habeas Data / Derechos ARCO)</h2>
-            <p>De conformidad con las leyes de protección de datos aplicables, incluyendo el Reglamento General de Protección de Datos (RGPD) europeo y las normativas latinoamericanas de Habeas Data, usted tiene derecho a:</p>
-            <ul>
-                <li><strong>Conocer, actualizar y rectificar</strong> sus datos personales.</li>
-                <li><strong>Solicitar prueba</strong> de la autorización otorgada para el tratamiento de datos.</li>
-                <li><strong>Ser informado</strong> sobre el uso que se le ha dado a sus datos personales.</li>
-                <li><strong>Revocar la autorización y/o solicitar la supresión</strong> del dato cuando en el tratamiento no se respeten los principios, derechos y garantías legales.</li>
-                <li><strong>Acceder en forma gratuita</strong> a sus datos personales que hayan sido objeto de tratamiento.</li>
-            </ul>
-            <p>Para ejercer cualquiera de estos derechos, puede enviar una solicitud formal a <strong>hola@namna.com</strong> con el asunto "Ejercicio de Derechos Habeas Data".</p>
+                <h2>3. Derechos de los Titulares (Habeas Data / Derechos ARCO)</h2>
+                <p>De conformidad con las leyes de protección de datos aplicables, incluyendo el Reglamento General de Protección de Datos (RGPD) europeo y las normativas latinoamericanas de Habeas Data, usted tiene derecho a:</p>
+                <ul>
+                    <li><strong>Conocer, actualizar y rectificar</strong> sus datos personales.</li>
+                    <li><strong>Solicitar prueba</strong> de la autorización otorgada para el tratamiento de datos.</li>
+                    <li><strong>Ser informado</strong> sobre el uso que se le ha dado a sus datos personales.</li>
+                    <li><strong>Revocar la autorización y/o solicitar la supresión</strong> del dato cuando en el tratamiento no se respeten los principios, derechos y garantías legales.</li>
+                    <li><strong>Acceder en forma gratuita</strong> a sus datos personales que hayan sido objeto de tratamiento.</li>
+                </ul>
+                <p>Para ejercer cualquiera de estos derechos, puede enviar una solicitud formal a <strong>namnafine@gmail.com</strong> con el asunto "Ejercicio de Derechos Habeas Data".</p>
 
-            <h2>4. Seguridad de la Información</h2>
-            <p>Implementamos las medidas técnicas, humanas y administrativas necesarias para otorgar seguridad a los registros, evitando su adulteración, pérdida, consulta, uso o acceso no autorizado o fraudulento. Los pagos y transacciones acordadas vía WhatsApp se rigen bajo pasarelas de pago seguras externas y no almacenamos información de tarjetas de crédito.</p>
+                <h2>4. Seguridad de la Información</h2>
+                <p>Implementamos las medidas técnicas, humanas y administrativas necesarias para otorgar seguridad a los registros, evitando su adulteración, pérdida, consulta, uso o acceso no autorizado o fraudulento. Los pagos y transacciones acordadas vía WhatsApp se rigen bajo pasarelas de pago seguras externas y no almacenamos información de tarjetas de crédito.</p>
 
-            <h2>5. Uso de Cookies</h2>
-            <p>Este sitio web utiliza tecnologías locales (como `localStorage`) estrictamente necesarias para el funcionamiento del sitio (por ejemplo, para recordar su preferencia de idioma o los artículos en su lista de favoritos). No utilizamos cookies de rastreo invasivas de terceros para fines publicitarios no autorizados.</p>
+                <h2>5. Uso de Cookies</h2>
+                <p>Este sitio web utiliza tecnologías locales (como `localStorage`) estrictamente necesarias para el funcionamiento del sitio (por ejemplo, para recordar su preferencia de idioma o los artículos en su lista de favoritos). No utilizamos cookies de rastreo invasivas de terceros para fines publicitarios no autorizados.</p>
 
-            <h2>6. Modificaciones a la Política</h2>
-            <p>NAMNA Jewelry se reserva el derecho a modificar esta política en cualquier momento. Cualquier cambio sustancial será publicado en esta misma página con la fecha de actualización correspondiente.</p>
+                <h2>6. Modificaciones a la Política</h2>
+                <p>NAMNA Jewelry se reserva el derecho a modificar esta política en cualquier momento. Cualquier cambio sustancial será publicado en esta misma página con la fecha de actualización correspondiente.</p>
+            </div>
+        </div>
+
+        <!-- English Content -->
+        <div class="lang-en">
+            <h1 class="legal-title">Privacy Policy and Data Protection</h1>
+            
+            <div class="legal-content">
+                <p><strong>Last Updated:</strong> June 2026</p>
+
+                <h2>1. Data Controller Identification</h2>
+                <p><strong>NAMNA Jewelry</strong> (hereinafter "the Company"), with contact email <strong>namnafine@gmail.com</strong>, is responsible for processing personal data collected through the website <code>www.namnafine.com</code> and our WhatsApp customer service channels.</p>
+
+                <h2>2. Purpose of Data Processing</h2>
+                <p>Your personal data (name, email, phone number, and shipping address) will be used exclusively for the following purposes:</p>
+                <ul>
+                    <li>Processing, shipping, and tracking jewelry orders.</li>
+                    <li>Direct communication via WhatsApp or email related to customer support, stock inquiries, or shipping status.</li>
+                    <li>Compliance with legal and tax obligations.</li>
+                </ul>
+
+                <h2>3. User Rights (GDPR / ARCO Rights)</h2>
+                <p>In accordance with applicable data protection laws, including the European General Data Protection Regulation (GDPR) and Latin American Habeas Data regulations, you have the right to:</p>
+                <ul>
+                    <li><strong>Access, update, and rectify</strong> your personal data.</li>
+                    <li><strong>Request proof</strong> of the authorization granted for data processing.</li>
+                    <li><strong>Be informed</strong> about how your personal data has been used.</li>
+                    <li><strong>Revoke authorization and/or request deletion</strong> of data if processing violates legal principles, rights, and guarantees.</li>
+                    <li><strong>Access free of charge</strong> your personal data that has been processed.</li>
+                </ul>
+                <p>To exercise any of these rights, you may send a formal request to <strong>namnafine@gmail.com</strong> with the subject "Exercise of Data Protection Rights".</p>
+
+                <h2>4. Information Security</h2>
+                <p>We implement necessary technical, human, and administrative measures to secure records and prevent their alteration, loss, or unauthorized access. Payments and transactions agreed upon via WhatsApp are governed by secure external payment gateways; we do not store credit card information.</p>
+
+                <h2>5. Use of Cookies</h2>
+                <p>This website uses local technologies (such as `localStorage`) strictly necessary for the site's functionality (e.g., to remember your language preference or items in your wishlist). We do not use invasive third-party tracking cookies for unauthorized advertising purposes.</p>
+
+                <h2>6. Policy Modifications</h2>
+                <p>NAMNA Jewelry reserves the right to modify this policy at any time. Any substantial changes will be posted on this page with the corresponding update date.</p>
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="main-footer" style="margin-top: 0;">
         <div class="footer-bottom" style="border-top: none; justify-content: center;">
-            <p>&copy; 2026 NAMNA Jewelry. Todos los derechos reservados.</p>
+            <p>&copy; 2026 NAMNA Jewelry. <span class="lang-es">Todos los derechos reservados.</span><span class="lang-en">All rights reserved.</span></p>
         </div>
     </footer>
+
+    <!-- Use app.js to keep the language toggle working smoothly across pages -->
+    <script src="js/app.js"></script>
+    <script src="js/shield.js"></script>
 
 </body>
 </html>
