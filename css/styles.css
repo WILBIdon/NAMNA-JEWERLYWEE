@@ -346,8 +346,9 @@ h4 { font-size: var(--text-xl); }
   transform: translateY(-6.5px) rotate(-45deg);
 }
 
-/* Mobile Navigation Overlay */
-.mobile-nav-overlay {
+/* Mobile Navigation Overlay & Panel */
+.mobile-nav-overlay,
+.mobile-nav-panel {
   display: none;
 }
 
@@ -1544,6 +1545,7 @@ body.mobile-menu-open {
   justify-content: center;
   box-shadow: 0 4px 16px rgba(37, 211, 102, 0.35);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  overflow: hidden;
 }
 
 .whatsapp-float:hover {
