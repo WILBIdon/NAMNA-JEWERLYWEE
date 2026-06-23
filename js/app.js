@@ -439,13 +439,21 @@ function loadFromCache() {
 function initI18n() {
   dom.langToggleBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      state.lang = state.lang === 'es' ? 'en' : 'es';
-      localStorage.setItem('namna_lang', state.lang);
-      updateTranslations();
-      state.activeCategory = 'all'; // Reset filter when lang changes
-      buildCategoryFilters();
-      renderProducts();
-      renderNuevos();
+      document.body.classList.add('lang-switching');
+      
+      setTimeout(() => {
+        state.lang = state.lang === 'es' ? 'en' : 'es';
+        localStorage.setItem('namna_lang', state.lang);
+        updateTranslations();
+        state.activeCategory = 'all'; // Reset filter when lang changes
+        buildCategoryFilters();
+        renderProducts();
+        renderNuevos();
+        
+        setTimeout(() => {
+          document.body.classList.remove('lang-switching');
+        }, 50); // slight delay to allow DOM to update before fading in
+      }, 300); // 300ms matches the CSS transition duration
     });
   });
 }

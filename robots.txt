@@ -1,8 +1,8 @@
 # NAMNA Jewelry — robots.txt
-# https://wilbidon.github.io/NAMNA-JEWERLYWEE/
+# https://www.namnafine.com/
 
 User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://wilbidon.github.io/NAMNA-JEWERLYWEE/sitemap.xml
+Sitemap: https://www.namnafine.com/sitemap.xml

@@ -100,7 +100,6 @@
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -112,6 +111,12 @@ body {
   color: var(--color-text);
   background-color: var(--color-background);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: opacity 0.3s ease;
+}
+
+body.lang-switching {
+  opacity: 0.2;
 }
 
 img {
