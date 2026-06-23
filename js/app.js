@@ -514,7 +514,6 @@ function renderNuevos(products = state.products) {
     card.style.animationDelay = `${index * 0.12}s`;
     card.innerHTML = `
       <div class="nuevos-card-image">
-        <span class="product-badge">${t('newBadge')}</span>
         <img src="${product.imagenes[0]}" alt="${product.nombre}" />
       </div>
       <div class="nuevos-card-info">
