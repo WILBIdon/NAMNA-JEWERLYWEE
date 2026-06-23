@@ -444,7 +444,11 @@ function inyectarTextosIngles() {
     { id: "TXT-040", es: "¿Tienes alguna pregunta? Escríbenos y te responderemos a la brevedad.", en: "Have a question? Write to us and we'll reply shortly." },
     { id: "TXT-041", es: "Nombre", en: "Name" },
     { id: "TXT-042", es: "Mensaje", en: "Message" },
-    { id: "TXT-043", es: "Enviar por WhatsApp", en: "Send via WhatsApp" }
+    { id: "TXT-043", es: "Enviar por WhatsApp", en: "Send via WhatsApp" },
+    { id: "TXT-044", es: "Privacidad y Datos", en: "Privacy & Data" },
+    { id: "TXT-045", es: "Garantía", en: "Warranty" },
+    { id: "TXT-046", es: "Nuestras joyas están diseñadas para durar toda la vida. Ofrecemos una garantía contra defectos de fabricación. Si tu pieza presenta algún problema de calidad que no sea resultado del uso natural o mal manejo, nos haremos cargo de repararla o reemplazarla.", en: "Our jewelry is designed to last a lifetime. We offer a warranty against manufacturing defects. If your piece presents any quality issue that is not the result of natural wear or mishandling, we will repair or replace it." },
+    { id: "TXT-047", es: "Para activar tu garantía o realizar una consulta sobre el cuidado de tu joya, comunícate a través de nuestro WhatsApp oficial.", en: "To activate your warranty or inquire about the care of your jewelry, please contact us through our official WhatsApp." }
   ];
   
   // Mapear los IDs existentes
