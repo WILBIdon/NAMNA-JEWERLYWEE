@@ -915,8 +915,29 @@ function toggleWishlist(id, btnElement) {
     setTimeout(() => btnElement.style.transform = '', 200);
   }
   localStorage.setItem('namna_wishlist', JSON.stringify(state.wishlist));
+  
   updateWishlistBadge();
 }
+
+// Actualizar también el botón en el modal
+window.updateModalWishlistBtn = function(id) {
+  const btn = document.getElementById('modal-wishlist-btn');
+  if (btn) {
+    if (state.wishlist.includes(id)) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+};
+
+window.scrollCarousel = function(id, dir) {
+  const el = document.getElementById(id);
+  if (el) {
+    const scrollAmount = window.innerWidth > 700 ? 400 : 250;
+    el.scrollBy({ left: scrollAmount * dir, behavior: 'smooth' });
+  }
+};
 
 function updateWishlistBadge() {
   const badge = document.getElementById('wishlist-badge');

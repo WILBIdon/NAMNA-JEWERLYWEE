@@ -723,6 +723,30 @@ body.mobile-menu-open {
   margin-inline: auto;
 }
 
+.carousel-nav {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.carousel-btn {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
+}
+
+.carousel-btn:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
 .nuevos-badge {
   font-family: var(--font-body);
   font-size: var(--text-xs);
@@ -847,7 +871,7 @@ body.mobile-menu-open {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--grid-gap);
   max-width: var(--container-max);
   margin: 0 auto;
