@@ -452,8 +452,8 @@ function initI18n() {
         
         setTimeout(() => {
           document.body.classList.remove('lang-switching');
-        }, 50); // slight delay to allow DOM to update before fading in
-      }, 300); // 300ms matches the CSS transition duration
+        }, 20); // slight delay to allow DOM to update before fading in
+      }, 100); // 100ms matches the CSS transition duration
     });
   });
 }
