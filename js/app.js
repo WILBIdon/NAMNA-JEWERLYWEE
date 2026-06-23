@@ -65,7 +65,7 @@ const i18n = {
     outOfStock: 'Agotado temporalmente',
     orderWhatsApp: 'Pedir por WhatsApp',
     code: 'Código',
-    newBadge: 'Nuevo',
+    newBadge: 'NUEVO',
     whatsappMessage: '¡Hola! Me interesa la pieza "{name}" (Código: {id}). ¿Podrían darme más información?',
     piece: 'pieza',
     pieces: 'piezas'
@@ -78,7 +78,7 @@ const i18n = {
     outOfStock: 'Temporarily out of stock',
     orderWhatsApp: 'Order via WhatsApp',
     code: 'Code',
-    newBadge: 'New',
+    newBadge: 'NUEVO',
     whatsappMessage: 'Hello! I am interested in the piece "{name}" (Code: {id}). Could you provide more information?',
     piece: 'piece',
     pieces: 'pieces'
@@ -515,7 +515,7 @@ function renderNuevos(products = state.products) {
     card.innerHTML = `
       <div class="nuevos-card-image">
         <span class="product-badge">${t('newBadge')}</span>
-        <img src="${product.imagenes[0]}" alt="${product.nombre}" loading="lazy" />
+        <img src="${product.imagenes[0]}" alt="${product.nombre}" />
       </div>
       <div class="nuevos-card-info">
         <p class="nuevos-card-category">${product.categoria}</p>
