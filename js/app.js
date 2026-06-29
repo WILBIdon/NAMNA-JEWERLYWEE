@@ -578,6 +578,18 @@ function finishLoading() {
   showDataSourceBadge();
 }
 
+function getSingularCategory(cat) {
+  const lowerCat = String(cat).toLowerCase().trim();
+  const singularMap = {
+    'collares': 'Collar', 'pendientes': 'Pendiente', 'aretes': 'Arete', 
+    'anillos': 'Anillo', 'pulseras': 'Pulsera', 'dijes': 'Dije', 
+    'colgantes': 'Colgante', 'sets': 'Set', 'joyas': 'Joya',
+    'necklaces': 'Necklace', 'earrings': 'Earring', 'rings': 'Ring', 
+    'bracelets': 'Bracelet', 'pendants': 'Pendant', 'jewelry': 'Jewelry'
+  };
+  return singularMap[lowerCat] || cat.replace(/s$/i, '');
+}
+
 // ── Novedades: últimos 4 productos añadidos ──
 function renderNuevos(products = state.products) {
   if (!dom.nuevosGrid) return;
@@ -600,7 +612,7 @@ function renderNuevos(products = state.products) {
         <img src="${product.imagenes[0]}" alt="${product.nombre}" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
       </div>
       <div class="nuevos-card-info">
-        <p class="nuevos-card-category">${product.categoria}</p>
+        <p class="nuevos-card-category">${getSingularCategory(product.categoria)}</p>
         <h3 class="nuevos-card-name">${product.nombre}</h3>
         <p class="nuevos-card-price">${formatPrice(product.precioPublico)}</p>
       </div>
@@ -720,7 +732,7 @@ function createProductCard(product, index) {
       <button class="quick-view-btn" aria-label="${t('quickView')}">${t('quickView')}</button>
     </div>
     <div class="product-card-info">
-      <p class="product-card-category">${product.categoria}</p>
+      <p class="product-card-category">${getSingularCategory(product.categoria)}</p>
       <h3 class="product-card-name">${product.nombre}</h3>
       <p class="product-card-price">${formatPrice(product.precioPublico)}</p>
     </div>
@@ -777,15 +789,7 @@ function openModal(product) {
     galleryHTML += `</div>`;
   }
 
-  const lowerCat = String(product.categoria).toLowerCase().trim();
-  const singularMap = {
-    'collares': 'Collar', 'pendientes': 'Pendiente', 'aretes': 'Arete', 
-    'anillos': 'Anillo', 'pulseras': 'Pulsera', 'dijes': 'Dije', 
-    'colgantes': 'Colgante', 'sets': 'Set', 'joyas': 'Joya',
-    'necklaces': 'Necklace', 'earrings': 'Earring', 'rings': 'Ring', 
-    'bracelets': 'Bracelet', 'pendants': 'Pendant', 'jewelry': 'Jewelry'
-  };
-  let singularCat = singularMap[lowerCat] || product.categoria.replace(/s$/i, '');
+  let singularCat = getSingularCategory(product.categoria);
 
   let descHtml = '';
   if (product.descripcion) {
