@@ -48,7 +48,7 @@ const state = {
   modalOpen: false,
   dataSource: 'loading',
   sheetProducts: 0,
-  lang: localStorage.getItem('namna_lang') || 'en',
+  lang: localStorage.getItem('namna_lang') || 'es',
   textos_es: {},
   textos_en: {},
   siteImages: {},
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initWishlist();
   
-  if (!localStorage.getItem('namna_lang') && navigator.language.startsWith('es')) {
+  if (!localStorage.getItem('namna_lang') && !navigator.language.startsWith('es')) {
     showLanguageRecommendation();
   }
 });
@@ -142,16 +142,16 @@ function showLanguageRecommendation() {
   const banner = document.createElement('div');
   banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--color-primary);color:#fff;padding:12px 24px;border-radius:30px;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.2);display:flex;align-items:center;gap:15px;font-family:var(--font-body);font-size:14px;animation:fadeSlideUp 0.5s ease-out;';
   banner.innerHTML = `
-    <span>¿Prefieres ver el sitio en Español? 🇪🇸</span>
-    <button style="background:var(--color-accent);color:#fff;border:none;padding:6px 12px;border-radius:20px;cursor:pointer;font-weight:600;">Cambiar a ES</button>
+    <span>Prefer to view the site in English? 🇬🇧</span>
+    <button style="background:var(--color-accent);color:#fff;border:none;padding:6px 12px;border-radius:20px;cursor:pointer;font-weight:600;">Switch to EN</button>
     <button style="background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;">&times;</button>
   `;
   document.body.appendChild(banner);
   
   const btns = banner.querySelectorAll('button');
   btns[0].addEventListener('click', () => {
-    state.lang = 'es';
-    localStorage.setItem('namna_lang', 'es');
+    state.lang = 'en';
+    localStorage.setItem('namna_lang', 'en');
     updateTranslations();
     state.activeCategory = 'all';
     buildCategoryFilters();
