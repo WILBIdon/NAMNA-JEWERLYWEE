@@ -442,7 +442,7 @@ function inyectarTextosIngles() {
     { id: "TXT-034", es: "Hecho a mano con ♡", en: "Handmade with ♡" },
     { id: "TXT-035", es: "Nuestra Historia", en: "Our Story" },
     { id: "TXT-036", es: "Donde la artesanía se encuentra con la elegancia atemporal", en: "Where craftsmanship meets timeless elegance" },
-    { id: "TXT-037", es: "Políticas de Envío", en: "Shipping Policies" },
+    { id: "TXT-037", es: "Políticas de Envío y Devoluciones", en: "Shipping and Return Policies" },
     { id: "TXT-038", es: "Políticas de Devolución", en: "Return Policies" },
     { id: "TXT-039", es: "Guía de Tallas", en: "Sizing Guide" },
     { id: "TXT-040", es: "¿Tienes alguna pregunta? Escríbenos y te responderemos a la brevedad.", en: "Have a question? Write to us and we'll reply shortly." },
