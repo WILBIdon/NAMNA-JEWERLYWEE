@@ -27,21 +27,23 @@ function doGet() {
     const sheet = ss.getSheets()[0];
     const data = sheet.getDataRange().getValues();
 
-    const headers = data[0];
-    if (!headers.includes("ID_Producto") || !headers.includes("Precio_Publico") || !headers.includes("Visible")) {
-      throw new Error("Estructura de la hoja alterada. Faltan columnas críticas.");
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    
+    // Check for critical columns regardless of case
+    if (!headers.includes("id_producto") || !headers.includes("precio_publico") || !headers.includes("visible")) {
+      throw new Error("Estructura de la hoja alterada. Faltan columnas críticas (ID_Producto, Precio_Publico, Visible).");
     }
 
     const idx = {
-      id: headers.findIndex(h => h === "ID_Producto"),
-      nombre: headers.findIndex(h => h === "Nombre"),
-      desc_es: headers.findIndex(h => h === "Descripción Es" || h === "Descripción"),
-      desc_en: headers.findIndex(h => h === "Descripción En"),
-      cat_es: headers.findIndex(h => h === "Categoría Es" || h === "Categoría"),
-      cat_en: headers.findIndex(h => h === "Categoría En"),
-      precioPub: headers.findIndex(h => h === "Precio_Publico"),
-      visible: headers.findIndex(h => h === "Visible"),
-      stock: headers.findIndex(h => h === "Stock")
+      id: headers.findIndex(h => h === "id_producto"),
+      nombre: headers.findIndex(h => h === "nombre"),
+      desc_es: headers.findIndex(h => h === "descripción es" || h === "descripción" || h === "descripcion es" || h === "descripcion"),
+      desc_en: headers.findIndex(h => h === "descripción en" || h === "descripcion en"),
+      cat_es: headers.findIndex(h => h === "categoría es" || h === "categoría" || h === "categoria es" || h === "categoria"),
+      cat_en: headers.findIndex(h => h === "categoría en" || h === "categoria en"),
+      precioPub: headers.findIndex(h => h === "precio_publico"),
+      visible: headers.findIndex(h => h === "visible"),
+      stock: headers.findIndex(h => h === "stock")
     };
 
     // ── INDEXACIÓN EN MEMORIA (Fotos principales + Hijas) ──
@@ -57,7 +59,8 @@ function doGet() {
       if (!idProducto) continue;
 
       const isVisible = String(row[idx.visible]).trim().toLowerCase();
-      if (isVisible !== "sí" && isVisible !== "si") continue;
+      const validVisible = ["sí", "si", "true", "1", "yes", "s", "y", "ok"];
+      if (!validVisible.includes(isVisible)) continue;
 
       const precio = Number(row[idx.precioPub]) || 0;
       const stock = Number(row[idx.stock]) || 0;
