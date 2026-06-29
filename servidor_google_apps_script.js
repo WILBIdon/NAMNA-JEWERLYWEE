@@ -365,8 +365,12 @@ function leerImagenesSitio(folderId) {
 }
 
 /**
- * ── FUNCIÓN DE AYUDA (EJECUTAR MANUALMENTE) ──
- * Inyecta la columna Texto_EN y los textos automáticamente en la hoja TEXTOS
+ * ── INYECCIÓN INTELIGENTE DE TEXTOS ──
+ * REGLA DE ORO: Solo agrega textos NUEVOS (IDs que no existan).
+ * NUNCA sobrescribe textos que ya están en la hoja.
+ * Así puedes editar libremente en la hoja sin miedo a perder cambios.
+ *
+ * Ejecutar: Apps Script → Ejecutar → inyectarTextosIngles
  */
 function inyectarTextosIngles() {
   const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
@@ -396,15 +400,15 @@ function inyectarTextosIngles() {
     return;
   }
   
-  // Buscar o crear Texto_EN
+  // Buscar o crear columna Texto_EN
   let iEn = cabeceras.findIndex(c => c && c.toString().toUpperCase().includes("TEXTO_EN"));
   if (iEn === -1) {
     iEn = cabeceras.length;
     hoja.getRange(1, iEn + 1).setValue("Texto_EN");
   }
   
-  // El diccionario completo
-  const NUEVOS_TEXTOS = [
+  // El catálogo maestro de textos (valores por defecto para textos NUEVOS)
+  const CATALOGO_TEXTOS = [
     { id: "TXT-001", es: "Envío gratis en pedidos superiores a €999 a toda España y Europa — Piezas únicas hechas a mano", en: "Free shipping on orders over €999 to all of Spain and Europe — Unique handmade pieces" },
     { id: "TXT-002", es: "Alta Joyería", en: "Fine Jewelry" },
     { id: "TXT-003", es: "Elegancia Atemporal", en: "Timeless Elegance" },
@@ -451,43 +455,46 @@ function inyectarTextosIngles() {
     { id: "TXT-047", es: "Para activar tu garantía o realizar una consulta sobre el cuidado de tu joya, comunícate a través de nuestro WhatsApp oficial.", en: "To activate your warranty or inquire about the care of your jewelry, please contact us through our official WhatsApp." }
   ];
   
-  // Mapear los IDs existentes
-  const filasExistentes = {};
+  // ── INYECCIÓN INTELIGENTE ──
+  // Paso 1: Recolectar todos los IDs que YA existen en la hoja
+  const idsExistentes = new Set();
   for (let i = 1; i < datos.length; i++) {
     const id = String(datos[i][iId]).trim();
-    if (id) filasExistentes[id] = i + 1; // 1-indexed for reference
+    if (id) idsExistentes.add(id);
   }
   
-  let añadidos = 0;
-  let actualizados = 0;
+  // Paso 2: Filtrar solo los textos que NO existen en la hoja
+  const textosFaltantes = CATALOGO_TEXTOS.filter(item => !idsExistentes.has(item.id));
   
-  for (const item of NUEVOS_TEXTOS) {
-    if (filasExistentes[item.id]) {
-      const rowIndex = filasExistentes[item.id] - 1; // 0-indexed for array
-      // Sobrescribir ambos para asegurar que la web se actualice con los textos de España/Europa
-      datos[rowIndex][iEs] = item.es;
-      datos[rowIndex][iEn] = item.en;
-      actualizados++;
-    } else {
-      const newRow = new Array(cabeceras.length).fill("");
-      newRow[iId] = item.id;
-      newRow[iEs] = item.es;
-      newRow[iEn] = item.en;
-      datos.push(newRow);
-      añadidos++;
-    }
+  // Paso 3: Si no hay nada nuevo, terminar sin tocar la hoja
+  if (textosFaltantes.length === 0) {
+    const msg = `✅ Todo actualizado — Los ${idsExistentes.size} textos ya existen en la hoja.\nNo se modificó nada. Puedes editar tus textos en la hoja con confianza.`;
+    console.log(msg);
+    try { SpreadsheetApp.getUi().alert(msg); } catch(e) {}
+    return;
   }
   
-  // Asegurar que todas las filas tengan la misma longitud para setValues
-  const colCount = cabeceras.length;
-  for (let i = 0; i < datos.length; i++) {
-    while (datos[i].length < colCount) datos[i].push("");
-  }
+  // Paso 4: Agregar solo las filas nuevas al final
+  const colCount = Math.max(cabeceras.length, iEn + 1);
+  const filasNuevas = textosFaltantes.map(item => {
+    const row = new Array(colCount).fill("");
+    row[iId] = item.id;
+    row[iEs] = item.es;
+    row[iEn] = item.en;
+    return row;
+  });
   
-  // Escribir todo de golpe (súper rápido, evita timeout)
-  hoja.getRange(1, 1, datos.length, colCount).setValues(datos);
+  // Escribir solo las filas nuevas (no toca las existentes)
+  const startRow = datos.length + 1;
+  hoja.getRange(startRow, 1, filasNuevas.length, colCount).setValues(filasNuevas);
   
-  console.log(`✅ Textos inyectados!\n- Textos en inglés agregados/actualizados: ${actualizados}\n- Textos nuevos completos añadidos: ${añadidos}`);
+  const idsAgregados = textosFaltantes.map(t => t.id).join(", ");
+  const msg = `✅ Inyección inteligente completada:\n` +
+    `- Textos existentes (NO tocados): ${idsExistentes.size}\n` +
+    `- Textos nuevos agregados: ${textosFaltantes.length}\n` +
+    `- IDs nuevos: ${idsAgregados}`;
+  console.log(msg);
+  try { SpreadsheetApp.getUi().alert(msg); } catch(e) {}
 }
 
 /**

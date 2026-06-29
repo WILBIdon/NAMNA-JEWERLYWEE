@@ -19,7 +19,7 @@ const CONFIG = {
   WHATSAPP_NUMBER: '4917670201873',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
-  CACHE_DURATION_MS: 5 * 60 * 1000,
+  CACHE_DURATION_MS: 30 * 60 * 1000,  // 30 minutos — carga instantánea para visitantes recurrentes
 };
 
 // ── DATOS DEMO ELIMINADOS ──
@@ -108,7 +108,7 @@ const dom = {
 
 // ── Sincronización Inmediata del Idioma (Evita parpadeos) ──
 (function() {
-  const cachedStr = sessionStorage.getItem('namna_catalog');
+  const cachedStr = localStorage.getItem('namna_catalog');
   if (cachedStr) {
     try {
       const cached = JSON.parse(cachedStr);
@@ -226,12 +226,34 @@ function initMobileMenu() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MOTOR HÍBRIDO CONECTADO
+// MOTOR HÍBRIDO CONECTADO — Estrategia: Cache-First + Background Refresh
+// 1. Si hay caché válido → muestra INSTANTÁNEO, luego actualiza en background
+// 2. Si no hay caché → muestra loader y espera al servidor
 // ═══════════════════════════════════════════════════════════════
 async function loadProducts() {
+  // PASO 1: Intentar caché primero (carga instantánea)
+  const cached = loadFromCache();
+  if (cached && cached.length > 0) {
+    console.log('⚡ NAMNA: Carga instantánea desde caché (' + cached.length + ' productos)');
+    state.products = cached;
+    state.dataSource = 'cache';
+    state.sheetProducts = cached.length;
+    finishLoading();
+    // PASO 2: Actualizar en background sin bloquear la UI
+    refreshInBackground();
+    return;
+  }
+
+  // Sin caché → carga normal (muestra loader)
+  console.log('🔄 NAMNA: Sin caché, cargando del servidor...');
+  await loadFromServer();
+}
+
+// ── Carga desde servidor (bloqueante, muestra loader) ──
+async function loadFromServer() {
   if (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim() !== '') {
     try {
-      console.log('🔐 NAMNA: Conectando via Apps Script (fotos múltiples)...');
+      console.log('🔐 NAMNA: Conectando via Apps Script...');
       const apiProducts = await fetchFromAppsScript();
       if (apiProducts && apiProducts.length > 0) {
         state.products = apiProducts;
@@ -263,19 +285,43 @@ async function loadProducts() {
     }
   }
 
-  const cached = loadFromCache();
-  if (cached) {
-    state.products = cached;
-    state.dataSource = 'cache';
-    state.sheetProducts = cached.length;
-    finishLoading();
-    return;
-  }
-
-  // Si todo falla, no hay demo. Catálogo vacío.
+  // Si todo falla, catálogo vacío
   state.products = [];
   state.dataSource = 'error';
   finishLoading();
+}
+
+// ── Actualización silenciosa en background ──
+async function refreshInBackground() {
+  try {
+    if (!CONFIG.APPS_SCRIPT_URL || CONFIG.APPS_SCRIPT_URL.trim() === '') return;
+    console.log('🔄 NAMNA: Actualizando en background...');
+    const freshProducts = await fetchFromAppsScript();
+    if (freshProducts && freshProducts.length > 0) {
+      // Solo actualizar si hay cambios reales
+      const oldCount = state.products.length;
+      const newCount = freshProducts.length;
+      state.products = freshProducts;
+      state.filteredProducts = state.activeCategory === 'all'
+        ? [...freshProducts]
+        : freshProducts.filter(p => p.categoria === state.activeCategory);
+      state.dataSource = 'apps-script';
+      state.sheetProducts = newCount;
+      saveToCache(freshProducts);
+      // Solo re-renderizar si hubo cambios
+      if (oldCount !== newCount) {
+        buildCategoryFilters();
+        renderProducts();
+        renderNuevos();
+        console.log('✅ NAMNA: Catálogo actualizado (' + oldCount + ' → ' + newCount + ' productos)');
+      } else {
+        console.log('✅ NAMNA: Catálogo confirmado al día (' + newCount + ' productos)');
+      }
+    }
+  } catch (err) {
+    // Silencioso — el usuario ya tiene contenido del caché
+    console.log('ℹ️ NAMNA: Background refresh no disponible, usando caché');
+  }
 }
 
 async function fetchFromAppsScript() {
@@ -401,25 +447,31 @@ async function fetchFromGoogleSheets() {
 function saveToCache(data) {
   try {
     const cacheData = { timestamp: Date.now(), items: data, textos_es: state.textos_es, textos_en: state.textos_en, siteImages: state.siteImages };
-    sessionStorage.setItem('namna_catalog', JSON.stringify(cacheData));
+    localStorage.setItem('namna_catalog', JSON.stringify(cacheData));
   } catch (e) {
+    // Si localStorage está lleno, intentar limpiar y reintentar
     console.warn('⚠️ No se pudo guardar en caché:', e);
+    try {
+      localStorage.removeItem('namna_catalog');
+      localStorage.setItem('namna_catalog', JSON.stringify(cacheData));
+    } catch (e2) {
+      console.warn('⚠️ Caché no disponible');
+    }
   }
 }
 
 function loadFromCache() {
   try {
-    const cached = sessionStorage.getItem('namna_catalog');
+    const cached = localStorage.getItem('namna_catalog');
     if (!cached) return null;
     const parsed = JSON.parse(cached);
     if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION_MS) {
-      sessionStorage.removeItem('namna_catalog');
+      localStorage.removeItem('namna_catalog');
       return null;
     }
     if (parsed.textos_es) state.textos_es = parsed.textos_es;
     if (parsed.textos_en) state.textos_en = parsed.textos_en;
     if (parsed.siteImages) state.siteImages = parsed.siteImages;
-    updateTranslations();
     updateTranslations();
     applySiteImages();
     // Re-attach getters that were lost during JSON.stringify
@@ -483,16 +535,36 @@ function updateTranslations() {
   }
 }
 
-// ── Site Images Logic ──
+// ── Site Images Logic (con protección contra imágenes fantasma) ──
 function applySiteImages() {
   if (!state.siteImages) return;
   document.querySelectorAll('img[data-site-img]').forEach(img => {
     const key = img.getAttribute('data-site-img');
     if (state.siteImages[key]) {
-      img.src = state.siteImages[key];
+      const originalSrc = img.src; // Guardar imagen local como fallback
+      const newImg = new Image();
+      newImg.onload = () => {
+        img.src = state.siteImages[key]; // Solo cambiar si cargó bien
+      };
+      newImg.onerror = () => {
+        console.warn('⚠️ Imagen de Drive no disponible:', key, '→ usando local');
+        // No cambiar — mantener la imagen local original
+      };
+      newImg.src = state.siteImages[key];
     }
   });
 }
+
+// ── Manejo global de imágenes rotas (anti-fantasma) ──
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG' && e.target.src.includes('drive.google.com')) {
+    const cat = e.target.closest('[data-category]')?.dataset?.category || '';
+    const fallback = CATEGORY_IMAGE_FALLBACK[cat] || CATEGORY_IMAGE_FALLBACK._default;
+    e.target.src = fallback;
+    e.target.style.opacity = '1';
+    console.warn('🖼️ Imagen de Drive falló, usando fallback:', e.target.alt);
+  }
+}, true);
 
 function finishLoading() {
   state.filteredProducts = [...state.products];
@@ -522,7 +594,7 @@ function renderNuevos(products = state.products) {
     card.style.animationDelay = `${index * 0.12}s`;
     card.innerHTML = `
       <div class="nuevos-card-image">
-        <img src="${product.imagenes[0]}" alt="${product.nombre}" />
+        <img src="${product.imagenes[0]}" alt="${product.nombre}" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
       </div>
       <div class="nuevos-card-info">
         <p class="nuevos-card-category">${product.categoria}</p>
@@ -641,7 +713,7 @@ function createProductCard(product, index) {
       <button class="wishlist-heart-btn ${isWished ? 'active' : ''}" data-id="${product.id}" aria-label="Favorito">
         ${heartIconHTML}
       </button>
-      <img src="${mainImage}" alt="${product.nombre}" loading="lazy" />
+      <img src="${mainImage}" alt="${product.nombre}" loading="lazy" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
       <button class="quick-view-btn" aria-label="${t('quickView')}">${t('quickView')}</button>
     </div>
     <div class="product-card-info">
@@ -717,7 +789,7 @@ function openModal(product) {
   dom.modalBody.innerHTML = `
     <div class="modal-media-container">
       <div class="modal-image-wrapper" onclick="this.classList.toggle('fullscreen')">
-        <img id="modal-main-image" src="${product.imagenes[0]}" alt="${product.nombre}" />
+        <img id="modal-main-image" src="${product.imagenes[0]}" alt="${product.nombre}" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
         <div class="zoom-hint">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
         </div>
