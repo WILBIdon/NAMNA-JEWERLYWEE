@@ -31,13 +31,13 @@ const CONFIG = {
 
 // ── Mapeo de categorías a imágenes demo (fallback) ──
 const CATEGORY_IMAGE_FALLBACK = {
-  'Necklace':   'assets/product_necklace.png',
-  'Earrings':   'assets/product_earrings.png',
-  'Collares':   'assets/product_necklace.png',
-  'Dijes':      'assets/product_pendant.png',
-  'Aretes':     'assets/product_earrings.png',
-  'Sets':       'assets/product_necklace.png',
-  '_default':   'assets/product_pendant.png'
+  'Necklace':   'assets/fallback_necklace.png',
+  'Earrings':   'assets/fallback_earrings.png',
+  'Collares':   'assets/fallback_necklace.png',
+  'Dijes':      'assets/fallback_pendant.png',
+  'Aretes':     'assets/fallback_earrings.png',
+  'Sets':       'assets/fallback_necklace.png',
+  '_default':   'assets/fallback_default.png'
 };
 
 // ── Application State ──
