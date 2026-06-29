@@ -331,7 +331,8 @@ async function fetchFromAppsScript() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
-    const response = await fetch(CONFIG.APPS_SCRIPT_URL, { signal: controller.signal });
+    const fetchUrl = `${CONFIG.APPS_SCRIPT_URL}${CONFIG.APPS_SCRIPT_URL.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    const response = await fetch(fetchUrl, { signal: controller.signal, cache: 'no-store' });
     clearTimeout(timeout);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
