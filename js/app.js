@@ -774,7 +774,15 @@ function openModal(product) {
     galleryHTML += `</div>`;
   }
 
-  let singularCat = product.categoria.replace(/es$/i, '').replace(/s$/i, '');
+  const lowerCat = String(product.categoria).toLowerCase().trim();
+  const singularMap = {
+    'collares': 'Collar', 'pendientes': 'Pendiente', 'aretes': 'Arete', 
+    'anillos': 'Anillo', 'pulseras': 'Pulsera', 'dijes': 'Dije', 
+    'colgantes': 'Colgante', 'sets': 'Set', 'joyas': 'Joya',
+    'necklaces': 'Necklace', 'earrings': 'Earring', 'rings': 'Ring', 
+    'bracelets': 'Bracelet', 'pendants': 'Pendant', 'jewelry': 'Jewelry'
+  };
+  let singularCat = singularMap[lowerCat] || product.categoria.replace(/s$/i, '');
 
   let descHtml = '';
   if (product.descripcion) {
