@@ -536,6 +536,14 @@ function updateTranslations() {
       }
     });
   }
+  
+  // Translate generic WhatsApp links
+  const waMsg = state.lang === 'en' 
+    ? "Hello! I am interested in knowing more about your jewelry." 
+    : "¡Hola! Estoy interesado en conocer más información sobre sus joyas.";
+  document.querySelectorAll('.whatsapp-float, .footer-links a[href^="https://wa.me"], .mobile-nav-footer a[href^="https://wa.me"]').forEach(a => {
+    a.href = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`;
+  });
 }
 
 // ── Site Images Logic (con protección contra imágenes fantasma) ──
