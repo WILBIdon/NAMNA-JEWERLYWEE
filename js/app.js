@@ -16,7 +16,7 @@ const CONFIG = {
   // Conexión directa a tu Google Sheet (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
 
-  WHATSAPP_NUMBER: '4917670201873',
+  WHATSAPP_NUMBER: '34695261649',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
   CACHE_DURATION_MS: 30 * 60 * 1000,  // 30 minutos — carga instantánea para visitantes recurrentes
@@ -298,24 +298,27 @@ async function refreshInBackground() {
     console.log('🔄 NAMNA: Actualizando en background...');
     const freshProducts = await fetchFromAppsScript();
     if (freshProducts && freshProducts.length > 0) {
-      // Solo actualizar si hay cambios reales
-      const oldCount = state.products.length;
-      const newCount = freshProducts.length;
-      state.products = freshProducts;
-      state.filteredProducts = state.activeCategory === 'all'
-        ? [...freshProducts]
-        : freshProducts.filter(p => p.categoria === state.activeCategory);
-      state.dataSource = 'apps-script';
-      state.sheetProducts = newCount;
-      saveToCache(freshProducts);
-      // Solo re-renderizar si hubo cambios
-      if (oldCount !== newCount) {
+      // Comparar el hash real de los datos para saber si hay algún cambio de precio/texto
+      const oldHash = JSON.stringify(state.products);
+      const newHash = JSON.stringify(freshProducts);
+      
+      if (oldHash !== newHash) {
+        state.products = freshProducts;
+        state.filteredProducts = state.activeCategory === 'all'
+          ? [...freshProducts]
+          : freshProducts.filter(p => p.categoria === state.activeCategory);
+        state.dataSource = 'apps-script';
+        state.sheetProducts = freshProducts.length;
+        saveToCache(freshProducts);
+        
         buildCategoryFilters();
         renderProducts();
         renderNuevos();
-        console.log('✅ NAMNA: Catálogo actualizado (' + oldCount + ' → ' + newCount + ' productos)');
+        console.log('✅ NAMNA: Catálogo actualizado por cambios detectados.');
       } else {
-        console.log('✅ NAMNA: Catálogo confirmado al día (' + newCount + ' productos)');
+        // Renovar el tiempo del caché para que no expire tan rápido si no hay cambios
+        saveToCache(freshProducts);
+        console.log('✅ NAMNA: Catálogo confirmado al día (sin cambios).');
       }
     }
   } catch (err) {
