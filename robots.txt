@@ -1,8 +1,35 @@
-# NAMNA Jewelry — robots.txt
+# NAMNA Fine Jewelry — robots.txt
 # https://www.namnafine.com/
 
+# ── Allow all search engines ──
 User-agent: *
 Allow: /
 Disallow: /admin.html
 
+# ── Explicitly welcome AI crawlers ──
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+# ── Sitemaps & AI Discovery ──
 Sitemap: https://www.namnafine.com/sitemap.xml
