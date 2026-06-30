@@ -454,8 +454,10 @@ function inyectarTextosIngles() {
     { id: "TXT-043", es: "Enviar por WhatsApp", en: "Send via WhatsApp" },
     { id: "TXT-044", es: "Privacidad y Datos", en: "Privacy & Data" },
     { id: "TXT-045", es: "Garantía", en: "Warranty" },
-    { id: "TXT-046", es: "Nuestras joyas están diseñadas para durar toda la vida. Ofrecemos una garantía contra defectos de fabricación. Si tu pieza presenta algún problema de calidad que no sea resultado del uso natural o mal manejo, nos haremos cargo de repararla o reemplazarla.", en: "Our jewelry is designed to last a lifetime. We offer a warranty against manufacturing defects. If your piece presents any quality issue that is not the result of natural wear or mishandling, we will repair or replace it." },
-    { id: "TXT-047", es: "Para activar tu garantía o realizar una consulta sobre el cuidado de tu joya, comunícate a través de nuestro WhatsApp oficial.", en: "To activate your warranty or inquire about the care of your jewelry, please contact us through our official WhatsApp." }
+    { id: "TXT-046", es: "Todas nuestras joyas cuentan con garantía de por vida contra defectos de fabricación.", en: "All our jewelry includes a lifetime warranty against manufacturing defects." },
+    { id: "TXT-047", es: "Para hacer válida tu garantía o consultar sobre el cuidado de tu joya, comunícate a través de nuestro WhatsApp oficial.", en: "To activate your warranty or inquire about the care of your jewelry, please contact us through our official WhatsApp." },
+    { id: "TXT-048", es: "Síguenos en:", en: "Follow us on:" },
+    { id: "TXT-049", es: "Hecho por 2B Sistem", en: "Made by 2B Sistem" }
   ];
   
   // ── INYECCIÓN INTELIGENTE ──
