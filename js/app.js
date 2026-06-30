@@ -31,13 +31,13 @@ const CONFIG = {
 
 // ── Mapeo de categorías a imágenes demo (fallback) ──
 const CATEGORY_IMAGE_FALLBACK = {
-  'Necklace':   'assets/fallback_necklace.png',
-  'Earrings':   'assets/fallback_earrings.png',
-  'Collares':   'assets/fallback_necklace.png',
-  'Dijes':      'assets/fallback_pendant.png',
-  'Aretes':     'assets/fallback_earrings.png',
-  'Sets':       'assets/fallback_necklace.png',
-  '_default':   'assets/fallback_default.png'
+  'Necklace':   'assets/fallback_necklace.webp',
+  'Earrings':   'assets/fallback_earrings.webp',
+  'Collares':   'assets/fallback_necklace.webp',
+  'Dijes':      'assets/fallback_pendant.webp',
+  'Aretes':     'assets/fallback_earrings.webp',
+  'Sets':       'assets/fallback_necklace.webp',
+  '_default':   'assets/fallback_default.webp'
 };
 
 // ── Application State ──
@@ -716,6 +716,48 @@ function renderProducts() {
     dom.productsGrid.appendChild(createProductCard(product, index));
   });
   observeCards();
+  injectProductSchema(state.filteredProducts);
+}
+
+// ── SEO: Inyectar Schema.org Product para Google Rich Results ──
+function injectProductSchema(products) {
+  // Eliminar schema anterior si existe
+  const old = document.getElementById('dynamic-product-schema');
+  if (old) old.remove();
+
+  const items = products.slice(0, 20).map(p => ({
+    "@type": "Product",
+    "name": p.nombre,
+    "image": p.imagenes[0],
+    "description": p.descripcion || `${getSingularCategory(p.categoria)} by NAMNA Fine Jewelry. 18k gold with natural stones.`,
+    "brand": { "@type": "Brand", "name": "NAMNA Fine Jewelry" },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": p.precioPublico || 0,
+      "availability": (p.stock !== null && p.stock <= 0) 
+        ? "https://schema.org/OutOfStock" 
+        : "https://schema.org/InStock",
+      "url": "https://www.namnafine.com/",
+      "seller": { "@type": "Organization", "name": "NAMNA Fine Jewelry" }
+    }
+  }));
+
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'dynamic-product-schema';
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "NAMNA Fine Jewelry Collection",
+    "numberOfItems": items.length,
+    "itemListElement": items.map((item, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "item": item
+    }))
+  });
+  document.head.appendChild(script);
 }
 
 function createProductCard(product, index) {

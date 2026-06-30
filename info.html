@@ -24,31 +24,68 @@
     <meta property="og:title" content="Sobre Nosotros — NAMNA Fine Jewelry">
     <meta property="og:description" content="Conoce NAMNA Fine Jewelry. Pendientes, collares, piedras naturales y 18k. Envíos rápidos a toda España y Europa.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://www.namnafine.com/assets/info_hero.png">
+    <meta property="og:image" content="https://www.namnafine.com/assets/hero_info.webp">
     <meta property="og:url" content="https://www.namnafine.com/info.html">
-    <meta property="og:site_name" content="NAMNA Jewelry">
+    <meta property="og:site_name" content="NAMNA Fine Jewelry">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:locale:alternate" content="en_US">
 
-    <!-- Schema.org -->
+    <!-- Hreflang: Bilingual support -->
+    <link rel="alternate" hreflang="es" href="https://www.namnafine.com/info.html">
+    <link rel="alternate" hreflang="en" href="https://www.namnafine.com/info.html">
+    <link rel="alternate" hreflang="x-default" href="https://www.namnafine.com/info.html">
+
+    <!-- Schema.org: AboutPage + BreadcrumbList + areaServed -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "AboutPage",
-      "name": "Sobre Nosotros — NAMNA Jewelry",
-      "description": "Conoce la historia, valores y políticas de NAMNA Jewelry. Joyería artesanal premium.",
+      "name": "About NAMNA Fine Jewelry",
+      "description": "About NAMNA Fine Jewelry. Premium 18k jewelry with real diamonds and natural stones. Shipping to all of Europe. Políticas de envío y devoluciones.",
       "url": "https://www.namnafine.com/info.html",
       "mainEntity": {
         "@type": "JewelryStore",
-        "name": "NAMNA Jewelry",
-        "description": "Joyería artesanal premium con piedras naturales",
+        "name": "NAMNA Fine Jewelry",
+        "description": "Premium 18k fine jewelry with real diamonds and natural stones. Fast insured shipping to all of Europe.",
         "telephone": "+34695261649",
-        "email": "namnafine@gmail.com"
+        "email": "namnafine@gmail.com",
+        "sameAs": ["https://instagram.com/namnafine"],
+        "areaServed": [
+          { "@type": "Country", "name": "Spain" },
+          { "@type": "Country", "name": "Germany" },
+          { "@type": "Country", "name": "France" },
+          { "@type": "Country", "name": "Italy" },
+          { "@type": "Country", "name": "Portugal" },
+          { "@type": "Country", "name": "United Kingdom" },
+          { "@type": "Continent", "name": "Europe" }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "ES"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 40.4168,
+          "longitude": -3.7038
+        }
       }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "NAMNA Fine Jewelry", "item": "https://www.namnafine.com/" },
+        { "@type": "ListItem", "position": 2, "name": "About / Información", "item": "https://www.namnafine.com/info.html" }
+      ]
     }
     </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap">
 
     <link rel="stylesheet" href="css/styles.css">
     <link rel="icon" href="Logo-namna2.png" type="image/png">
@@ -361,7 +398,7 @@
 
     <!-- Hero -->
     <section class="info-hero" id="about">
-        <img src="assets/hero_info.png" alt="Colección de joyería NAMNA" loading="eager" data-site-img="hero_info">
+        <img src="assets/hero_info.webp" alt="NAMNA Fine Jewelry Collection" loading="eager" data-site-img="hero_info">
         <div class="info-hero-overlay"></div>
         <div class="info-hero-content">
             <h1 data-txt="TXT-035">NUESTRA HISTORIA</h1>
@@ -374,7 +411,7 @@
         <!-- Quiénes Somos -->
         <article class="info-card" id="quienes-somos">
             <div class="info-card-visual">
-                <img src="assets/quienes_somos.png" alt="Joyería NAMNA" loading="lazy" data-site-img="info_card_1">
+                <img src="assets/quienes_somos.webp" alt="NAMNA Fine Jewelry artisans" loading="lazy" data-site-img="info_card_1">
             </div>
             <div class="info-card-text">
                 <div class="info-card-icon">
@@ -389,7 +426,7 @@
         <!-- Políticas de Envío y Devolución -->
         <article class="info-card reverse" id="shipping-returns">
             <div class="info-card-visual">
-                <img src="assets/envios.png" alt="Envíos NAMNA" loading="lazy" data-site-img="info_card_2">
+                <img src="assets/envios.webp" alt="Shipping to all of Europe — NAMNA" loading="lazy" data-site-img="info_card_2">
             </div>
             <div class="info-card-text">
                 <div class="info-card-icon">
@@ -513,7 +550,7 @@
     <script src="js/app.js" defer></script>
 
     <!-- Security Shield -->
-    <script src="js/shield.js"></script>
+    <script src="js/shield.js" defer></script>
 
 </body>
 </html>
