@@ -62,7 +62,7 @@ const i18n = {
     emptyCategory: 'No hay piezas en esta categoría',
     askPrice: 'Consultar precio',
     onlyLeft: '⚡ Solo quedan {n} unidades',
-    outOfStock: 'Agotado temporalmente',
+    outOfStock: 'Agotado',
     orderWhatsApp: 'Pedir por WhatsApp',
     code: 'Código',
     newBadge: 'NUEVO',
@@ -75,7 +75,7 @@ const i18n = {
     emptyCategory: 'No items in this category',
     askPrice: 'Inquire Price',
     onlyLeft: '⚡ Only {n} units left',
-    outOfStock: 'Temporarily out of stock',
+    outOfStock: 'Sold out',
     orderWhatsApp: 'Order via WhatsApp',
     code: 'Code',
     newBadge: 'NUEVO',
@@ -618,6 +618,8 @@ function renderNuevos(products = state.products) {
     card.style.animationDelay = `${index * 0.12}s`;
     card.innerHTML = `
       <div class="nuevos-card-image">
+        ${product.stock !== null && product.stock <= 0 ? `<span class="product-badge" style="background: var(--color-text-muted);">${t('outOfStock')}</span>` : ''}
+        ${product.stock !== null && product.stock <= 5 && product.stock > 0 ? `<span class="product-badge" style="background: var(--color-accent);">${t('onlyLeft', {n: product.stock}).replace('⚡ ', '')}</span>` : ''}
         <img src="${product.imagenes[0]}" alt="${product.nombre}" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
       </div>
       <div class="nuevos-card-info">
@@ -724,9 +726,14 @@ function createProductCard(product, index) {
   // La imagen principal de la card siempre es la primera del array
   const mainImage = product.imagenes[0];
 
-  const stockHTML = (product.stock !== null && product.stock <= 5 && product.stock > 0)
-    ? `<span class="product-badge" style="background: var(--color-accent);">${t('onlyLeft', {n: product.stock}).replace('⚡ ', '')}</span>`
-    : '';
+  let stockHTML = '';
+  if (product.stock !== null) {
+    if (product.stock <= 0) {
+      stockHTML = `<span class="product-badge" style="background: var(--color-text-muted);">${t('outOfStock')}</span>`;
+    } else if (product.stock <= 5) {
+      stockHTML = `<span class="product-badge" style="background: var(--color-accent);">${t('onlyLeft', {n: product.stock}).replace('⚡ ', '')}</span>`;
+    }
+  }
 
   const isWished = state.wishlist.includes(product.id);
   const heartIconHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
@@ -829,10 +836,16 @@ function openModal(product) {
         ${descHtml}
       </div>
       <div class="modal-actions">
+        ${product.stock !== null && product.stock <= 0 ? `
+        <button class="modal-cta" disabled style="background: var(--color-text-muted); cursor: not-allowed; opacity: 0.8;">
+          ${t('outOfStock')}
+        </button>
+        ` : `
         <button class="modal-cta" onclick="handleWhatsAppOrder('${product.id}', '${product.nombre}')">
           <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" fill="currentColor"/></svg>
           ${t('orderWhatsApp')}
         </button>
+        `}
         <p style="text-align: center; margin-top: var(--space-sm); font-size: var(--text-xs); color: var(--color-text-muted);">
           ${t('code')}: ${product.id}
         </p>
