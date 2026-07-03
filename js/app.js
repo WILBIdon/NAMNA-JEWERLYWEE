@@ -48,7 +48,7 @@ const state = {
   modalOpen: false,
   dataSource: 'loading',
   sheetProducts: 0,
-  lang: localStorage.getItem('namna_lang') || 'es',
+  lang: localStorage.getItem('namna_lang') || 'en',
   textos_es: {},
   textos_en: {},
   siteImages: {},
@@ -133,9 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initWishlist();
   
-  if (!localStorage.getItem('namna_lang') && !navigator.language.startsWith('es')) {
-    showLanguageRecommendation();
-  }
+  // Language recommendation removed as default is now English
 });
 
 function showLanguageRecommendation() {
