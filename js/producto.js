@@ -490,7 +490,7 @@ function renderProduct(product) {
 
 // ── Update Meta Tags for SEO / Social Sharing ──
 function updateMetaTags(product) {
-  const productUrl = `${CONFIG.SITE_URL}/producto.html?id=${encodeURIComponent(product.id)}`;
+  const productUrl = `${CONFIG.SITE_URL}/producto?id=${encodeURIComponent(product.id)}`;
   const desc = product.descripcion || `${getSingularCategory(product.categoria)} by NAMNA Fine Jewelry. 18k gold with natural stones.`;
   const image = product.imagenes[0];
 
@@ -564,7 +564,7 @@ function updateMetaTags(product) {
 
 // ── Share Product ──
 function shareProduct(product) {
-  const shareUrl = `${CONFIG.SITE_URL}/producto.html?id=${encodeURIComponent(product.id)}`;
+  const shareUrl = `${CONFIG.SITE_URL}/producto?id=${encodeURIComponent(product.id)}`;
 
   // Try native Web Share API first (mobile)
   if (navigator.share) {

@@ -931,7 +931,7 @@ window.handleWhatsAppOrder = handleWhatsAppOrder;
 
 // ── Share Product Link ──
 window.shareProductLink = function(productId, productName) {
-  const shareUrl = `${window.location.origin}/producto.html?id=${encodeURIComponent(productId)}`;
+  const shareUrl = `${window.location.origin}/producto?id=${encodeURIComponent(productId)}`;
 
   // Try native Web Share API first (mobile)
   if (navigator.share) {
