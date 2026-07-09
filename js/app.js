@@ -881,11 +881,19 @@ function openModal(product) {
           ${t('outOfStock')}
         </button>
         ` : `
-        <button class="modal-cta" onclick="handleWhatsAppOrder('${product.id}', '${product.nombre}')">
+        <button class="modal-cta" onclick="handleWhatsAppOrder('${product.id}', '${product.nombre.replace(/'/g, "\\'")}')">
           <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" fill="currentColor"/></svg>
           ${t('orderWhatsApp')}
         </button>
         `}
+        <button class="modal-share-btn" onclick="shareProductLink('${product.id}', '${product.nombre.replace(/'/g, "\\'")}')">
+          <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>${state.lang === 'es' ? 'Compartir enlace' : 'Share link'}</span>
+        </button>
+        <div class="share-toast" id="modal-share-toast">
+          <svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>${state.lang === 'es' ? '¡Enlace copiado!' : 'Link copied!'}</span>
+        </div>
         <p style="text-align: center; margin-top: var(--space-sm); font-size: var(--text-xs); color: var(--color-text-muted);">
           ${t('code')}: ${product.id}
         </p>
@@ -920,6 +928,48 @@ function handleWhatsAppOrder(productId, productName) {
   window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${message}`, '_blank');
 }
 window.handleWhatsAppOrder = handleWhatsAppOrder;
+
+// ── Share Product Link ──
+window.shareProductLink = function(productId, productName) {
+  const shareUrl = `${window.location.origin}/producto.html?id=${encodeURIComponent(productId)}`;
+
+  // Try native Web Share API first (mobile)
+  if (navigator.share) {
+    navigator.share({
+      title: `${productName} — NAMNA Fine Jewelry`,
+      url: shareUrl
+    }).catch(() => {
+      // User cancelled or error — fallback to clipboard
+      copyProductLink(shareUrl);
+    });
+  } else {
+    copyProductLink(shareUrl);
+  }
+};
+
+function copyProductLink(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showModalShareToast();
+  }).catch(() => {
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+    showModalShareToast();
+  });
+}
+
+function showModalShareToast() {
+  const toast = document.getElementById('modal-share-toast');
+  if (!toast) return;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2500);
+}
 
 function hideLoader() {
   if (dom.loader) dom.loader.classList.add('hidden');
