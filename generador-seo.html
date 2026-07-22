@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador JSON-LD - NAMNA</title>
+  <style>
+    :root {
+      --primary: #3B4643;
+      --bg: #F3ECE3;
+      --accent: #E78A5E;
+      --white: #FFFFFF;
+      --border: #DDD5CB;
+    }
+    body {
+      font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--primary);
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--white);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    h1 {
+      margin-top: 0;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
+    }
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 768px) {
+      .panel.active { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    .code-preview {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9rem;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .copy-btn:hover { background: #d07a51; }
+    
+    /* FAQ dynamic fields */
+    .faq-item {
+      border: 1px dashed var(--border);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Generador de Esquemas JSON-LD (SEO Semántico)</h1>
+  <p>Genera marcado de datos estructurados para mejorar la lectura de tu sitio web por parte de Google y motores de Inteligencia Artificial (ChatGPT, Gemini).</p>
+  
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('org')">Organization</button>
+    <button class="tab-btn" onclick="switchTab('product')">Product</button>
+    <button class="tab-btn" onclick="switchTab('article')">Article</button>
+    <button class="tab-btn" onclick="switchTab('faq')">FAQPage</button>
+  </div>
+
+  <!-- ORGANIZATION -->
+  <div id="org" class="panel active">
+    <div class="form-section">
+      <h3>Datos de la Empresa</h3>
+      <div class="form-group">
+        <label>Nombre de la Empresa</label>
+        <input type="text" id="org_name" value="NAMNA Fine Jewelry" oninput="updateOrg()">
+      </div>
+      <div class="form-group">
+        <label>URL del Sitio Web</label>
+        <input type="url" id="org_url" value="https://www.namnafine.com" oninput="updateOrg()">
+      </div>
+      <div class="form-group">
+        <label>URL del Logo</label>
+        <input type="url" id="org_logo" value="https://www.namnafine.com/Logo-namna2.png" oninput="updateOrg()">
+      </div>
+      <div class="form-group">
+        <label>Redes Sociales (separadas por coma)</label>
+        <input type="text" id="org_social" value="https://instagram.com/namnafine" oninput="updateOrg()">
+      </div>
+    </div>
+    <div class="preview-section">
+      <div class="code-preview">
+        <button class="copy-btn" onclick="copyCode('code_org')">Copiar</button>
+        <pre id="code_org"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT -->
+  <div id="product" class="panel">
+    <div class="form-section">
+      <h3>Datos del Producto</h3>
+      <div class="form-group">
+        <label>Nombre del Producto</label>
+        <input type="text" id="prod_name" value="Anillo Solitario" oninput="updateProduct()">
+      </div>
+      <div class="form-group">
+        <label>URL de la Imagen</label>
+        <input type="url" id="prod_img" value="https://www.namnafine.com/foto.jpg" oninput="updateProduct()">
+      </div>
+      <div class="form-group">
+        <label>Descripción corta</label>
+        <textarea id="prod_desc" oninput="updateProduct()">Anillo solitario en oro 18k con diamante central.</textarea>
+      </div>
+      <div class="form-group">
+        <label>SKU (Referencia)</label>
+        <input type="text" id="prod_sku" value="PROD-01" oninput="updateProduct()">
+      </div>
+      <div class="form-group">
+        <label>Precio</label>
+        <input type="number" id="prod_price" value="950" oninput="updateProduct()">
+      </div>
+      <div class="form-group">
+        <label>Moneda</label>
+        <input type="text" id="prod_currency" value="EUR" oninput="updateProduct()">
+      </div>
+      <div class="form-group">
+        <label>Disponibilidad</label>
+        <select id="prod_stock" onchange="updateProduct()">
+          <option value="InStock">En Stock</option>
+          <option value="OutOfStock">Agotado</option>
+          <option value="PreOrder">Preventa</option>
+        </select>
+      </div>
+    </div>
+    <div class="preview-section">
+      <div class="code-preview">
+        <button class="copy-btn" onclick="copyCode('code_prod')">Copiar</button>
+        <pre id="code_prod"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTICLE -->
+  <div id="article" class="panel">
+    <div class="form-section">
+      <h3>Datos del Artículo / Post</h3>
+      <div class="form-group">
+        <label>Título del Artículo</label>
+        <input type="text" id="art_title" value="Cómo cuidar tus joyas de oro 18k" oninput="updateArticle()">
+      </div>
+      <div class="form-group">
+        <label>URL del Artículo</label>
+        <input type="url" id="art_url" value="https://www.namnafine.com/blog/cuidado-joyas" oninput="updateArticle()">
+      </div>
+      <div class="form-group">
+        <label>URL Imagen Destacada</label>
+        <input type="url" id="art_img" value="https://www.namnafine.com/blog/img1.jpg" oninput="updateArticle()">
+      </div>
+      <div class="form-group">
+        <label>Autor</label>
+        <input type="text" id="art_author" value="NAMNA Jewelry" oninput="updateArticle()">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Publicación</label>
+        <input type="date" id="art_date" value="2026-07-20" oninput="updateArticle()">
+      </div>
+    </div>
+    <div class="preview-section">
+      <div class="code-preview">
+        <button class="copy-btn" onclick="copyCode('code_art')">Copiar</button>
+        <pre id="code_art"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ PAGE -->
+  <div id="faq" class="panel">
+    <div class="form-section">
+      <h3>Preguntas Frecuentes</h3>
+      <div id="faq_container">
+        <div class="faq-item">
+          <div class="form-group">
+            <label>Pregunta 1</label>
+            <input type="text" class="faq_q" value="¿Hacen envíos internacionales?" oninput="updateFaq()">
+          </div>
+          <div class="form-group">
+            <label>Respuesta 1</label>
+            <textarea class="faq_a" oninput="updateFaq()">Sí, realizamos envíos a toda España y Europa mediante mensajería asegurada.</textarea>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="tab-btn" onclick="addFaq()">+ Añadir Pregunta</button>
+    </div>
+    <div class="preview-section">
+      <div class="code-preview">
+        <button class="copy-btn" onclick="copyCode('code_faq')">Copiar</button>
+        <pre id="code_faq"></pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function render(id, obj) {
+    const html = `<script type="application/ld+json">\n${JSON.stringify(obj, null, 2)}\n<\/script>`;
+    document.getElementById(id).textContent = html;
+  }
+
+  function updateOrg() {
+    const social = document.getElementById('org_social').value.split(',').map(s => s.trim()).filter(s => s);
+    const obj = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": document.getElementById('org_name').value,
+      "url": document.getElementById('org_url').value,
+      "logo": document.getElementById('org_logo').value,
+    };
+    if (social.length > 0) obj.sameAs = social;
+    render('code_org', obj);
+  }
+
+  function updateProduct() {
+    const obj = {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": document.getElementById('prod_name').value,
+      "image": document.getElementById('prod_img').value,
+      "description": document.getElementById('prod_desc').value,
+      "sku": document.getElementById('prod_sku').value,
+      "offers": {
+        "@type": "Offer",
+        "url": "https://www.namnafine.com",
+        "priceCurrency": document.getElementById('prod_currency').value,
+        "price": document.getElementById('prod_price').value,
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/" + document.getElementById('prod_stock').value
+      }
+    };
+    render('code_prod', obj);
+  }
+
+  function updateArticle() {
+    const obj = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": document.getElementById('art_title').value,
+      "image": [ document.getElementById('art_img').value ],
+      "datePublished": document.getElementById('art_date').value,
+      "author": [{
+          "@type": "Organization",
+          "name": document.getElementById('art_author').value
+      }]
+    };
+    render('code_art', obj);
+  }
+
+  function updateFaq() {
+    const items = [];
+    const questions = document.querySelectorAll('.faq_q');
+    const answers = document.querySelectorAll('.faq_a');
+    
+    questions.forEach((q, i) => {
+      if (q.value.trim() && answers[i].value.trim()) {
+        items.push({
+          "@type": "Question",
+          "name": q.value,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": answers[i].value
+          }
+        });
+      }
+    });
+
+    const obj = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": items
+    };
+    render('code_faq', obj);
+  }
+
+  function addFaq() {
+    const i = document.querySelectorAll('.faq-item').length + 1;
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.innerHTML = `
+      <div class="form-group"><label>Pregunta ${i}</label><input type="text" class="faq_q" oninput="updateFaq()"></div>
+      <div class="form-group"><label>Respuesta ${i}</label><textarea class="faq_a" oninput="updateFaq()"></textarea></div>
+    `;
+    document.getElementById('faq_container').appendChild(div);
+  }
+
+  function copyCode(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text);
+    alert('Código copiado al portapapeles');
+  }
+
+  // Init all
+  updateOrg(); updateProduct(); updateArticle(); updateFaq();
+</script>
+</body>
+</html>
