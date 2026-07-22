@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NAMNA — Panel de Control</title>
   <meta name="robots" content="noindex, nofollow" />
+  <script>
+    if (sessionStorage.getItem('namna_admin') !== 'true') {
+      let pwd = prompt('Acceso Restringido. Contraseña:');
+      if (pwd === 'Junio2026') {
+        sessionStorage.setItem('namna_admin', 'true');
+      } else {
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -904,7 +914,12 @@ function doGet(e) {
 
   CURRENCY:         'EUR',
   LOCALE:           'es-ES',
-  CACHE_DURATION_MS: 5 * 60 * 1000,  // 5 minutos de caché en sesión
+  CACHE_DURATION_MS: 6 * 60 * 60 * 1000,  // 6 horas de caché
+
+  // ── Analítica y Tracking (Opcional) ──
+  // Pega aquí tus IDs para activar el seguimiento automáticamente. Déjalos vacíos ('') para desactivar.
+  GOOGLE_ANALYTICS_ID: '', // Ejemplo: 'G-XXXXXXXXXX'
+  META_PIXEL_ID: '',       // Ejemplo: '123456789012345'
 };</pre>
         </div>
       </div>

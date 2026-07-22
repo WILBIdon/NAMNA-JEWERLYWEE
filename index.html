@@ -151,7 +151,6 @@
                 <a href="#catalogo" data-txt="TXT-020">Colección</a>
                 <a href="#nuevos" data-txt="TXT-021">Novedades</a>
                 <a href="info.html#about" data-txt="TXT-022">Quiénes Somos</a>
-                <a href="#" onclick="event.preventDefault(); if(prompt('Contraseña:')==='Junio2026') window.location.href='admin.html';" style="opacity:0.5; font-size:0.65rem">⚙️ Admin</a>
             </nav>
 
             <!-- Header actions -->
@@ -333,6 +332,11 @@
             <p><a href="https://2bsistem.com/#inicio" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;" data-txt="TXT-049">Made by 2B Sistem</a></p>
         </div>
     </footer>
+
+    <!-- Hidden Admin Trigger (Double click or tap) -->
+    <div style="text-align: center; padding: 10px; background: var(--color-background-dark); color: var(--color-background-dark); font-size: 10px; user-select: none; cursor: default;" ondblclick="if(prompt('Contraseña de Admin:')==='Junio2026') { sessionStorage.setItem('namna_admin', 'true'); window.location.href='admin.html'; }">
+        .
+    </div>
 
     <!-- WhatsApp Float -->
     <a href="https://wa.me/34695261649" target="_blank" rel="noopener" class="whatsapp-float" id="whatsapp-btn" aria-label="Contactar por WhatsApp">

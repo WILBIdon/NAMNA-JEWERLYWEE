@@ -20,7 +20,48 @@ const CONFIG = {
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
   CACHE_DURATION_MS: 6 * 60 * 60 * 1000,  // 6 horas — sincronizado con CacheService del servidor
+
+  // ── Analítica y Tracking (Opcional) ──
+  // Pega aquí tus IDs para activar el seguimiento automáticamente. Déjalos vacíos ('') para desactivar.
+  GOOGLE_ANALYTICS_ID: '', // Ejemplo: 'G-XXXXXXXXXX'
+  META_PIXEL_ID: '',       // Ejemplo: '123456789012345'
 };
+
+// ═══════════════════════════════════════════════════════════════
+// INICIALIZACIÓN DE TRACKING (Google Analytics & Meta Pixel)
+// ═══════════════════════════════════════════════════════════════
+function initTracking() {
+  // Google Analytics (GA4)
+  if (CONFIG.GOOGLE_ANALYTICS_ID) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${CONFIG.GOOGLE_ANALYTICS_ID}`;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', CONFIG.GOOGLE_ANALYTICS_ID);
+    console.log('📈 Google Analytics activado');
+  }
+
+  // Meta Pixel (Facebook)
+  if (CONFIG.META_PIXEL_ID) {
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', CONFIG.META_PIXEL_ID);
+    fbq('track', 'PageView');
+    console.log('📈 Meta Pixel activado');
+  }
+}
+// Inicializar tracking al arrancar
+initTracking();
 
 // ── DATOS DEMO ELIMINADOS ──
 // La web ahora es 100% real y se alimenta exclusivamente de la hoja maestra y el servidor.
