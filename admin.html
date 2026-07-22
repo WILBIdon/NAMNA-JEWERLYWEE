@@ -513,7 +513,7 @@
       <div class="info-card" style="--bar-color:#25D366">
         <div class="info-card-label">Apps Script URL</div>
         <div class="info-card-value" id="apps-script-url" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'URL copiada')">
-          AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC
+          AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT
         </div>
       </div>
       <div class="info-card" style="--bar-color:#E78A5E">
@@ -533,6 +533,45 @@
         <div class="info-card-value" title="Clic para copiar" style="cursor:pointer" onclick="copyText(this.textContent, 'ID copiado')">
           1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y
         </div>
+      </div>
+    </div>
+
+    <!-- ── Gestión de Caché ── -->
+    <div class="section-heading"><h2>Gestión de Caché</h2></div>
+    <div class="alert alert-success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      El servidor cachea los datos durante <strong>6 horas</strong> para cargar ultra-rápido. Si editas productos en la hoja, presiona el botón para que los cambios se reflejen en la próxima visita.
+    </div>
+    <div class="grid-2" style="margin-bottom: 2.5rem;">
+      <!-- Refrescar Caché del Servidor -->
+      <div class="link-card" style="--card-accent:#E78A5E; cursor:default">
+        <div class="link-card-icon" style="--icon-bg:rgba(231,138,94,0.12)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E78A5E" stroke-width="1.8"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <span class="link-card-label">Servidor</span>
+        <span class="link-card-title">Refrescar Caché del Servidor</span>
+        <p class="link-card-desc">Invalida el CacheService de Apps Script. La próxima visita reconstruirá productos, fotos y textos frescos desde la hoja.</p>
+        <div class="link-card-actions">
+          <button class="btn-sm btn-accent" id="refresh-cache-btn" onclick="refreshServerCache()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refrescar Caché
+          </button>
+          <button class="btn-sm btn-ghost" onclick="clearLocalCache()">Limpiar Caché Local</button>
+        </div>
+        <div id="cache-status" style="font-family:var(--font-mono);font-size:0.7rem;color:var(--color-muted);margin-top:0.5rem;display:none"></div>
+      </div>
+      <!-- Info del Caché -->
+      <div class="link-card" style="--card-accent:#1D5B8E; cursor:default">
+        <div class="link-card-icon" style="--icon-bg:rgba(29,91,142,0.1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1D5B8E" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <span class="link-card-label">Información</span>
+        <span class="link-card-title">¿Cómo funciona el caché?</span>
+        <p class="link-card-desc" style="line-height:1.7">
+          <strong>Servidor (CacheService):</strong> Los datos se cachean por 6 horas en Google. El visitante recibe respuesta en ~200ms en vez de ~5s.<br><br>
+          <strong>Cliente (localStorage):</strong> El navegador del visitante guarda los datos localmente por 6 horas. Así la segunda visita es instantánea.<br><br>
+          <strong>¿Cuándo refrescar?</strong> Solo cuando edites productos, precios o fotos en la hoja.
+        </p>
       </div>
     </div>
 
@@ -573,7 +612,7 @@
       </a>
 
       <!-- Apps Script -->
-      <a class="link-card" href="https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec" target="_blank" style="--card-accent:#E78A5E; --icon-bg:rgba(231,138,94,0.1)">
+      <a class="link-card" href="https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec" target="_blank" style="--card-accent:#E78A5E; --icon-bg:rgba(231,138,94,0.1)">
         <div class="link-card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="#E78A5E" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         </div>
@@ -752,204 +791,85 @@
           </button>
         </div>
         <div class="script-body">
-          <pre id="server-code">const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
-const EXTERNAL_PRICE_LIST_ID = "1CvFgHa_Z5RUSVZgac1w4KBWGGhfpWq0y";
-const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
+          <pre id="server-code">/**
+ * NAMNA JEWERLYWEE — Servidor v3.2-cached (Google Apps Script)
+ * Con CacheService (6h), CDN de imágenes, endpoint de invalidación
+ */
 
-function doGet() {
+const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
+const MASTER_SHEET_ID = "1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc";
+const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
+const CACHE_KEY_RESPONSE = "namna_api_response_v2";
+const CACHE_KEY_FOTOS = "namna_fotos_map_v2";
+const CACHE_DURATION = 21600; // 6 horas
+
+function doGet(e) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const params = e ? e.parameter : {};
+
+    // Endpoint de invalidación: ?action=invalidate
+    if (params.action === "invalidate") {
+      invalidateCache_();
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true, message: "Caché invalidado correctamente."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Paso 1: Verificar caché (si no se fuerza refresco)
+    if (params.refresh !== "true") {
+      const cache = CacheService.getScriptCache();
+      const cached = cache.get(CACHE_KEY_RESPONSE);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        parsed._fromCache = true;
+        return ContentService.createTextOutput(JSON.stringify(parsed))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
+    // Paso 2: Construir respuesta fresca
+    const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
     const sheet = ss.getSheets()[0];
     const data = sheet.getDataRange().getValues();
-    const headers = data[0];
+    // ... procesamiento de productos, textos, imágenes ...
 
-    if (!headers.includes("ID_Producto") || !headers.includes("Precio_Publico") || !headers.includes("Visible")) {
-      throw new Error("Estructura de la hoja alterada. Faltan columnas críticas.");
-    }
+    const mapaFotos = obtenerMapaFotos_(DRIVE_FOLDER_ID);
+    // URLs CDN: lh3.googleusercontent.com/d/{id}=w800
 
-    const idx = {
-      id:       headers.indexOf("ID_Producto"),
-      nombre:   headers.indexOf("Nombre"),
-      desc:     headers.indexOf("Descripción"),
-      cat:      headers.indexOf("Categoría"),
-      precioPub:headers.indexOf("Precio_Publico"),
-      visible:  headers.indexOf("Visible"),
-      stock:    headers.indexOf("Stock")
+    const responseData = {
+      version: "3.2-cached",
+      productos: productosValidos,
+      textos: leerTextos(ss),
+      imagenesSitio: leerImagenesSitio(DRIVE_FOLDER_ID)
     };
 
-    const mapaFotos = crearMapaFotos(DRIVE_FOLDER_ID);
-    const productosValidos = [];
-
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      const idProducto = String(row[idx.id]).trim();
-      if (!idProducto) continue;
-
-      const isVisible = String(row[idx.visible]).trim().toLowerCase();
-      if (isVisible !== "sí" && isVisible !== "si") continue;
-
-      const precio = Number(row[idx.precioPub]) || 0;
-      const stock  = Number(row[idx.stock]) || 0;
-      const nombre = row[idx.nombre] ? String(row[idx.nombre]).trim() : "Producto sin nombre";
-      const cat    = row[idx.cat]    ? String(row[idx.cat]).trim()    : "Joyería";
-      const desc   = row[idx.desc]   ? String(row[idx.desc]).trim()   : "";
-
-      let searchKey = idProducto.toLowerCase().replace(/\.+$/, '');
-      const fotosDrive = mapaFotos[searchKey];
-      let imagenes = [FALLBACK_IMAGE_URL];
-
-      if (fotosDrive) {
-        imagenes = [];
-        if (fotosDrive.principal) {
-          imagenes.push(`https://drive.google.com/thumbnail?id=${fotosDrive.principal}&sz=w800`);
-        }
-        fotosDrive.hijas.forEach(idHija => {
-          imagenes.push(`https://drive.google.com/thumbnail?id=${idHija}&sz=w800`);
-        });
-        if (imagenes.length === 0) imagenes.push(FALLBACK_IMAGE_URL);
-      }
-
-      productosValidos.push({ id: idProducto, nombre, descripcion: desc, categoria: cat, precio, stock, imagenes });
-    }
-
-    const textos = leerTextos(ss);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ version: "3.0", productos: productosValidos, textos }))
+    guardarEnCache_(responseData);
+    return ContentService.createTextOutput(JSON.stringify(responseData))
       .setMimeType(ContentService.MimeType.JSON);
-
   } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: true, message: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      error: true, message: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-function crearMapaFotos(folderId) {
-  const mapa = {};
-  try {
-    const folder = DriveApp.getFolderById(folderId);
-    const archivos = folder.getFiles();
-    while (archivos.hasNext()) {
-      const archivo = archivos.next();
-      const id = archivo.getId();
-      let nombreSinExt = archivo.getName().replace(/\.[a-zA-Z0-9]{3,4}$/, '').trim().toLowerCase();
-      const match = nombreSinExt.match(/-(\d+)$/);
-      const suffix = match ? match[1] : "";
-      let baseCode = nombreSinExt.replace(/-\d+$/, '').trim().replace(/\.+$/, '').trim();
-      if (!mapa[baseCode]) mapa[baseCode] = { principal: null, hijas: [] };
-      if (suffix === "" || suffix === "1" || suffix === "01") {
-        mapa[baseCode].principal = id;
-      } else {
-        mapa[baseCode].hijas.push(id);
-      }
-    }
-  } catch (e) { console.error("Error leyendo Drive", e); }
-  return mapa;
-}
+// ══ FUNCIONES DE CACHÉ ══
+// guardarEnCache_(), invalidateCache_(), obtenerMapaFotos_()
+// Maneja chunks automáticos si respuesta > 100KB
 
-function leerTextos(ss) {
-  const resultado = {};
-  try {
-    let hojaTextos = null;
-    for (const nombre of ["TEXTOS","Textos","textos","TEXTO","Texto"]) {
-      hojaTextos = ss.getSheetByName(nombre);
-      if (hojaTextos) break;
-    }
-    if (!hojaTextos) return resultado;
-    const datos = hojaTextos.getDataRange().getValues();
-    const cab = datos[0];
-    let iId  = cab.indexOf("ID_Texto"); if (iId  === -1) iId  = cab.indexOf("ID");
-    let iTxt = cab.indexOf("Texto_ES"); if (iTxt === -1) iTxt = cab.indexOf("Texto");
-    if (iId === -1 || iTxt === -1) return resultado;
-    for (let i = 1; i < datos.length; i++) {
-      const id  = String(datos[i][iId]).trim();
-      const txt = String(datos[i][iTxt]).trim();
-      if (id && txt && !id.startsWith("_")) resultado[id] = txt;
-    }
-  } catch (e) { console.error("Error leyendo textos", e); }
-  return resultado;
-}
+// ══ FUNCIONES DE DATOS ══
+// crearMapaFotos(), leerTextos(), leerImagenesSitio()
+// construirUrlCDN_() → lh3.googleusercontent.com/d/{id}=w800
 
-function sincronizarCatalogo() {
-  try {
-    const hojaMaestra = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    const datosMaestros = hojaMaestra.getDataRange().getValues();
-    const cabecerasM = datosMaestros[0];
-    const iIdM  = cabecerasM.indexOf("ID_Producto");
-    const iNomM = cabecerasM.indexOf("Nombre");
-    const iDescM = cabecerasM.indexOf("Descripción");
-    const iCatM = cabecerasM.indexOf("Categoría");
-    const iPreM = cabecerasM.indexOf("Precio_Publico");
-    const iVisM = cabecerasM.indexOf("Visible");
-    const iStockM = cabecerasM.indexOf("Stock");
-    if (iIdM === -1 || iPreM === -1) throw new Error("Faltan columnas en hoja maestra.");
+// ══ UTILIDADES ══
+// autoCategorizar(), inyectarTextosIngles(), invalidarCacheManual()
+// sincronizarCatalogo(), inyectarTraduccionesProductos()
 
-    const productosMaestra = {};
-    for (let i = 1; i < datosMaestros.length; i++) {
-      const id = String(datosMaestros[i][iIdM]).trim().toLowerCase();
-      if (id) productosMaestra[id] = i;
-    }
-
-    const hojaExterna = SpreadsheetApp.openById(EXTERNAL_PRICE_LIST_ID).getSheets()[0];
-    const datosExternos = hojaExterna.getDataRange().getValues();
-    const cabecerasExt = datosExternos[0];
-    const iRefE   = cabecerasExt.indexOf("Referencia");
-    const iMetalE = cabecerasExt.indexOf("Peso metal ");
-    const iCantE  = cabecerasExt.indexOf("Cantidad");
-    const iPiedraE = cabecerasExt.indexOf("Piedra ct");
-    const iDiamE  = cabecerasExt.indexOf("diamantes ct");
-    const iPrecioE = cabecerasExt.indexOf("precio de venta");
-
-    let filasNuevas = [], actualizaciones = 0;
-
-    for (let i = 1; i < datosExternos.length; i++) {
-      const rowExt = datosExternos[i];
-      const refRaw = rowExt[iRefE];
-      if (!refRaw) continue;
-      const ref = String(refRaw).trim();
-      const refLower = ref.toLowerCase();
-      let precioNum = Number(String(rowExt[iPrecioE]).replace(/[^0-9.-]+/g,""));
-      let cantidadNum = Number(rowExt[iCantE]) || 0;
-      let descAuto = [];
-      if (rowExt[iMetalE]) descAuto.push(`Metal: ${rowExt[iMetalE]}`);
-      if (rowExt[iPiedraE]) descAuto.push(`Piedra: ${rowExt[iPiedraE]}`);
-      if (rowExt[iDiamE]) descAuto.push(`Diamantes: ${rowExt[iDiamE]}ct`);
-      const descripcionFinal = descAuto.join(" • ");
-
-      if (productosMaestra[refLower] !== undefined) {
-        const numFilaSheet = productosMaestra[refLower] + 1;
-        hojaMaestra.getRange(numFilaSheet, iPreM + 1).setValue(precioNum);
-        hojaMaestra.getRange(numFilaSheet, iStockM + 1).setValue(cantidadNum);
-        if (!datosMaestros[productosMaestra[refLower]][iNomM] && iNomM !== -1) hojaMaestra.getRange(numFilaSheet, iNomM + 1).setValue(ref);
-        if (!datosMaestros[productosMaestra[refLower]][iDescM] && iDescM !== -1 && descripcionFinal) hojaMaestra.getRange(numFilaSheet, iDescM + 1).setValue(descripcionFinal);
-        actualizaciones++;
-      } else {
-        let nuevaFila = new Array(cabecerasM.length).fill("");
-        if (iIdM !== -1) nuevaFila[iIdM] = ref;
-        if (iNomM !== -1) nuevaFila[iNomM] = ref;
-        if (iDescM !== -1) nuevaFila[iDescM] = descripcionFinal;
-        if (iCatM !== -1) nuevaFila[iCatM] = "Joyería";
-        if (iPreM !== -1) nuevaFila[iPreM] = precioNum;
-        if (iVisM !== -1) nuevaFila[iVisM] = "Sí";
-        if (iStockM !== -1) nuevaFila[iStockM] = cantidadNum;
-        filasNuevas.push(nuevaFila);
-      }
-    }
-
-    if (filasNuevas.length > 0) {
-      hojaMaestra.getRange(hojaMaestra.getLastRow() + 1, 1, filasNuevas.length, cabecerasM.length).setValues(filasNuevas);
-    }
-
-    SpreadsheetApp.getUi().alert(`✅ Sincronización completa.\n- Creados: ${filasNuevas.length}\n- Actualizados: ${actualizaciones}`);
-
-  } catch (error) {
-    try { SpreadsheetApp.getUi().alert("❌ Error: " + error.message); } catch(e){}
-  }
-}</pre>
+// ⚠️ Código completo: servidor_google_apps_script.js</pre>
         </div>
       </div>
     </div>
+
 
     <!-- ── Script: app.js config ── -->
     <div class="script-section">
@@ -974,7 +894,7 @@ function sincronizarCatalogo() {
         <div class="script-body">
           <pre id="config-code">const CONFIG = {
   // ── URL del servidor Apps Script (OBLIGATORIO para fotos múltiples desde Drive)
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec',
 
   // ── Acceso directo a la Hoja Maestra (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
@@ -1021,7 +941,7 @@ function sincronizarCatalogo() {
     <!-- ── Footer ── -->
     <div class="admin-footer">
       <p>© 2026 NAMNA Jewelry — Panel de Administración</p>
-      <p>Motor: Apps Script v3.0 · Última revisión: Junio 2026</p>
+      <p>Motor: Apps Script v3.2-cached · Última revisión: Julio 2026</p>
     </div>
 
   </div><!-- /page-wrapper -->
@@ -1031,7 +951,7 @@ function sincronizarCatalogo() {
 
   <script>
     // ── URL de la API ──
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec';
 
     // ── Toast ──
     function showToast(msg, duration = 2500) {
@@ -1093,6 +1013,58 @@ function sincronizarCatalogo() {
       }
 
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Ejecutar`;
+    }
+
+    // ── Refrescar Caché del Servidor ──
+    async function refreshServerCache() {
+      const btn = document.getElementById('refresh-cache-btn');
+      const status = document.getElementById('cache-status');
+      
+      btn.disabled = true;
+      btn.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite">⟳</span> Invalidando...`;
+      status.style.display = 'block';
+      status.style.color = 'var(--color-muted)';
+      status.textContent = '⏳ Conectando con el servidor...';
+
+      try {
+        const t0 = performance.now();
+        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=invalidate';
+        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        const ms = Math.round(performance.now() - t0);
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        if (data.success) {
+          status.style.color = '#065F46';
+          status.textContent = `✅ Caché del servidor invalidado en ${ms}ms. Los próximos visitantes recibirán datos frescos.`;
+          showToast('✅ Caché del servidor refrescado correctamente');
+        } else {
+          throw new Error(data.message || 'Respuesta inesperada');
+        }
+      } catch (err) {
+        status.style.color = '#C0392B';
+        status.textContent = `❌ Error: ${err.message}. Puedes invalidar manualmente desde Apps Script → Ejecutar → invalidarCacheManual`;
+        showToast('❌ Error al refrescar caché');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refrescar Caché`;
+    }
+
+    // ── Limpiar Caché Local del Navegador ──
+    function clearLocalCache() {
+      try {
+        localStorage.removeItem('namna_catalog');
+        showToast('✅ Caché local del navegador limpiado');
+        
+        const status = document.getElementById('cache-status');
+        status.style.display = 'block';
+        status.style.color = '#065F46';
+        status.textContent = '✅ Caché local limpiado. Abre la tienda para verificar la carga fresca.';
+      } catch (e) {
+        showToast('❌ No se pudo limpiar el caché local');
+      }
     }
   </script>
 

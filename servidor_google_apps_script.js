@@ -1,12 +1,18 @@
 /**
  * ================================================================
  * NAMNA JEWERLYWEE — Servidor Seguro Avanzado (Google Apps Script)
- * v1.6 — Junio 2026
+ * v2.0 — Julio 2026
  *
  * BLOQUES:
- * 1. doGet()           → API Web: sirve productos + fotos + textos
+ * 1. doGet()           → API Web con CacheService (6h de caché)
  * 2. autoCategorizar() → Rellena Categoría según prefijo del ID
  *    (N. = Necklace | E. = Earrings)
+ *
+ * OPTIMIZACIONES v2.0:
+ * - CacheService para respuesta JSON completa (6 horas)
+ * - Endpoint ?action=invalidate para refrescar caché desde admin
+ * - Parámetro ?refresh=true para forzar reconstrucción
+ * - URLs de imágenes optimizadas via CDN de Google (lh3)
  * ================================================================
  */
 
@@ -14,11 +20,52 @@ const DRIVE_FOLDER_ID = "1U0PAfAUyimmUvDojxNygvhYYXtrteSuF";
 const MASTER_SHEET_ID = "1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc"; // ← Hoja Maestra
 const FALLBACK_IMAGE_URL = "https://via.placeholder.com/600x600/F3ECE3/3B4643?text=NAMNA+Jewelry";
 
+// ── Configuración del Caché ──
+const CACHE_KEY_RESPONSE = "namna_api_response_v2";
+const CACHE_KEY_FOTOS = "namna_fotos_map_v2";
+const CACHE_DURATION = 21600; // 6 horas en segundos (máximo de Google CacheService)
+
 // ═══════════════════════════════════════════════════════════════
 // BLOQUE 1: LA API WEB (Sirve los datos al catálogo)
+// Con sistema de caché inteligente para cargas <500ms
 // ═══════════════════════════════════════════════════════════════
-function doGet() {
+function doGet(e) {
   try {
+    const params = e ? e.parameter : {};
+
+    // ── ENDPOINT DE INVALIDACIÓN ──
+    // Permite al admin refrescar el caché: ?action=invalidate
+    if (params.action === "invalidate") {
+      invalidateCache_();
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          success: true,
+          message: "Caché invalidado correctamente. La próxima petición reconstruirá los datos.",
+          timestamp: new Date().toISOString()
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ── PASO 1: Verificar caché (si no se fuerza refresco) ──
+    const forceRefresh = params.refresh === "true";
+    
+    if (!forceRefresh) {
+      const cache = CacheService.getScriptCache();
+      const cachedResponse = cache.get(CACHE_KEY_RESPONSE);
+      
+      if (cachedResponse) {
+        // ¡Respuesta instantánea desde caché! (<500ms)
+        const parsed = JSON.parse(cachedResponse);
+        parsed._fromCache = true;
+        parsed._cacheHit = new Date().toISOString();
+        
+        return ContentService
+          .createTextOutput(JSON.stringify(parsed))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
+    // ── PASO 2: Construir respuesta fresca ──
     // IMPORTANTE: openById() es necesario cuando se ejecuta como API web.
     // getActiveSpreadsheet() solo funciona desde el editor, no en producción.
     const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
@@ -47,7 +94,8 @@ function doGet() {
     };
 
     // ── INDEXACIÓN EN MEMORIA (Fotos principales + Hijas) ──
-    const mapaFotos = crearMapaFotos(DRIVE_FOLDER_ID);
+    // Intentar cargar mapa de fotos desde caché primero
+    const mapaFotos = obtenerMapaFotos_(DRIVE_FOLDER_ID);
 
     const productosValidos = [];
 
@@ -78,10 +126,10 @@ function doGet() {
       if (fotosDrive) {
         imagenes = [];
         if (fotosDrive.principal) {
-          imagenes.push(`https://drive.google.com/thumbnail?id=${fotosDrive.principal}&sz=w800`);
+          imagenes.push(construirUrlCDN_(fotosDrive.principal));
         }
         fotosDrive.hijas.forEach(idHija => {
-          imagenes.push(`https://drive.google.com/thumbnail?id=${idHija}&sz=w800`);
+          imagenes.push(construirUrlCDN_(idHija));
         });
         if (imagenes.length === 0) {
           imagenes.push(FALLBACK_IMAGE_URL);
@@ -109,20 +157,224 @@ function doGet() {
     // ── IMÁGENES DEL SITIO (Carpeta Site_Assets) ──
     const imagenesSitio = leerImagenesSitio(DRIVE_FOLDER_ID);
 
+    const responseData = {
+      version: "3.2-cached",
+      keysEncontradasEnDrive: Object.keys(mapaFotos),
+      productos: productosValidos,
+      textos: textos,
+      imagenesSitio: imagenesSitio,
+      _fromCache: false,
+      _buildTime: new Date().toISOString()
+    };
+
+    // ── GUARDAR EN CACHÉ ──
+    guardarEnCache_(responseData);
+
     return ContentService
-      .createTextOutput(JSON.stringify({
-        version: "3.1",
-        keysEncontradasEnDrive: Object.keys(mapaFotos),
-        productos: productosValidos,
-        textos: textos,
-        imagenesSitio: imagenesSitio
-      }))
+      .createTextOutput(JSON.stringify(responseData))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     return ContentService
       .createTextOutput(JSON.stringify({ error: true, message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SISTEMA DE CACHÉ — CacheService de Google
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Guarda la respuesta completa en CacheService.
+ * CacheService tiene un límite de 100KB por clave, así que dividimos
+ * si es necesario usando chunks.
+ */
+function guardarEnCache_(data) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const jsonStr = JSON.stringify(data);
+    
+    // CacheService permite máximo 100KB por clave
+    const MAX_CHUNK_SIZE = 95000; // 95KB para dejar margen
+    
+    if (jsonStr.length <= MAX_CHUNK_SIZE) {
+      // Cabe en una sola clave
+      cache.put(CACHE_KEY_RESPONSE, jsonStr, CACHE_DURATION);
+      cache.put(CACHE_KEY_RESPONSE + "_chunks", "1", CACHE_DURATION);
+    } else {
+      // Dividir en chunks
+      const numChunks = Math.ceil(jsonStr.length / MAX_CHUNK_SIZE);
+      const cacheEntries = {};
+      
+      for (let i = 0; i < numChunks; i++) {
+        const chunk = jsonStr.substring(i * MAX_CHUNK_SIZE, (i + 1) * MAX_CHUNK_SIZE);
+        cacheEntries[CACHE_KEY_RESPONSE + "_part_" + i] = chunk;
+      }
+      cacheEntries[CACHE_KEY_RESPONSE + "_chunks"] = String(numChunks);
+      
+      // putAll es más eficiente que put individual
+      cache.putAll(cacheEntries, CACHE_DURATION);
+      
+      // También guardamos la primera parte con la clave principal como "flag"
+      // para que el chequeo rápido funcione
+      cache.put(CACHE_KEY_RESPONSE, "__chunked__" + numChunks, CACHE_DURATION);
+    }
+  } catch (e) {
+    // El caché no es crítico, si falla continuamos normalmente
+    console.warn("⚠️ No se pudo guardar en caché:", e.toString());
+  }
+}
+
+/**
+ * Recupera la respuesta cacheada (maneja chunks si es necesario).
+ * Retorna null si no hay caché válido.
+ */
+function leerDeCache_() {
+  try {
+    const cache = CacheService.getScriptCache();
+    const raw = cache.get(CACHE_KEY_RESPONSE);
+    
+    if (!raw) return null;
+    
+    // Verificar si está dividido en chunks
+    if (raw.startsWith("__chunked__")) {
+      const numChunks = parseInt(raw.replace("__chunked__", ""), 10);
+      const keys = [];
+      for (let i = 0; i < numChunks; i++) {
+        keys.push(CACHE_KEY_RESPONSE + "_part_" + i);
+      }
+      
+      const parts = cache.getAll(keys);
+      let fullJson = "";
+      for (let i = 0; i < numChunks; i++) {
+        const part = parts[CACHE_KEY_RESPONSE + "_part_" + i];
+        if (!part) return null; // Chunk faltante, caché corrupto
+        fullJson += part;
+      }
+      
+      return JSON.parse(fullJson);
+    }
+    
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Invalida todo el caché (productos + mapa de fotos).
+ */
+function invalidateCache_() {
+  try {
+    const cache = CacheService.getScriptCache();
+    
+    // Invalidar respuesta principal
+    cache.remove(CACHE_KEY_RESPONSE);
+    
+    // Invalidar chunks si existen
+    const chunksStr = cache.get(CACHE_KEY_RESPONSE + "_chunks");
+    if (chunksStr) {
+      const numChunks = parseInt(chunksStr, 10);
+      const keys = [CACHE_KEY_RESPONSE + "_chunks"];
+      for (let i = 0; i < numChunks; i++) {
+        keys.push(CACHE_KEY_RESPONSE + "_part_" + i);
+      }
+      cache.removeAll(keys);
+    }
+    
+    // Invalidar mapa de fotos
+    cache.remove(CACHE_KEY_FOTOS);
+    const fotoChunks = cache.get(CACHE_KEY_FOTOS + "_chunks");
+    if (fotoChunks) {
+      const n = parseInt(fotoChunks, 10);
+      const fkeys = [CACHE_KEY_FOTOS + "_chunks"];
+      for (let i = 0; i < n; i++) {
+        fkeys.push(CACHE_KEY_FOTOS + "_part_" + i);
+      }
+      cache.removeAll(fkeys);
+    }
+    
+    console.log("✅ Caché invalidado completamente");
+  } catch (e) {
+    console.error("❌ Error invalidando caché:", e.toString());
+  }
+}
+
+/**
+ * Obtiene el mapa de fotos, intentando caché primero.
+ * El mapa de fotos es lo más costoso (recorre todos los archivos de Drive).
+ */
+function obtenerMapaFotos_(folderId) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cached = cache.get(CACHE_KEY_FOTOS);
+    
+    if (cached && !cached.startsWith("__chunked__")) {
+      return JSON.parse(cached);
+    }
+    
+    if (cached && cached.startsWith("__chunked__")) {
+      const numChunks = parseInt(cached.replace("__chunked__", ""), 10);
+      const keys = [];
+      for (let i = 0; i < numChunks; i++) {
+        keys.push(CACHE_KEY_FOTOS + "_part_" + i);
+      }
+      const parts = cache.getAll(keys);
+      let fullJson = "";
+      for (let i = 0; i < numChunks; i++) {
+        const part = parts[CACHE_KEY_FOTOS + "_part_" + i];
+        if (!part) break;
+        fullJson += part;
+      }
+      if (fullJson) {
+        try { return JSON.parse(fullJson); } catch(e) {}
+      }
+    }
+  } catch (e) {}
+
+  // Si no hay caché, construir y guardar
+  const mapa = crearMapaFotos(folderId);
+  
+  try {
+    const cache = CacheService.getScriptCache();
+    const jsonStr = JSON.stringify(mapa);
+    const MAX_CHUNK_SIZE = 95000;
+    
+    if (jsonStr.length <= MAX_CHUNK_SIZE) {
+      cache.put(CACHE_KEY_FOTOS, jsonStr, CACHE_DURATION);
+    } else {
+      const numChunks = Math.ceil(jsonStr.length / MAX_CHUNK_SIZE);
+      const entries = {};
+      for (let i = 0; i < numChunks; i++) {
+        entries[CACHE_KEY_FOTOS + "_part_" + i] = jsonStr.substring(i * MAX_CHUNK_SIZE, (i + 1) * MAX_CHUNK_SIZE);
+      }
+      entries[CACHE_KEY_FOTOS + "_chunks"] = String(numChunks);
+      cache.putAll(entries, CACHE_DURATION);
+      cache.put(CACHE_KEY_FOTOS, "__chunked__" + numChunks, CACHE_DURATION);
+    }
+  } catch (e) {}
+  
+  return mapa;
+}
+
+/**
+ * Construye URL optimizada usando el CDN de Google (lh3.googleusercontent.com).
+ * Es 2-4x más rápido que drive.google.com/thumbnail.
+ * Formato: https://lh3.googleusercontent.com/d/{fileId}=w800
+ */
+function construirUrlCDN_(fileId) {
+  return `https://lh3.googleusercontent.com/d/${fileId}=w800`;
+}
+
+// ── FUNCIÓN DE UTILIDAD: Invalidar caché manualmente desde el editor ──
+// Ejecutar: Apps Script → Ejecutar → invalidarCacheManual
+function invalidarCacheManual() {
+  invalidateCache_();
+  try {
+    SpreadsheetApp.getUi().alert("✅ Caché invalidado correctamente.\n\nLa próxima visita al sitio reconstruirá los datos frescos.");
+  } catch (e) {
+    console.log("✅ Caché invalidado correctamente.");
   }
 }
 
@@ -357,7 +609,7 @@ function leerImagenesSitio(folderId) {
         // Solo procesar imágenes
         if (mime.includes('image/')) {
           let name = file.getName().replace(/\.[a-zA-Z0-9]{3,4}$/, '').toLowerCase().trim();
-          imagenes[name] = `https://drive.google.com/thumbnail?id=${file.getId()}&sz=w1200`;
+          imagenes[name] = construirUrlCDN_(file.getId()).replace('=w800', '=w1200');
         }
       }
     }

@@ -1710,6 +1710,32 @@ body.mobile-menu-open {
   border-radius: var(--radius-sm);
 }
 
+/* Skeleton shimmer (for JS-generated placeholders) */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-background-dark, #E8DDD0) 25%,
+    var(--color-background, #F3ECE3) 37%,
+    var(--color-background-dark, #E8DDD0) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-card {
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.skeleton-card .product-card-info,
+.skeleton-card .nuevos-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: var(--space-sm, 0.75rem);
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;

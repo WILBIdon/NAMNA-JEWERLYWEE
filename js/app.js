@@ -11,7 +11,7 @@
 const CONFIG = {
   // Pega aquí la URL de tu Google Apps Script implementado
   // Es OBLIGATORIO para cargar las múltiples fotos desde Drive
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxAhAWbrLuZudbI18FB-AT0wrk3jp1GNUzpdSP3TybOS_QuRaYsm-zW2-z0yVNYbPhC/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec',
 
   // Conexión directa a tu Google Sheet (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
@@ -19,7 +19,7 @@ const CONFIG = {
   WHATSAPP_NUMBER: '34695261649',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
-  CACHE_DURATION_MS: 30 * 60 * 1000,  // 30 minutos — carga instantánea para visitantes recurrentes
+  CACHE_DURATION_MS: 6 * 60 * 60 * 1000,  // 6 horas — sincronizado con CacheService del servidor
 };
 
 // ── DATOS DEMO ELIMINADOS ──
@@ -226,7 +226,7 @@ function initMobileMenu() {
 // ═══════════════════════════════════════════════════════════════
 // MOTOR HÍBRIDO CONECTADO — Estrategia: Cache-First + Background Refresh
 // 1. Si hay caché válido → muestra INSTANTÁNEO, luego actualiza en background
-// 2. Si no hay caché → muestra loader y espera al servidor
+// 2. Si no hay caché → muestra skeletons + espera al servidor
 // ═══════════════════════════════════════════════════════════════
 async function loadProducts() {
   // PASO 1: Intentar caché primero (carga instantánea)
@@ -242,8 +242,9 @@ async function loadProducts() {
     return;
   }
 
-  // Sin caché → carga normal (muestra loader)
+  // Sin caché → mostrar skeletons mientras carga
   console.log('🔄 NAMNA: Sin caché, cargando del servidor...');
+  showSkeletons();
   await loadFromServer();
 }
 
@@ -327,14 +328,21 @@ async function refreshInBackground() {
 
 async function fetchFromAppsScript() {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), 8000); // Reducido de 10s a 8s
   try {
-    const fetchUrl = `${CONFIG.APPS_SCRIPT_URL}${CONFIG.APPS_SCRIPT_URL.includes('?') ? '&' : '?'}t=${Date.now()}`;
-    const response = await fetch(fetchUrl, { signal: controller.signal, cache: 'no-store' });
+    // No agregar cache-buster t= para permitir que el servidor use su CacheService
+    const response = await fetch(CONFIG.APPS_SCRIPT_URL, { signal: controller.signal });
     clearTimeout(timeout);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (data.error) throw new Error(data.message);
+    
+    // Log de caché del servidor
+    if (data._fromCache) {
+      console.log('⚡ NAMNA: Respuesta del servidor desde CacheService (ultra-rápido)');
+    } else {
+      console.log('🔨 NAMNA: Respuesta del servidor reconstruida (primera carga del día)');
+    }
     
     // ── Textos e Imágenes del Sitio ──
     if (data.textos) {
@@ -582,7 +590,48 @@ function finishLoading() {
   renderProducts();
   renderNuevos();
   hideLoader();
+  hideSkeletons();
   showDataSourceBadge();
+}
+
+// ── Skeleton Loading: Placeholders visuales mientras carga ──
+function showSkeletons() {
+  if (!dom.productsGrid) return;
+  const skeletonCount = window.innerWidth > 700 ? 6 : 4;
+  let html = '';
+  for (let i = 0; i < skeletonCount; i++) {
+    html += `
+      <article class="product-card skeleton-card" style="animation-delay:${i * 0.1}s">
+        <div class="product-card-image skeleton-shimmer" style="aspect-ratio:1;border-radius:var(--radius-md,8px)"></div>
+        <div class="product-card-info">
+          <div class="skeleton-shimmer" style="height:12px;width:40%;border-radius:4px;margin-bottom:8px"></div>
+          <div class="skeleton-shimmer" style="height:16px;width:75%;border-radius:4px;margin-bottom:6px"></div>
+          <div class="skeleton-shimmer" style="height:14px;width:30%;border-radius:4px"></div>
+        </div>
+      </article>`;
+  }
+  dom.productsGrid.innerHTML = html;
+  
+  // También mostrar skeletons en novedades
+  if (dom.nuevosGrid) {
+    let nuevosHtml = '';
+    for (let i = 0; i < 4; i++) {
+      nuevosHtml += `
+        <div class="nuevos-card skeleton-card" style="animation-delay:${i * 0.1}s">
+          <div class="nuevos-card-image skeleton-shimmer" style="aspect-ratio:1;border-radius:var(--radius-md,8px)"></div>
+          <div class="nuevos-card-info">
+            <div class="skeleton-shimmer" style="height:10px;width:35%;border-radius:4px;margin-bottom:6px"></div>
+            <div class="skeleton-shimmer" style="height:14px;width:65%;border-radius:4px;margin-bottom:4px"></div>
+            <div class="skeleton-shimmer" style="height:12px;width:25%;border-radius:4px"></div>
+          </div>
+        </div>`;
+    }
+    dom.nuevosGrid.innerHTML = nuevosHtml;
+  }
+}
+
+function hideSkeletons() {
+  document.querySelectorAll('.skeleton-card').forEach(el => el.remove());
 }
 
 function getSingularCategory(cat) {
@@ -637,8 +686,8 @@ function showDataSourceBadge() {
 
   const labels = {
     'sheets': { text: `● Sheets (Sin Fotos Hijas) — ${state.sheetProducts} prod`, color: '#F59E0B' },
-    'apps-script': { text: `● Sincronización Total (Drive) — ${state.sheetProducts} prod`, color: '#25D366' },
-    'cache': { text: `● Caché (${state.sheetProducts} prod)`, color: '#E78A5E' },
+    'apps-script': { text: `⚡ Servidor (${state.sheetProducts} prod)`, color: '#25D366' },
+    'cache': { text: `⚡ Caché local (${state.sheetProducts} prod)`, color: '#E78A5E' },
     'error': { text: '● Catálogo Vacío / Error', color: '#EF4444' }
   };
 
@@ -653,7 +702,7 @@ function showDataSourceBadge() {
   `;
   badge.textContent = info.text;
   document.body.appendChild(badge);
-  setTimeout(() => badge.remove(), 5000);
+  setTimeout(() => badge.remove(), 4000);
 }
 
 // ═══════════════════════════════════════════════════════════════
