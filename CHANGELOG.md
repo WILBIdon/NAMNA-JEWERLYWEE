@@ -11,6 +11,22 @@
 
 ---
 
+## 2026-11-09 (tarde) — Migración a Supabase, fase 1
+
+- **feat:** `supabase/schema.sql` — esquema Postgres con `productos`, `imagenes`, `textos`, `imagenes_sitio`, la vista `catalogo` y políticas RLS (lectura pública solo de lo visible, escritura solo autenticada). Columnas `archivado`/`archivada` en vez de borrado. Campos nuevos: `orden`, `precio_mayorista`, fechas.
+- **feat:** `scripts/migrar-a-supabase.mjs` — vuelca el catálogo del Apps Script a Postgres + Storage. Re-ejecutable, con `--dry`, `--solo-datos` y `--forzar`, y comprobación de totales al final. Convierte las fotos a WebP 1400 px: medido sobre 4 reales, **−98 %** (PNG de 5‑6 MB → ~80 KB).
+- **feat:** `js/config.js` — configuración única del sitio. Resuelve el punto 3 del backlog: la `APPS_SCRIPT_URL` estaba copiada en 4 archivos.
+- **feat:** `js/datos.js` — capa de datos con Supabase primero y Apps Script de respaldo automático. Habla con PostgREST por `fetch` a pelo, sin cargar la librería de Supabase.
+- **refactor:** `app.js` y `producto.js` pasan por la capa nueva. Sin Supabase configurado el comportamiento es idéntico al de antes.
+- **perf:** la caché del navegador baja de 6 h a 10 min cuando los datos vienen de Supabase, y se mantiene en 6 h si se cae a Apps Script.
+- **fix:** `saveToCache()` declaraba `cacheData` dentro del `try`, así que el reintento del `catch` petaba con `ReferenceError` cuando `localStorage` estaba lleno.
+- **docs:** `MIGRACION-SUPABASE.md` con los pasos, la vuelta atrás y lo que falta.
+
+### Medido en producción antes de decidir
+Apps Script tarda **1.540 ms** en devolver 25 KB desde su propia caché; Drive sirve las fotos en ~100 ms. El cuello de botella era Apps Script, no Drive. El sitio además se sirve desde Railway en Miami (`x-railway-edge: mia1`) vendiendo a España y Europa.
+
+---
+
 ## 2026-11-09
 
 - **feat:** panel de gestión `panel.html` (Fase 2) — alta, edición, publicación y retirada de productos; precios, stock, categorías y descripciones ES/EN; subida y retirada de fotos a Drive; edición de los textos de la web; botón de publicar cambios. Buscador, filtros y diseño responsive con la identidad de la marca. Ver [PANEL-ADMIN.md](PANEL-ADMIN.md).

@@ -18,3 +18,7 @@ gemini-code-*.md
 
 # Copia local de trabajo (snapshot, no versionar)
 copia-local/
+
+# Claves locales (nunca al repositorio)
+.env
+.env.*

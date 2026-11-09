@@ -7,6 +7,8 @@
     "start": "npx serve ."
   },
   "dependencies": {
-    "serve": "^14.2.4"
+    "@supabase/supabase-js": "^2.119.0",
+    "serve": "^14.2.4",
+    "sharp": "^0.35.5"
   }
 }

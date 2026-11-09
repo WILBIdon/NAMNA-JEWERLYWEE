@@ -1,11 +1,16 @@
 # NAMNA Fine Jewelry — contexto del proyecto
 
-Catálogo de joyería **estático** (HTML + CSS + JS vanilla, sin build ni framework) cuyo backend es un Google Apps Script que lee una Hoja de Google (productos y textos) y una carpeta de Drive (fotos). El pedido se cierra por WhatsApp; no hay checkout.
+Catálogo de joyería **estático** (HTML + CSS + JS vanilla, sin build ni framework). El pedido se cierra por WhatsApp; no hay checkout. Alojado en Railway (`namnafine.com`), que hoy sirve desde Miami.
+
+**En migración de Google Sheets a Supabase.** Las dos rutas conviven y `js/datos.js` elige:
 
 ```
-Sheets + Drive → Apps Script (doGet, caché 6 h) → js/app.js (localStorage 6 h) → HTML → WhatsApp
-                      └ respaldo si falla: lectura directa gviz de la hoja
+Supabase (Postgres + Storage)  ──┐
+                                 ├─→ js/datos.js → app.js / producto.js → HTML → WhatsApp
+Apps Script → Sheets + Drive  ───┘   (respaldo automático)
 ```
+
+La ruta activa depende de si `SUPABASE_URL` está relleno en `js/config.js`. Vacío = todo por Apps Script, como siempre. Ver `MIGRACION-SUPABASE.md`.
 
 ## Mapa de archivos
 
@@ -18,7 +23,9 @@ Sheets + Drive → Apps Script (doGet, caché 6 h) → js/app.js (localStorage 6
 | `panel.html` | **Panel de gestión** (Fase 2): CRUD de productos, fotos y textos. Login contra `doPost` (`noindex`) |
 | `admin.html` | Panel antiguo: documentación y prueba de API (`noindex`) |
 | `generador-seo.html` | Generador de JSON-LD (`noindex`) |
-| `js/app.js` (1295 ln) | Catálogo: carga, caché, i18n, render, wishlist, búsqueda. `CONFIG` al inicio |
+| `js/config.js` | **Configuración única.** Se carga antes que todo lo demás |
+| `js/datos.js` | **Capa de datos.** Supabase primero, Apps Script de respaldo |
+| `js/app.js` (1310 ln) | Catálogo: carga, caché, i18n, render, wishlist, búsqueda. `CONFIG` al inicio |
 | `js/producto.js` (782 ln) | Ficha. **Duplica** carga/caché/i18n/`formatPrice` de `app.js` |
 | `js/shield.js` | Anti-clonación (clic derecho, selección, DevTools, anti-iframe) |
 | `css/styles.css` (2172 ln), `css/wishlist_search.css` | Estilos |
@@ -36,7 +43,8 @@ No hay tests, lint ni build. Sin `-s` en `serve`: esa bandera redirige `info.htm
 ## Reglas del proyecto
 
 - **Todo cambio se registra en `CHANGELOG.md`.** Es obligatorio (lo dice el propio archivo). Fecha las entradas nuevas en `YYYY-MM-DD`; las antiguas dicen "Reciente" y no sirven para ordenar.
-- `APPS_SCRIPT_URL` está **duplicada en 4 sitios**: `js/app.js`, `js/producto.js`, `admin.html` y `panel.html`. Al cambiar una, cambiar las cuatro.
+- La configuración vive **solo** en `js/config.js`. `app.js` y `producto.js` ya la leen de ahí; `admin.html` y `panel.html` todavía la llevan dentro.
+- Nunca pongas la `service_role` key de Supabase en el frontend ni en el repo. En el navegador solo la `anon key`, que está protegida por RLS.
 - Idioma por defecto: **EN**. Todo texto nuevo necesita par ES/EN.
 - Caché doble de 6 h (servidor + navegador): un cambio en la hoja no se ve hasta refrescar caché desde `admin.html`.
 - La copia local de trabajo vive en `copia-local/` (ignorada por git). **Excluirla de las búsquedas** o cada resultado sale duplicado.
@@ -62,6 +70,8 @@ Regla del proyecto: las operaciones destructivas archivan en vez de eliminar. Pr
 | `CHANGELOG.md` (5 KB) | Historial |
 | `PLAN-SEO-GEO.md` (19 KB) | **Solo** en tareas de SEO/GEO — es el doc más caro |
 | `BLUEPRINT.md` (5 KB) | Visión original del proyecto por fases |
+| `MIGRACION-SUPABASE.md` (5 KB) | Estado y pasos de la migración a Postgres |
+| `supabase/schema.sql` | Esquema y políticas RLS |
 | `PANEL-ADMIN.md` (4 KB) | Puesta en marcha del panel y solución de problemas |
 | `copia-local/BITACORA.md` | Registro de la copia local y hallazgos de eficiencia |
 

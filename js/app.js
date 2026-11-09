@@ -8,23 +8,17 @@
  */
 
 // ── CONFIGURACIÓN CONECTADA ────────────────────────────────────
-const CONFIG = {
-  // Pega aquí la URL de tu Google Apps Script implementado
-  // Es OBLIGATORIO para cargar las múltiples fotos desde Drive
+// Los valores viven en js/config.js (cargado antes que este archivo).
+// El objeto de respaldo mantiene el sitio en pie si config.js no estuviera.
+const CONFIG = window.NAMNA_CONFIG || {
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec',
-
-  // Conexión directa a tu Google Sheet (Respaldo si falla Apps Script)
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
-
   WHATSAPP_NUMBER: '34695261649',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
-  CACHE_DURATION_MS: 6 * 60 * 60 * 1000,  // 6 horas — sincronizado con CacheService del servidor
-
-  // ── Analítica y Tracking (Opcional) ──
-  // Pega aquí tus IDs para activar el seguimiento automáticamente. Déjalos vacíos ('') para desactivar.
-  GOOGLE_ANALYTICS_ID: '', // Ejemplo: 'G-XXXXXXXXXX'
-  META_PIXEL_ID: '',       // Ejemplo: '123456789012345'
+  CACHE_DURATION_MS: 10 * 60 * 1000,
+  GOOGLE_ANALYTICS_ID: '',
+  META_PIXEL_ID: ''
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -290,21 +284,43 @@ async function loadProducts() {
 }
 
 // ── Carga desde servidor (bloqueante, muestra loader) ──
+/**
+ * Capa de datos unificada (js/datos.js): Supabase primero, Apps Script
+ * de respaldo. Aplica textos e imágenes del sitio y devuelve los
+ * productos ya normalizados.
+ */
+async function fetchCatalogo() {
+  if (!window.NAMNA_DATOS) return fetchFromAppsScript();   // datos.js no cargado
+
+  const r = await window.NAMNA_DATOS.cargarCatalogo(state);
+
+  if (r.textos_es && Object.keys(r.textos_es).length) {
+    state.textos_es = r.textos_es;
+    state.textos_en = r.textos_en || r.textos_es;
+    updateTranslations();
+  }
+  if (r.imagenesSitio && Object.keys(r.imagenesSitio).length) {
+    state.siteImages = r.imagenesSitio;
+    applySiteImages();
+  }
+
+  state.dataSource = r.origen;
+  return r.productos;
+}
+
 async function loadFromServer() {
-  if (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim() !== '') {
+  if ((window.NAMNA_DATOS) || (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim() !== '')) {
     try {
-      console.log('🔐 NAMNA: Conectando via Apps Script...');
-      const apiProducts = await fetchFromAppsScript();
+      const apiProducts = await fetchCatalogo();
       if (apiProducts && apiProducts.length > 0) {
         state.products = apiProducts;
-        state.dataSource = 'apps-script';
         state.sheetProducts = apiProducts.length;
         saveToCache(apiProducts);
         finishLoading();
         return;
       }
     } catch (err) {
-      console.warn('⚠️ Apps Script falló:', err.message);
+      console.warn('⚠️ Carga del catálogo falló:', err.message);
     }
   }
 
@@ -334,9 +350,9 @@ async function loadFromServer() {
 // ── Actualización silenciosa en background ──
 async function refreshInBackground() {
   try {
-    if (!CONFIG.APPS_SCRIPT_URL || CONFIG.APPS_SCRIPT_URL.trim() === '') return;
+    if (!window.NAMNA_DATOS && (!CONFIG.APPS_SCRIPT_URL || CONFIG.APPS_SCRIPT_URL.trim() === '')) return;
     console.log('🔄 NAMNA: Actualizando en background...');
-    const freshProducts = await fetchFromAppsScript();
+    const freshProducts = await fetchCatalogo();
     if (freshProducts && freshProducts.length > 0) {
       // Comparar el hash real de los datos para saber si hay algún cambio de precio/texto
       const oldHash = JSON.stringify(state.products);
@@ -347,7 +363,6 @@ async function refreshInBackground() {
         state.filteredProducts = state.activeCategory === 'all'
           ? [...freshProducts]
           : freshProducts.filter(p => p.categoria === state.activeCategory);
-        state.dataSource = 'apps-script';
         state.sheetProducts = freshProducts.length;
         saveToCache(freshProducts);
         
@@ -496,11 +511,20 @@ async function fetchFromGoogleSheets() {
 }
 
 function saveToCache(data) {
+  // `cacheData` se declara fuera del try: antes estaba dentro y el
+  // reintento del catch petaba con ReferenceError.
+  const cacheData = {
+    timestamp: Date.now(),
+    origen: state.dataSource,      // de él depende cuánto dura la caché
+    items: data,
+    textos_es: state.textos_es,
+    textos_en: state.textos_en,
+    siteImages: state.siteImages
+  };
   try {
-    const cacheData = { timestamp: Date.now(), items: data, textos_es: state.textos_es, textos_en: state.textos_en, siteImages: state.siteImages };
     localStorage.setItem('namna_catalog', JSON.stringify(cacheData));
   } catch (e) {
-    // Si localStorage está lleno, intentar limpiar y reintentar
+    // Si localStorage está lleno, limpiar y reintentar
     console.warn('⚠️ No se pudo guardar en caché:', e);
     try {
       localStorage.removeItem('namna_catalog');
@@ -516,7 +540,10 @@ function loadFromCache() {
     const cached = localStorage.getItem('namna_catalog');
     if (!cached) return null;
     const parsed = JSON.parse(cached);
-    if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION_MS) {
+    const maxEdad = window.NAMNA_DATOS
+      ? window.NAMNA_DATOS.duracionCache(parsed.origen || 'supabase')
+      : CONFIG.CACHE_DURATION_MS;
+    if (Date.now() - parsed.timestamp > maxEdad) {
       localStorage.removeItem('namna_catalog');
       return null;
     }

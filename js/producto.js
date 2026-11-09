@@ -9,17 +9,18 @@
  */
 
 // ── CONFIGURACIÓN (duplicada de app.js para independencia) ──
-const CONFIG = {
+// Los valores vienen de js/config.js (cargado antes). SITE_URL es propio
+// de esta página y se añade encima.
+const CONFIG = Object.assign({
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec',
   SHEET_ID: '1Xb29JGt7XgwT_YJ08zusT6kvZs4w5lCn7H1lDlCzxbc',
   WHATSAPP_NUMBER: '34695261649',
   CURRENCY: 'EUR',
   LOCALE: 'es-ES',
-  CACHE_DURATION_MS: 6 * 60 * 60 * 1000,
-  GOOGLE_ANALYTICS_ID: '', // Ejemplo: 'G-XXXXXXXXXX'
-  META_PIXEL_ID: '',       // Ejemplo: '123456789012345'
-  SITE_URL: 'https://www.namnafine.com'
-};
+  CACHE_DURATION_MS: 10 * 60 * 1000,
+  GOOGLE_ANALYTICS_ID: '',
+  META_PIXEL_ID: ''
+}, window.NAMNA_CONFIG || {}, { SITE_URL: 'https://www.namnafine.com' });
 
 // ═══════════════════════════════════════════════════════════════
 // INICIALIZACIÓN DE TRACKING
@@ -171,10 +172,23 @@ async function loadProductFromURL() {
 }
 
 // ── Server Loading ──
+/** Supabase primero, Apps Script de respaldo (js/datos.js). */
+async function fetchCatalogo() {
+  if (!window.NAMNA_DATOS) return fetchFromAppsScript();
+  const r = await window.NAMNA_DATOS.cargarCatalogo(state);
+  if (r.textos_es && Object.keys(r.textos_es).length) {
+    state.textos_es = r.textos_es;
+    state.textos_en = r.textos_en || r.textos_es;
+    if (typeof updateTranslations === 'function') updateTranslations();
+  }
+  state.dataSource = r.origen;
+  return r.productos;
+}
+
 async function loadFromServer(productId) {
-  if (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim() !== '') {
+  if (window.NAMNA_DATOS || (CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.trim() !== '')) {
     try {
-      const apiProducts = await fetchFromAppsScript();
+      const apiProducts = await fetchCatalogo();
       if (apiProducts && apiProducts.length > 0) {
         state.products = apiProducts;
         saveToCache(apiProducts);
@@ -186,7 +200,7 @@ async function loadFromServer(productId) {
         }
       }
     } catch (err) {
-      console.warn('⚠️ Apps Script falló:', err.message);
+      console.warn('⚠️ Carga del catálogo falló:', err.message);
     }
   }
 
@@ -366,7 +380,10 @@ function loadFromCache() {
     const cached = localStorage.getItem('namna_catalog');
     if (!cached) return null;
     const parsed = JSON.parse(cached);
-    if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION_MS) {
+    const maxEdad = window.NAMNA_DATOS
+      ? window.NAMNA_DATOS.duracionCache(parsed.origen || 'supabase')
+      : CONFIG.CACHE_DURATION_MS;
+    if (Date.now() - parsed.timestamp > maxEdad) {
       localStorage.removeItem('namna_catalog');
       return null;
     }
