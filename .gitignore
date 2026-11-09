@@ -15,3 +15,6 @@ desktop.ini
 gemini-code-*.md
 *.tmp
 *.log
+
+# Copia local de trabajo (snapshot, no versionar)
+copia-local/

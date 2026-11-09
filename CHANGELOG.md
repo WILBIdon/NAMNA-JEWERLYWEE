@@ -3,9 +3,25 @@
 > [!IMPORTANT]  
 > **TAREA PERMANENTE:** Todo cambio realizado en el proyecto debe ser registrado obligatoriamente en este documento. Es responsabilidad de cualquier asistente o desarrollador mantener este registro actualizado para tener un control claro de las modificaciones.
 
-## Cambios Recientes
+## Convenciones
 
-### Últimas actualizaciones
+- Entradas nuevas: **siempre fechadas** `YYYY-MM-DD`, lo más reciente arriba.
+- Las entradas marcadas `**Reciente**` son históricas y anteriores al 2026-10-22; no tienen fecha fiable.
+- La estructura del proyecto se documenta en [PROCESO.md](PROCESO.md), no aquí.
+
+---
+
+## 2026-11-09
+
+- **docs:** crear `CLAUDE.md` — contexto de arranque del proyecto (arquitectura, mapa de archivos, reglas, riesgos abiertos) con punteros a los demás documentos en vez de duplicarlos.
+- **chore:** copia local verificada del sitio en `copia-local/sitio-2026-11-09/` (69 archivos, SHA-1 idéntico al origen) + `copia-local/BITACORA.md`. Carpeta ignorada por git.
+- **chore:** limpieza — `Untitled.html` movido a `_archivo/` (página huérfana con dos `<title>`); `gemini-code-1781227114465.md` renombrado a `BLUEPRINT.md` (deja de estar ignorado por el patrón `gemini-code-*.md`).
+- **docs:** `CHANGELOG.md` — eliminada la sección «Estructura del Proyecto» duplicada de `PROCESO.md` y adoptadas entradas fechadas.
+
+---
+
+## Histórico (sin fecha, anterior a 2026-10-22)
+- **Reciente** docs: añadir `PROCESO.md` (funcionamiento técnico de punta a punta) y `ESTATUS_Y_MEJORAS.md` (estado por fases y backlog priorizado).
 - **Reciente** style: optimizar ventana de producto para móvil — ocupa 100% de pantalla sin scroll, imagen al 42%, detalles compactos con tipografía reducida, botón CTA fijo al fondo; en desktop se mantiene el layout lado a lado.
 - **Reciente** fix: implementar funcionalidad completa del menú hamburguesa en móvil en `index.html` e `info.html` — panel de navegación lateral con overlay, animación del botón (☰→✕), links con transiciones escalonadas, cierre al tocar overlay/Escape/link, y botón de WhatsApp en el pie del menú.
 - **Reciente** feat: buscador inteligente (Smart Search) a pantalla completa con atajos a páginas de índice (contacto, envíos).
@@ -41,10 +57,4 @@
 - **`d6427cc`** feat: aumentar tamaño de logo, agregar página de info y arreglar links de footer y whatsapp general
 - **`bfd4a16`** feat: actualizar número de WhatsApp para pedidos
 
-## Estructura del Proyecto
-- `index.html`: Página de inicio
-- `info.html`: Página de información
-- `admin.html`: Panel de administración
-- `servidor_google_apps_script.js`: Código del servidor (Google Apps Script)
-- `js/app.js`: Lógica de la aplicación web
-- `css/styles.css`: Hojas de estilo del proyecto
+
