@@ -5,6 +5,9 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /panel.html
+Disallow: /generador-seo.html
+Disallow: /_archivo/
 
 # ── Explicitly welcome AI crawlers ──
 User-agent: GPTBot

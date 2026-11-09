@@ -334,8 +334,10 @@
         </div>
     </footer>
 
-    <!-- Hidden Admin Trigger (Double click or tap) -->
-    <div style="text-align: center; padding: 15px; background: var(--color-background-dark); font-size: 16px; user-select: none; cursor: pointer;" ondblclick="if(prompt('Contraseña de Admin:')==='Junio2026') { sessionStorage.setItem('namna_admin', 'true'); window.location.href='admin.html'; }">
+    <!-- Acceso al panel de gestion (doble clic o toque).
+         La contrasena ya NO se comprueba aqui: se valida en el servidor
+         (Apps Script) desde panel.html. Ver PANEL-ADMIN.md. -->
+    <div style="text-align: center; padding: 15px; background: var(--color-background-dark); font-size: 16px; user-select: none; cursor: pointer;" ondblclick="window.location.href='panel.html';" title="">
         <span style="opacity: 0.35; color: #fff;">💎</span>
     </div>
 

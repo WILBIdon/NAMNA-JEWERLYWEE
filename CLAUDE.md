@@ -15,13 +15,14 @@ Sheets + Drive → Apps Script (doGet, caché 6 h) → js/app.js (localStorage 6
 | `producto.html?id=XXX` | Ficha individual (`js/producto.js`) |
 | `info.html` | Info/contacto/FAQ — **106 KB, no leer entero** (ver abajo) |
 | `privacidad.html` | Legal |
-| `admin.html` | Herramientas y documentación interna (`noindex`) |
+| `panel.html` | **Panel de gestión** (Fase 2): CRUD de productos, fotos y textos. Login contra `doPost` (`noindex`) |
+| `admin.html` | Panel antiguo: documentación y prueba de API (`noindex`) |
 | `generador-seo.html` | Generador de JSON-LD (`noindex`) |
 | `js/app.js` (1295 ln) | Catálogo: carga, caché, i18n, render, wishlist, búsqueda. `CONFIG` al inicio |
 | `js/producto.js` (782 ln) | Ficha. **Duplica** carga/caché/i18n/`formatPrice` de `app.js` |
 | `js/shield.js` | Anti-clonación (clic derecho, selección, DevTools, anti-iframe) |
 | `css/styles.css` (2172 ln), `css/wishlist_search.css` | Estilos |
-| `servidor_google_apps_script.js` (36 KB) | Backend. **No se ejecuta aquí**: se pega en el editor de Apps Script |
+| `servidor_google_apps_script.js` (46 KB) | Backend. **No se ejecuta aquí**: se pega en el editor de Apps Script. BLOQUE 5 = API de escritura del panel |
 | `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt` | SEO e IA |
 
 ## Comandos
@@ -35,7 +36,7 @@ No hay tests, lint ni build. Sin `-s` en `serve`: esa bandera redirige `info.htm
 ## Reglas del proyecto
 
 - **Todo cambio se registra en `CHANGELOG.md`.** Es obligatorio (lo dice el propio archivo). Fecha las entradas nuevas en `YYYY-MM-DD`; las antiguas dicen "Reciente" y no sirven para ordenar.
-- `CONFIG` (`APPS_SCRIPT_URL`, `SHEET_ID`, WhatsApp `34695261649`) está **duplicado** en `js/app.js`, `js/producto.js` y `admin.html`. Al cambiar uno, cambiar los tres.
+- `APPS_SCRIPT_URL` está **duplicada en 4 sitios**: `js/app.js`, `js/producto.js`, `admin.html` y `panel.html`. Al cambiar una, cambiar las cuatro.
 - Idioma por defecto: **EN**. Todo texto nuevo necesita par ES/EN.
 - Caché doble de 6 h (servidor + navegador): un cambio en la hoja no se ve hasta refrescar caché desde `admin.html`.
 - La copia local de trabajo vive en `copia-local/` (ignorada por git). **Excluirla de las búsquedas** o cada resultado sale duplicado.
@@ -43,7 +44,14 @@ No hay tests, lint ni build. Sin `-s` en `serve`: esa bandera redirige `info.htm
 
 ## Abierto y conocido
 
-Dos riesgos de seguridad sin resolver, detallados en `ESTATUS_Y_MEJORAS.md`: la contraseña de `admin.html` está en texto plano en el JS del cliente, y el endpoint `?action=invalidate` es público (cualquiera puede vaciar la caché). Analítica preparada pero desactivada (IDs vacíos).
+- **Bloqueante:** el panel de gestión no funciona hasta que el operador suba el Apps Script nuevo, ejecute `configurarAdmin("...")` y vuelva a publicar la app web. Pasos en `PANEL-ADMIN.md`.
+- La contraseña antigua `Junio2026` estuvo publicada en el código fuente de `index.html`. Comprometida.
+- Analítica preparada pero desactivada (IDs vacíos).
+- `panel.html` es estático: la página de login es pública aunque no se pueda entrar. Falta auth básica en el hosting.
+
+## Nada se borra
+
+Regla del proyecto: las operaciones destructivas archivan en vez de eliminar. Productos → pestaña `ARCHIVO_PRODUCTOS`. Fotos → subcarpeta `ARCHIVO` de Drive. Archivos del repo → `_archivo/`. Mantener este criterio en cualquier función nueva.
 
 ## Documentación — leer solo la que haga falta
 
@@ -54,6 +62,7 @@ Dos riesgos de seguridad sin resolver, detallados en `ESTATUS_Y_MEJORAS.md`: la 
 | `CHANGELOG.md` (5 KB) | Historial |
 | `PLAN-SEO-GEO.md` (19 KB) | **Solo** en tareas de SEO/GEO — es el doc más caro |
 | `BLUEPRINT.md` (5 KB) | Visión original del proyecto por fases |
+| `PANEL-ADMIN.md` (4 KB) | Puesta en marcha del panel y solución de problemas |
 | `copia-local/BITACORA.md` | Registro de la copia local y hallazgos de eficiencia |
 
 ## Economía de tokens

@@ -13,6 +13,15 @@
 
 ## 2026-11-09
 
+- **feat:** panel de gestión `panel.html` (Fase 2) — alta, edición, publicación y retirada de productos; precios, stock, categorías y descripciones ES/EN; subida y retirada de fotos a Drive; edición de los textos de la web; botón de publicar cambios. Buscador, filtros y diseño responsive con la identidad de la marca. Ver [PANEL-ADMIN.md](PANEL-ADMIN.md).
+- **feat:** API de escritura en `servidor_google_apps_script.js` (BLOQUE 5) — `doPost` con las acciones login, listar, guardarProducto, cambiarVisible, archivarProducto, guardarTexto, subirFoto, archivarFoto e invalidar.
+- **security:** la contraseña de administración deja de estar en el cliente. Ahora se guarda como hash SHA-256 con sal en `PropertiesService` y se valida en el servidor (`configurarAdmin()`), con sesiones de 2 h por token. Resuelve el punto 1 del backlog.
+- **security:** `?action=invalidate` exige token de sesión en cuanto hay contraseña configurada. Resuelve el punto 2 del backlog.
+- **security:** eliminada la contraseña en texto plano `Junio2026` del disparador 💎 de `index.html`; ahora enlaza a `panel.html`. **La clave antigua queda comprometida: hay que usar otra.**
+- **chore:** `robots.txt` bloquea también `/panel.html`, `/generador-seo.html` y `/_archivo/`.
+- **chore:** nada se borra — eliminar un producto lo mueve a la pestaña `ARCHIVO_PRODUCTOS`; quitar una foto la mueve a la subcarpeta `ARCHIVO` de Drive.
+- **test:** sitio verificado en local — 18 productos, 108 tarjetas, 87 textos, todas las rutas 200. Panel probado de punta a punta con backend simulado: interruptores, alta, edición, validaciones de ID, fotos, textos y publicación.
+
 - **docs:** crear `CLAUDE.md` — contexto de arranque del proyecto (arquitectura, mapa de archivos, reglas, riesgos abiertos) con punteros a los demás documentos en vez de duplicarlos.
 - **chore:** copia local verificada del sitio en `copia-local/sitio-2026-11-09/` (69 archivos, SHA-1 idéntico al origen) + `copia-local/BITACORA.md`. Carpeta ignorada por git.
 - **chore:** limpieza — `Untitled.html` movido a `_archivo/` (página huérfana con dos `<title>`); `gemini-code-1781227114465.md` renombrado a `BLUEPRINT.md` (deja de estar ignorado por el patrón `gemini-code-*.md`).

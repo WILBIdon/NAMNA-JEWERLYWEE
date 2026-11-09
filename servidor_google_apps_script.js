@@ -36,6 +36,18 @@ function doGet(e) {
     // ── ENDPOINT DE INVALIDACIÓN ──
     // Permite al admin refrescar el caché: ?action=invalidate
     if (params.action === "invalidate") {
+      // Si ya hay contraseña de admin configurada, exigimos un token de sesión
+      // válido. Mientras no lo esté, se mantiene el comportamiento antiguo para
+      // no romper el panel existente.
+      if (adminConfigurado_() && !adminTokenValido_(params.token)) {
+        return ContentService
+          .createTextOutput(JSON.stringify({
+            success: false,
+            error: "NO_AUTORIZADO",
+            message: "Esta operación requiere iniciar sesión en el panel de administración."
+          }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
       invalidateCache_();
       return ContentService
         .createTextOutput(JSON.stringify({
@@ -813,4 +825,378 @@ function inyectarTraduccionesProductos() {
   
   hoja.getRange(1, 1, datos.length, cabeceras.length).setValues(datos);
   console.log(`✅ Traducciones de productos inyectadas: ${actualizados} celdas actualizadas.`);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// BLOQUE 5: PANEL DE ADMINISTRACIÓN (API de escritura)
+// ───────────────────────────────────────────────────────────────
+// Añadido 2026-11-09. Expone un doPost() con autenticación por
+// contraseña validada EN EL SERVIDOR (ya no en el navegador) y
+// operaciones de escritura sobre la Hoja Maestra y Drive.
+//
+// ▸ PUESTA EN MARCHA (una sola vez, desde el editor de Apps Script):
+//     1. Ejecuta  configurarAdmin("TU_CONTRASEÑA")  cambiando el texto.
+//     2. Vuelve a implementar la app web (Implementar → Gestionar
+//        implementaciones → editar → Nueva versión).
+//     3. Borra la llamada a configurarAdmin para no dejar la clave
+//        escrita en el editor.
+//
+// ▸ NADA SE BORRA: "eliminar" un producto lo mueve a la pestaña
+//   ARCHIVO_PRODUCTOS y "eliminar" una foto la mueve a la subcarpeta
+//   ARCHIVO de Drive. Todo es recuperable.
+// ═══════════════════════════════════════════════════════════════
+
+const ADMIN_PROP_HASH   = "ADMIN_PASSWORD_HASH";
+const ADMIN_PROP_SALT   = "ADMIN_SALT";
+const ADMIN_TOKEN_TTL   = 7200;                 // 2 h de sesión
+const ADMIN_HOJA_ARCHIVO   = "ARCHIVO_PRODUCTOS";
+const ADMIN_CARPETA_ARCHIVO = "ARCHIVO";
+
+/**
+ * EJECUTAR UNA VEZ DESDE EL EDITOR.
+ * Guarda la contraseña como hash SHA-256 con sal en PropertiesService.
+ * La contraseña en claro nunca se almacena ni viaja al navegador.
+ */
+function configurarAdmin(passwordEnClaro) {
+  if (!passwordEnClaro || String(passwordEnClaro).length < 8) {
+    throw new Error("La contraseña debe tener al menos 8 caracteres.");
+  }
+  const props = PropertiesService.getScriptProperties();
+  const sal = Utilities.getUuid();
+  props.setProperty(ADMIN_PROP_SALT, sal);
+  props.setProperty(ADMIN_PROP_HASH, adminHash_(passwordEnClaro, sal));
+  console.log("✅ Contraseña de administración configurada. Vuelve a implementar la app web.");
+}
+
+function adminHash_(password, sal) {
+  const bytes = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    sal + "::" + password,
+    Utilities.Charset.UTF_8
+  );
+  return bytes.map(b => ((b & 0xFF) + 0x100).toString(16).slice(1)).join("");
+}
+
+function adminConfigurado_() {
+  return !!PropertiesService.getScriptProperties().getProperty(ADMIN_PROP_HASH);
+}
+
+function adminJson_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function adminLogin_(password) {
+  const props = PropertiesService.getScriptProperties();
+  const hash = props.getProperty(ADMIN_PROP_HASH);
+  const sal  = props.getProperty(ADMIN_PROP_SALT);
+
+  if (!hash) {
+    return { ok: false, error: "SIN_CONFIGURAR",
+             mensaje: "Falta ejecutar configurarAdmin(\"...\") en el editor de Apps Script." };
+  }
+  Utilities.sleep(400); // freno simple contra fuerza bruta
+  if (adminHash_(String(password || ""), sal) !== hash) {
+    return { ok: false, error: "CLAVE_INCORRECTA", mensaje: "Contraseña incorrecta." };
+  }
+  const token = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
+  CacheService.getScriptCache().put("admin_tk_" + token, "1", ADMIN_TOKEN_TTL);
+  return { ok: true, token: token, duracionSegundos: ADMIN_TOKEN_TTL };
+}
+
+function adminTokenValido_(token) {
+  if (!token) return false;
+  return CacheService.getScriptCache().get("admin_tk_" + String(token)) === "1";
+}
+
+// ── Punto de entrada de escritura ──────────────────────────────
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return adminJson_({ ok: false, error: "SIN_CUERPO", mensaje: "Petición vacía." });
+    }
+    const body = JSON.parse(e.postData.contents);
+    const accion = String(body.accion || "");
+
+    if (accion === "ping")  return adminJson_({ ok: true, configurado: adminConfigurado_() });
+    if (accion === "login") return adminJson_(adminLogin_(body.password));
+
+    if (!adminTokenValido_(body.token)) {
+      return adminJson_({ ok: false, error: "SESION_INVALIDA",
+                          mensaje: "Sesión caducada o no iniciada. Vuelve a entrar." });
+    }
+
+    switch (accion) {
+      case "listar":            return adminJson_(adminListar_());
+      case "guardarProducto":   return adminJson_(adminGuardarProducto_(body.producto));
+      case "cambiarVisible":    return adminJson_(adminCambiarVisible_(body.id, body.visible));
+      case "archivarProducto":  return adminJson_(adminArchivarProducto_(body.id));
+      case "guardarTexto":      return adminJson_(adminGuardarTexto_(body.id, body.es, body.en));
+      case "subirFoto":         return adminJson_(adminSubirFoto_(body.id, body.nombreArchivo, body.mimeType, body.base64));
+      case "archivarFoto":      return adminJson_(adminArchivarFoto_(body.fileId));
+      case "invalidar":         invalidateCache_(); return adminJson_({ ok: true, mensaje: "Caché vaciada." });
+      case "renovar":           return adminJson_({ ok: true });
+      default:
+        return adminJson_({ ok: false, error: "ACCION_DESCONOCIDA", mensaje: "Acción no reconocida: " + accion });
+    }
+  } catch (err) {
+    return adminJson_({ ok: false, error: "EXCEPCION", mensaje: String(err) });
+  }
+}
+
+// ── Utilidades de hoja ─────────────────────────────────────────
+function adminHojaProductos_() {
+  return SpreadsheetApp.openById(MASTER_SHEET_ID).getSheets()[0];
+}
+
+/** Devuelve {headers, idx} con los índices de columna (0-based). */
+function adminIndices_(headers) {
+  const h = headers.map(x => String(x).trim().toLowerCase());
+  const buscar = (...nombres) => {
+    for (const n of nombres) { const i = h.indexOf(n); if (i > -1) return i; }
+    return -1;
+  };
+  return {
+    id:        buscar("id_producto"),
+    nombre:    buscar("nombre"),
+    desc_es:   buscar("descripción es", "descripcion es", "descripción", "descripcion"),
+    desc_en:   buscar("descripción en", "descripcion en"),
+    cat_es:    buscar("categoría es", "categoria es", "categoría", "categoria"),
+    cat_en:    buscar("categoría en", "categoria en"),
+    precio:    buscar("precio_publico"),
+    mayorista: buscar("precio_mayorista"),
+    visible:   buscar("visible"),
+    stock:     buscar("stock")
+  };
+}
+
+function adminHojaTextos_(ss) {
+  const nombres = ["TEXTOS", "TEXTO", "Textos", "Texto", "textos", "texto", "Texto_ES"];
+  for (const n of nombres) { const s = ss.getSheetByName(n); if (s) return s; }
+  return null;
+}
+
+// ── Listado completo (incluye productos ocultos) ───────────────
+function adminListar_() {
+  const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  const hoja = ss.getSheets()[0];
+  const datos = hoja.getDataRange().getValues();
+  const idx = adminIndices_(datos[0]);
+
+  if (idx.id === -1 || idx.precio === -1 || idx.visible === -1) {
+    return { ok: false, error: "ESTRUCTURA",
+             mensaje: "Faltan columnas críticas (ID_Producto, Precio_Publico, Visible)." };
+  }
+
+  const mapaFotos = obtenerMapaFotos_(DRIVE_FOLDER_ID);
+  const visiblesOk = ["sí", "si", "true", "1", "yes", "s", "y", "ok"];
+  const productos = [];
+
+  for (let i = 1; i < datos.length; i++) {
+    const fila = datos[i];
+    const id = String(fila[idx.id]).trim();
+    if (!id) continue;
+
+    const clave = id.toLowerCase().replace(/\.+$/, "");
+    const fotos = mapaFotos[clave];
+    const imagenes = [];
+    if (fotos) {
+      if (fotos.principal) imagenes.push({ fileId: fotos.principal, url: construirUrlCDN_(fotos.principal), principal: true });
+      (fotos.hijas || []).forEach(fid => imagenes.push({ fileId: fid, url: construirUrlCDN_(fid), principal: false }));
+    }
+
+    productos.push({
+      _fila:      i + 1,
+      id:         id,
+      nombre:     idx.nombre   > -1 ? String(fila[idx.nombre]   || "").trim() : "",
+      desc_es:    idx.desc_es  > -1 ? String(fila[idx.desc_es]  || "").trim() : "",
+      desc_en:    idx.desc_en  > -1 ? String(fila[idx.desc_en]  || "").trim() : "",
+      cat_es:     idx.cat_es   > -1 ? String(fila[idx.cat_es]   || "").trim() : "",
+      cat_en:     idx.cat_en   > -1 ? String(fila[idx.cat_en]   || "").trim() : "",
+      precio:     Number(fila[idx.precio]) || 0,
+      stock:      idx.stock    > -1 ? (fila[idx.stock] === "" ? null : Number(fila[idx.stock])) : null,
+      visible:    visiblesOk.indexOf(String(fila[idx.visible]).trim().toLowerCase()) > -1,
+      imagenes:   imagenes
+    });
+  }
+
+  // ── Textos del sitio ──
+  const textos = [];
+  const hojaTextos = adminHojaTextos_(ss);
+  if (hojaTextos) {
+    const dt = hojaTextos.getDataRange().getValues();
+    const cab = dt[0].map(c => String(c).trim());
+    const iId = cab.findIndex(c => /^id(_texto)?$/i.test(c));
+    const iEs = cab.findIndex(c => /^(texto_es|texto)$/i.test(c));
+    const iEn = cab.findIndex(c => /^texto_en$/i.test(c));
+    if (iId > -1 && iEs > -1) {
+      for (let i = 1; i < dt.length; i++) {
+        const id = String(dt[i][iId]).trim();
+        if (!id || id.charAt(0) === "_") continue;
+        textos.push({
+          _fila: i + 1,
+          id: id,
+          es: String(dt[i][iEs] || "").trim(),
+          en: iEn > -1 ? String(dt[i][iEn] || "").trim() : ""
+        });
+      }
+    }
+  }
+
+  return { ok: true, productos: productos, textos: textos, hojaTextos: !!hojaTextos,
+           generado: new Date().toISOString() };
+}
+
+// ── Alta y edición de producto ─────────────────────────────────
+function adminGuardarProducto_(p) {
+  if (!p || !String(p.id || "").trim()) {
+    return { ok: false, error: "SIN_ID", mensaje: "El ID del producto es obligatorio." };
+  }
+  const hoja = adminHojaProductos_();
+  const datos = hoja.getDataRange().getValues();
+  const idx = adminIndices_(datos[0]);
+  const idNuevo = String(p.id).trim();
+
+  // Buscar fila existente por ID (no se fía del _fila que mande el cliente)
+  let fila = -1;
+  for (let i = 1; i < datos.length; i++) {
+    if (String(datos[i][idx.id]).trim().toLowerCase() === idNuevo.toLowerCase()) { fila = i + 1; break; }
+  }
+  const esNuevo = fila === -1;
+  if (esNuevo) fila = hoja.getLastRow() + 1;
+
+  const escribir = (col, valor) => { if (col > -1 && valor !== undefined) hoja.getRange(fila, col + 1).setValue(valor); };
+
+  escribir(idx.id, idNuevo);
+  escribir(idx.nombre,  p.nombre);
+  escribir(idx.desc_es, p.desc_es);
+  escribir(idx.desc_en, p.desc_en);
+  escribir(idx.cat_es,  p.cat_es);
+  escribir(idx.cat_en,  p.cat_en);
+  if (p.precio !== undefined && p.precio !== null && p.precio !== "") escribir(idx.precio, Number(p.precio));
+  if (p.stock  !== undefined && p.stock  !== null && p.stock  !== "") escribir(idx.stock,  Number(p.stock));
+  if (p.visible !== undefined) escribir(idx.visible, p.visible ? "SI" : "NO");
+
+  invalidateCache_();
+  return { ok: true, creado: esNuevo, fila: fila,
+           mensaje: esNuevo ? "Producto creado." : "Producto actualizado." };
+}
+
+function adminCambiarVisible_(id, visible) {
+  const hoja = adminHojaProductos_();
+  const datos = hoja.getDataRange().getValues();
+  const idx = adminIndices_(datos[0]);
+  for (let i = 1; i < datos.length; i++) {
+    if (String(datos[i][idx.id]).trim().toLowerCase() === String(id).trim().toLowerCase()) {
+      hoja.getRange(i + 1, idx.visible + 1).setValue(visible ? "SI" : "NO");
+      invalidateCache_();
+      return { ok: true, mensaje: visible ? "Producto publicado." : "Producto retirado de la web." };
+    }
+  }
+  return { ok: false, error: "NO_ENCONTRADO", mensaje: "No existe el producto " + id };
+}
+
+/** Mueve la fila a la pestaña ARCHIVO_PRODUCTOS. No borra nada de forma definitiva. */
+function adminArchivarProducto_(id) {
+  const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  const hoja = ss.getSheets()[0];
+  const datos = hoja.getDataRange().getValues();
+  const idx = adminIndices_(datos[0]);
+
+  for (let i = 1; i < datos.length; i++) {
+    if (String(datos[i][idx.id]).trim().toLowerCase() === String(id).trim().toLowerCase()) {
+      let archivo = ss.getSheetByName(ADMIN_HOJA_ARCHIVO);
+      if (!archivo) {
+        archivo = ss.insertSheet(ADMIN_HOJA_ARCHIVO);
+        archivo.appendRow(datos[0].concat(["_Archivado_el"]));
+      }
+      archivo.appendRow(datos[i].concat([new Date()]));
+      hoja.deleteRow(i + 1);
+      invalidateCache_();
+      return { ok: true, mensaje: "Producto movido a la pestaña " + ADMIN_HOJA_ARCHIVO + ". Es recuperable." };
+    }
+  }
+  return { ok: false, error: "NO_ENCONTRADO", mensaje: "No existe el producto " + id };
+}
+
+// ── Textos del sitio ───────────────────────────────────────────
+function adminGuardarTexto_(id, es, en) {
+  const ss = SpreadsheetApp.openById(MASTER_SHEET_ID);
+  const hoja = adminHojaTextos_(ss);
+  if (!hoja) return { ok: false, error: "SIN_PESTANA", mensaje: "No se encontró la pestaña TEXTOS." };
+
+  const datos = hoja.getDataRange().getValues();
+  const cab = datos[0].map(c => String(c).trim());
+  const iId = cab.findIndex(c => /^id(_texto)?$/i.test(c));
+  const iEs = cab.findIndex(c => /^(texto_es|texto)$/i.test(c));
+  const iEn = cab.findIndex(c => /^texto_en$/i.test(c));
+  if (iId === -1 || iEs === -1) {
+    return { ok: false, error: "ESTRUCTURA", mensaje: "Faltan las columnas ID_Texto o Texto_ES." };
+  }
+
+  for (let i = 1; i < datos.length; i++) {
+    if (String(datos[i][iId]).trim() === String(id).trim()) {
+      if (es !== undefined) hoja.getRange(i + 1, iEs + 1).setValue(es);
+      if (en !== undefined && iEn > -1) hoja.getRange(i + 1, iEn + 1).setValue(en);
+      invalidateCache_();
+      return { ok: true, mensaje: "Texto " + id + " actualizado." };
+    }
+  }
+  return { ok: false, error: "NO_ENCONTRADO", mensaje: "No existe el texto " + id };
+}
+
+// ── Fotos en Drive ─────────────────────────────────────────────
+/**
+ * Sube una foto respetando la convención de nombres:
+ *   primera foto → "ID_Producto.ext"   ·   siguientes → "ID_Producto-1.ext", "-2", …
+ */
+function adminSubirFoto_(idProducto, nombreArchivo, mimeType, base64) {
+  const id = String(idProducto || "").trim();
+  if (!id)     return { ok: false, error: "SIN_ID",   mensaje: "Falta el ID del producto." };
+  if (!base64) return { ok: false, error: "SIN_DATOS", mensaje: "No llegó el archivo." };
+
+  const carpeta = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  const clave = id.toLowerCase().replace(/\.+$/, "");
+  const ext = (String(nombreArchivo || "").match(/\.([a-zA-Z0-9]{3,4})$/) || [, "jpg"])[1].toLowerCase();
+
+  // Calcular el siguiente sufijo libre
+  let maxSufijo = -1;
+  const existentes = carpeta.getFiles();
+  while (existentes.hasNext()) {
+    const n = existentes.next().getName().replace(/\.[a-zA-Z0-9]{3,4}$/, "").trim().toLowerCase();
+    const base = n.replace(/-\d+$/, "").replace(/\.+$/, "").trim();
+    if (base !== clave) continue;
+    const m = n.match(/-(\d+)$/);
+    maxSufijo = Math.max(maxSufijo, m ? parseInt(m[1], 10) : 0);
+  }
+  const nombreFinal = maxSufijo < 0 ? id + "." + ext : id + "-" + (maxSufijo + 1) + "." + ext;
+
+  const blob = Utilities.newBlob(Utilities.base64Decode(base64), mimeType || "image/jpeg", nombreFinal);
+  const archivo = carpeta.createFile(blob);
+  try { archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+
+  CacheService.getScriptCache().remove(CACHE_KEY_FOTOS);
+  invalidateCache_();
+  return { ok: true, fileId: archivo.getId(), nombre: nombreFinal,
+           url: construirUrlCDN_(archivo.getId()),
+           principal: maxSufijo < 0, mensaje: "Foto subida como " + nombreFinal };
+}
+
+/** Mueve la foto a la subcarpeta ARCHIVO. No la envía a la papelera. */
+function adminArchivarFoto_(fileId) {
+  try {
+    const archivo = DriveApp.getFileById(String(fileId));
+    const raiz = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    let destino;
+    const subcarpetas = raiz.getFoldersByName(ADMIN_CARPETA_ARCHIVO);
+    destino = subcarpetas.hasNext() ? subcarpetas.next() : raiz.createFolder(ADMIN_CARPETA_ARCHIVO);
+    destino.addFile(archivo);
+    raiz.removeFile(archivo);
+    CacheService.getScriptCache().remove(CACHE_KEY_FOTOS);
+    invalidateCache_();
+    return { ok: true, mensaje: "Foto movida a la carpeta " + ADMIN_CARPETA_ARCHIVO + ". Es recuperable." };
+  } catch (err) {
+    return { ok: false, error: "DRIVE", mensaje: String(err) };
+  }
 }
