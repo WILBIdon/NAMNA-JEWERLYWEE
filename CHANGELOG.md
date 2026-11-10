@@ -11,6 +11,21 @@
 
 ---
 
+## 2026-11-10 — Auditoría: cerrar la escritura y el XSS
+
+Auditoría en paralelo de 7 dimensiones con verificación adversarial de cada hallazgo. 12 confirmados, más 30 sin verificar por caída de los verificadores. Lo que se arregló aquí:
+
+- **security (crítico):** el registro público de Supabase estaba abierto (`disable_signup:false`) y las políticas daban permiso total al rol `authenticated`. Cualquiera podía crearse una cuenta y editar precios, publicar o retirar piezas, reescribir los textos y subir archivos. `supabase/03-cerrar-escritura.sql` introduce una tabla `admins` y la función `es_admin()`, y reescribe las 6 políticas de escritura para exigirla. Aunque alguien se registre, no toca nada.
+- **security (crítico):** XSS almacenado. El nombre, la categoría y la descripción entraban sin escapar en `innerHTML` en ~30 puntos de `app.js` y `producto.js`, incluidos atributos (`alt="…"`) y llamadas `onclick('…')`. Encadenado con el registro abierto, permitía ejecutar JavaScript en el navegador de cada visitante. Se sanea en la frontera de datos (`limpiar()` en `js/datos.js`), no en los 30 puntos de salida.
+- **fix:** si Supabase fallaba, el respaldo de Apps Script dejaba los 17 productos como «Agotado» con el botón de WhatsApp desactivado, cacheado 6 h. El `0` de la Hoja significa «sin dato», no «cero unidades». Era el mismo bug que se corrigió en la base y en el migrador, pero no en la ruta de respaldo.
+- **fix:** `privacidad.html` cargaba `app.js` sin `config.js` ni `datos.js`, así que saltaba Supabase y sellaba la caché compartida 6 h con datos de la Hoja.
+- **fix:** `cache-control: '31536000'` no es válido sin `max-age=`; el navegador lo ignoraba y volvía a pedir cada imagen.
+- **fix:** la etiqueta de diagnóstico (`⚡ Supabase (17 prod)`) se mostraba a todos los visitantes en cada carga. Ahora solo en local o con `?namna_debug`.
+
+Descartado al verificar: la hipótesis de que 3 productos existían solo en la Hoja. Ambos orígenes devuelven los mismos 17 IDs.
+
+---
+
 ## 2026-11-10 — Imágenes de diseño editables
 
 - **feat:** pestaña «Imágenes de diseño» en el panel. Los 4 huecos decorativos (encabezado de portada, encabezado de información, tarjeta «Quiénes somos», tarjeta «Envíos») se cambian arrastrando una imagen, con conversión a WebP en el navegador. Antes salían de archivos en `assets/` y cambiarlos exigía tocar código y desplegar.

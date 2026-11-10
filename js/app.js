@@ -749,6 +749,13 @@ function renderNuevos(products = state.products) {
 }
 
 function showDataSourceBadge() {
+  // Solo en desarrollo. Esto nombra la infraestructura (Supabase, Apps
+  // Script, caché) y lo veia cada cliente de una joyeria de 280-730 EUR
+  // en cada carga: en una web de lujo se lee como que algo va mal.
+  const enLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+    || location.hostname.endsWith('.localhost');
+  if (!enLocal && !location.search.includes('namna_debug')) return;
+
   const existing = document.getElementById('data-source-badge');
   if (existing) existing.remove();
 

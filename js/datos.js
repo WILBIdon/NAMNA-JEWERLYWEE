@@ -44,6 +44,32 @@
   }
 
   /**
+   * Quita de un texto lo que podria escaparse de una plantilla HTML.
+   *
+   * El catalogo se pinta con `innerHTML` en unos 30 sitios de app.js y
+   * producto.js, metiendo el nombre, la categoria y la descripcion tanto
+   * en el cuerpo como dentro de atributos (alt="...") y de llamadas
+   * onclick('...'). Si alguien con acceso de escritura pusiera markup en
+   * esos campos, se ejecutaria en el navegador de cada visitante.
+   *
+   * Se limpia AQUI, en la unica puerta por la que entran los datos, en vez
+   * de escapar en los 30 puntos de salida: no hay forma de olvidarse de uno.
+   *
+   * No se escapan entidades (&amp;) porque estos mismos valores van tambien
+   * a document.title y a metaetiquetas, donde se verian literales. Se
+   * eliminan los angulos y se cambian las comillas por tipograficas, que en
+   * una web de joyeria ademas se leen mejor.
+   */
+  function limpiar(texto) {
+    if (texto === null || texto === undefined) return '';
+    return String(texto)
+      .replace(/[<>]/g, '')        // sin etiquetas: mata el vector de raiz
+      .replace(/"/g, '\u201d')      // no puede cerrar un atributo
+      .replace(/'/g, '\u2019')      // no puede cerrar un onclick('...')
+      .replace(/\u0000/g, '');
+  }
+
+  /**
    * Normaliza un producto al formato que ya usan app.js y producto.js:
    * descripcion y categoria son getters que siguen el idioma activo.
    */
@@ -53,14 +79,19 @@
       : [];
 
     const obj = {
-      id: item.id,
-      nombre: item.nombre || 'Producto sin nombre',
-      _descripcion_es: item.descripcion_es || '',
-      _descripcion_en: item.descripcion_en || item.descripcion_es || '',
-      _categoria_es: item.categoria_es || 'Joyería',
-      _categoria_en: item.categoria_en || item.categoria_es || 'Jewelry',
+      id: limpiar(item.id),
+      nombre: limpiar(item.nombre) || 'Producto sin nombre',
+      _descripcion_es: limpiar(item.descripcion_es),
+      _descripcion_en: limpiar(item.descripcion_en || item.descripcion_es),
+      _categoria_es: limpiar(item.categoria_es) || 'Joyería',
+      _categoria_en: limpiar(item.categoria_en || item.categoria_es) || 'Jewelry',
       precioPublico: Number(item.precio) || 0,
-      stock: (item.stock === null || item.stock === undefined) ? null : Number(item.stock),
+      // Apps Script convierte la celda vacia de Stock en 0. Si lo
+      // tomaramos al pie de la letra, al caer al respaldo los 17
+      // productos saldrian "Agotado" y con el boton de WhatsApp
+      // desactivado: el respaldo cerraria la tienda en vez de salvarla.
+      stock: (item.stock === null || item.stock === undefined || Number(item.stock) === 0)
+        ? null : Number(item.stock),
       visible: item.visible !== false,
       imagenes: imgs
     };
@@ -100,7 +131,10 @@
 
     const textos_es = {};
     const textos_en = {};
-    (textos || []).forEach(t => { textos_es[t.id] = t.es; textos_en[t.id] = t.en || t.es; });
+    (textos || []).forEach(t => {
+      textos_es[t.id] = limpiar(t.es);
+      textos_en[t.id] = limpiar(t.en || t.es);
+    });
 
     const imagenesSitio = {};
     (imgsSitio || []).forEach(i => { imagenesSitio[i.clave] = i.url; });
@@ -189,5 +223,5 @@
       : (CFG.CACHE_DURATION_FALLBACK_MS || 21600000);
   }
 
-  window.NAMNA_DATOS = { cargarCatalogo, desdeSupabase, desdeAppsScript, duracionCache, normalizar };
+  window.NAMNA_DATOS = { cargarCatalogo, desdeSupabase, desdeAppsScript, duracionCache, normalizar, limpiar };
 })();

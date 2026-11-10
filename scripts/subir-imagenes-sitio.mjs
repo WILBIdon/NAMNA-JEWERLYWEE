@@ -83,7 +83,7 @@ for (const h of HUECOS) {
 
   const r = await fetch(`${URL_SB}/storage/v1/object/productos/${ruta}`, {
     method: 'POST',
-    headers: { apikey: KEY_SB, Authorization: `Bearer ${KEY_SB}`, 'Content-Type': 'image/webp', 'x-upsert': 'true', 'cache-control': '31536000' },
+    headers: { apikey: KEY_SB, Authorization: `Bearer ${KEY_SB}`, 'Content-Type': 'image/webp', 'x-upsert': 'true', 'cache-control': 'public, max-age=31536000, immutable' },
     body: datos
   });
   if (!r.ok) { console.warn(`  ⚠ ${h.clave}: ${(await r.text()).slice(0, 120)}`); continue; }

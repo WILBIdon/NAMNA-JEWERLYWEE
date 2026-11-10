@@ -58,6 +58,12 @@ No hay tests, lint ni build. Sin `-s` en `serve`: esa bandera redirige `info.htm
 - Analítica preparada pero desactivada (IDs vacíos).
 - `panel.html` es estático: la página de login es pública aunque no se pueda entrar. Falta auth básica en el hosting.
 
+## Seguridad — lo aprendido
+
+- Escribir en la base exige estar en la tabla `admins`, no solo estar autenticado (`supabase/03-cerrar-escritura.sql`). El registro público de Supabase estuvo abierto: `authenticated` no es una credencial de confianza.
+- Los datos de la base se sanean en `limpiar()` de `js/datos.js`, en la frontera. El catálogo se pinta con `innerHTML` en ~30 sitios, incluidos atributos y `onclick`: escapar en los puntos de salida es inviable sin olvidarse de alguno.
+- Cualquier campo nuevo que venga de la base y acabe en el DOM debe pasar por `limpiar()`.
+
 ## Nada se borra
 
 Regla del proyecto: las operaciones destructivas archivan en vez de eliminar. Productos → pestaña `ARCHIVO_PRODUCTOS`. Fotos → subcarpeta `ARCHIVO` de Drive. Archivos del repo → `_archivo/`. Mantener este criterio en cualquier función nueva.

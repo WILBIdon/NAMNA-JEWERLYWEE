@@ -200,7 +200,7 @@ async function main() {
         bytesDespues += datos.length;
 
         const { error: errSubida } = await sb.storage.from(BUCKET)
-          .upload(ruta, datos, { contentType: tipo, upsert: true, cacheControl: '31536000' });
+          .upload(ruta, datos, { contentType: tipo, upsert: true, cacheControl: 'public, max-age=31536000, immutable' });
         if (errSubida) throw new Error(errSubida.message);
 
         const { data: pub } = sb.storage.from(BUCKET).getPublicUrl(ruta);
@@ -240,7 +240,7 @@ async function main() {
       if (DRY) { log(`   [dry] ${ruta}`); continue; }
       try {
         const { datos, tipo } = await optimizar(await descargar(urlOriginal(url)));
-        await sb.storage.from(BUCKET).upload(ruta, datos, { contentType: tipo, upsert: true, cacheControl: '31536000' });
+        await sb.storage.from(BUCKET).upload(ruta, datos, { contentType: tipo, upsert: true, cacheControl: 'public, max-age=31536000, immutable' });
         const { data: pub } = sb.storage.from(BUCKET).getPublicUrl(ruta);
         await sb.from('imagenes_sitio').upsert({ clave, url: pub.publicUrl, ruta }, { onConflict: 'clave' });
         log(`   ✓ ${clave}`);

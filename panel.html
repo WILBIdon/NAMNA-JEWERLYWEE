@@ -501,7 +501,7 @@ async function subirArchivo(ruta, blob) {
       Authorization: `Bearer ${tk}`,
       'Content-Type': blob.type || 'image/webp',
       'x-upsert': 'true',
-      'cache-control': '31536000'
+      'cache-control': 'public, max-age=31536000, immutable'
     },
     body: blob
   });
