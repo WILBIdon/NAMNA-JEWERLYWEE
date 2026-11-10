@@ -138,6 +138,14 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
   nav{top:53px}
   main{padding:1rem}
 }
+/* Textos agrupados por ubicación */
+.grupo{margin-bottom:1.6rem}
+.grupo>h3{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--verde);font-weight:700;padding-bottom:.4rem;border-bottom:1px solid var(--borde);margin-bottom:.8rem}
+.grupo>h3 .meta{font-weight:400;letter-spacing:.04em;text-transform:none}
+.sub-seccion{font-size:11.5px;color:var(--txt-mut);margin:.9rem 0 .4rem}
+.sub-seccion::before{content:"↳ ";opacity:.5}
+.chip.papel{background:var(--naranja-sv);color:var(--naranja);font-weight:500}
+.donde{font-size:12px;color:var(--txt-mut);margin:.45rem 0 0;line-height:1.5}
 .foto[draggable]{cursor:grab}
 .foto[draggable]:active{cursor:grabbing}
 #quien{font-family:var(--sans)}
@@ -210,7 +218,8 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
     <!-- Textos -->
     <section class="panel" id="p-textos">
       <div class="nota">
-        Los textos de la web, en español y en inglés. Se guardan uno a uno y el cambio es inmediato.
+        Cada texto lleva escrito dónde sale. Están ordenados como los encuentra un visitante:
+        la portada de arriba abajo, y luego el resto de páginas.
       </div>
       <div class="barra">
         <input class="campo" type="search" id="buscar-texto" placeholder="Buscar texto o ID…">
@@ -544,7 +553,7 @@ async function cargar() {
   try {
     const [productos, textos] = await Promise.all([
       dbGet('productos?select=*,imagenes(id,ruta,url,orden,archivada)&order=orden.asc,creado_en.desc'),
-      dbGet('textos?select=id,es,en&order=id.asc')
+      dbGet('textos?select=id,es,en,nota,pagina,seccion,papel,orden_ui&order=orden_ui.asc,id.asc')
     ]);
     productos.forEach(p => {
       // PostgREST devuelve `numeric` como cadena ("590.00"): si no lo
@@ -840,22 +849,53 @@ document.getElementById('btn-archivar').onclick = async function () {
 };
 
 /* ── Textos ─────────────────────────────────────────────────── */
+/* Agrupados por la página donde salen y en el orden en que un
+   visitante los encuentra, no por el ID, que no le dice nada a nadie. */
 function pintarTextos() {
   const q = document.getElementById('buscar-texto').value.trim().toLowerCase();
-  const lista = DATOS.textos.filter(t => !q || (t.id + ' ' + t.es + ' ' + t.en).toLowerCase().includes(q));
+  const lista = DATOS.textos.filter(t => !q ||
+    (t.id + ' ' + t.es + ' ' + t.en + ' ' + (t.pagina||'') + ' ' + (t.seccion||'') + ' ' + (t.papel||''))
+      .toLowerCase().includes(q));
   const cont = document.getElementById('lista-textos');
   if (!lista.length) { cont.innerHTML = '<div class="vacio">Ningún texto coincide.</div>'; return; }
 
-  cont.innerHTML = lista.map(t =>
-    '<div class="texto-item" data-id="' + esc(t.id) + '">' +
-      '<div style="display:flex;align-items:center;gap:.8rem">' +
-        '<span class="id">' + esc(t.id) + '</span><div style="flex:1"></div>' +
-        '<button class="btn sec peq guardar-texto" disabled>Guardar</button>' +
-      '</div>' +
-      '<div class="par">' +
-        '<div><label>Español</label><textarea class="campo es" rows="2">' + esc(t.es) + '</textarea></div>' +
-        '<div><label>English</label><textarea class="campo en" rows="2">' + esc(t.en) + '</textarea></div>' +
-      '</div></div>').join('');
+  // Agrupar por página conservando el orden de llegada
+  const grupos = new Map();
+  lista.forEach(t => {
+    const clave = t.pagina || 'Sin ubicar';
+    if (!grupos.has(clave)) grupos.set(clave, []);
+    grupos.get(clave).push(t);
+  });
+
+  let html = '';
+  for (const [pagina, textos] of grupos) {
+    html += '<div class="grupo"><h3>' + esc(pagina) +
+            '<span class="meta"> · ' + textos.length + ' texto' + (textos.length === 1 ? '' : 's') + '</span></h3>';
+
+    let seccionActual = null;
+    for (const t of textos) {
+      const sec = t.seccion || '—';
+      if (sec !== seccionActual) {
+        seccionActual = sec;
+        html += '<div class="sub-seccion">' + esc(sec) + '</div>';
+      }
+      html +=
+        '<div class="texto-item" data-id="' + esc(t.id) + '">' +
+          '<div style="display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap">' +
+            (t.papel ? '<span class="chip papel">' + esc(t.papel) + '</span>' : '') +
+            '<span class="id">' + esc(t.id) + '</span>' +
+            '<div style="flex:1"></div>' +
+            '<button class="btn sec peq guardar-texto" disabled>Guardar</button>' +
+          '</div>' +
+          (t.nota ? '<p class="donde">' + esc(t.nota) + '</p>' : '') +
+          '<div class="par">' +
+            '<div><label>Español</label><textarea class="campo es" rows="2">' + esc(t.es) + '</textarea></div>' +
+            '<div><label>English</label><textarea class="campo en" rows="2">' + esc(t.en) + '</textarea></div>' +
+          '</div></div>';
+    }
+    html += '</div>';
+  }
+  cont.innerHTML = html;
 
   cont.querySelectorAll('.texto-item').forEach(div => {
     const id = div.dataset.id;
@@ -869,7 +909,7 @@ function pintarTextos() {
         const t = DATOS.textos.find(x => x.id === id);
         t.es = ta[0].value; t.en = ta[1].value;
         btn.classList.add('sec');
-        aviso('Texto ' + id + ' actualizado.', 'ok');
+        aviso('Texto actualizado.', 'ok');
       } catch (e) { aviso(e.message, 'err'); btn.disabled = false; }
       btn.textContent = 'Guardar';
     };

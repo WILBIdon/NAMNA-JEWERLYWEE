@@ -84,9 +84,16 @@ create table if not exists public.textos (
   id             text        primary key,       -- 'TXT-001'
   es             text        not null default '',
   en             text        not null default '',
-  nota           text,                          -- dónde se usa, para quien edite
+  nota           text,                          -- frase legible para quien edita
+  pagina         text,                          -- en qué página(s) sale
+  seccion        text,                          -- Cabecera, Hero, Pie de página…
+  papel          text,                          -- Titular, Botón, Enlace del menú…
+  orden_ui       integer     not null default 9000,
   actualizado_en timestamptz not null default now()
 );
+
+-- Las 4 últimas las rellena scripts/mapear-textos.mjs leyendo los HTML.
+create index if not exists textos_orden_idx on public.textos (orden_ui);
 
 drop trigger if exists textos_tocar on public.textos;
 create trigger textos_tocar before update on public.textos

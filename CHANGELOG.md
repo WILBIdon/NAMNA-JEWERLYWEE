@@ -11,6 +11,16 @@
 
 ---
 
+## 2026-11-10 — Los textos dicen dónde van
+
+- **feat:** `scripts/mapear-textos.mjs` — recorre los HTML, localiza cada `data-txt` y deduce en qué página sale, en qué zona, qué papel cumple y si se repite. Lo vuelca en `textos.pagina/seccion/papel/nota/orden_ui`. No hay nada escrito a mano: si un texto cambia de sitio en el código, se vuelve a ejecutar.
+- **feat:** la pestaña de textos del panel se agrupa por página y sigue el recorrido real de la web, no el orden del ID. Cada texto lleva su etiqueta de papel y una frase de dónde va. El buscador entiende «pie de página» o «botón».
+- **feat:** los textos que ya no aparecen en ningún HTML se marcan «Sin usar».
+- **feat:** `supabase/02-textos-ubicacion.sql` — las 4 columnas nuevas.
+- Detectado al mapear: la detección de sección tenía que ser estructural. Por el último `<h2>`, los enlaces del pie heredaban el título de la sección anterior («Mis Favoritos»). Y un `<span data-txt>` dentro de un `<a class="btn">` salía como párrafo: ahora se mira el contenedor.
+
+---
+
 ## 2026-11-09 (noche) — Panel sobre Supabase
 
 - **feat:** `panel.html` reescrito contra Supabase. Auth propia (email + contraseña) con token JWT renovado solo, CRUD sobre Postgres y subida a Storage. El panel anterior queda en `_archivo/panel-v1-appsscript.html`.

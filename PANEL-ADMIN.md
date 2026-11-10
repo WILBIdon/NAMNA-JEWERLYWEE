@@ -31,6 +31,7 @@ Sin eso, el panel dirá *«Email o contraseña incorrectos»* por mucho que la e
 | Reordenar fotos | Arrastrando; reescribe `imagenes.orden` |
 | Quitar foto | `imagenes.archivada = true` (el archivo se conserva) |
 | Editar textos | Tabla `textos`, columnas `es` y `en` |
+| Ver dónde va cada texto | Columnas `pagina`, `seccion`, `papel`, `nota` (las rellena `scripts/mapear-textos.mjs`) |
 | Exportar CSV | Descarga, no escribe nada |
 
 ### Las fotos se optimizan solas
@@ -40,6 +41,22 @@ Comprobado: un PNG de 82 KB sale a 10 KB; los originales de 5-6 MB quedan en tor
 No hace falta que prepares nada: arrastra la foto tal cual salga de la cámara.
 
 La primera foto es la principal, la de la tarjeta. Para cambiarla, arrastra otra al primer puesto.
+
+### Los textos dicen dónde van
+
+La pestaña de textos no enseña una lista de `TXT-001`, `TXT-002`… sin más. Cada uno viene con:
+
+- **En qué página sale** — y están agrupados por eso.
+- **En qué zona** — Cabecera, Hero, Pie de página, la sección concreta…
+- **Qué es** — Titular principal, Botón, Enlace del menú, Párrafo…
+- **Un aviso si se repite**, por ejemplo «Se repite en 3 páginas. Sale 6 veces (menú de escritorio y de móvil)». Eso importa: cambiarlo lo cambia en todos los sitios a la vez.
+
+El orden no es el del ID, es **el del recorrido real de la web**: primero la portada de arriba abajo,
+luego el resto. Y el buscador entiende «pie de página» o «botón», no solo el ID.
+
+Esa información no está escrita a mano: `scripts/mapear-textos.mjs` lee los `data-txt` de los HTML y
+la deduce. Si mueves un texto de sitio en el código, vuelve a ejecutarlo y se actualiza sola.
+Los textos que ya no aparecen en ninguna página se marcan como **«Sin usar»**.
 
 ### Sobre el ID
 
