@@ -128,8 +128,14 @@ for (const pag of PAGINAS) {
       const envoltorio = [...anterior.matchAll(/<(a|button|h[1-6]|label)([^>]*)>/gi)].pop();
       if (envoltorio) { tagEfectiva = envoltorio[1].toLowerCase(); atrsEfectivos = envoltorio[2]; }
     }
-    const papel   = papelDe(tagEfectiva, atrsEfectivos);
+    let papel     = papelDe(tagEfectiva, atrsEfectivos);
     const seccion = seccionDe(html, m.index);
+
+    // Un <a> sin clase dentro de <nav> es un enlace del menú: decirlo
+    // así es más útil para quien edita que un «Enlace» a secas.
+    if (papel === 'Enlace' && dentroDe(html.slice(0, m.index), 'nav')) {
+      papel = 'Enlace del menú';
+    }
     const ahora   = contenidoDe(html, m.index, tag);
 
     if (!mapa.has(id)) {
