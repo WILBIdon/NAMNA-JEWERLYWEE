@@ -11,6 +11,20 @@
 
 ---
 
+## 2026-11-09 (noche) — Panel sobre Supabase
+
+- **feat:** `panel.html` reescrito contra Supabase. Auth propia (email + contraseña) con token JWT renovado solo, CRUD sobre Postgres y subida a Storage. El panel anterior queda en `_archivo/panel-v1-appsscript.html`.
+- **feat:** las fotos se reducen a 1400 px y se convierten a **WebP en el navegador** antes de subirlas. Medido: PNG de 82 KB → 10 KB.
+- **feat:** reordenar fotos arrastrando; la primera es la principal.
+- **feat:** filtro «Archivados» con botón de restaurar, y exportación a CSV del catálogo.
+- **refactor:** desaparecen `configurarAdmin()`, el sistema de tokens de sesión hecho a mano y la dependencia de Apps Script para escribir.
+- **fix:** PostgREST devuelve `numeric` como cadena (`"590.00"`); sin convertir, llegaba así a un `input type=number` con `step=1`.
+
+### Seguridad verificada contra la base real
+Con la clave pública que va en el JavaScript del sitio: `UPDATE` no cambia nada, `DELETE` no borra, `INSERT` rechazado (401), textos intactos, Storage rechaza subidas (400) y los productos ocultos o archivados son invisibles. El `HTTP 204` de PostgREST en escrituras anónimas es «0 filas afectadas», no éxito: comprobado leyendo el dato después.
+
+---
+
 ## 2026-11-09 (tarde) — Migración a Supabase, fase 1
 
 - **feat:** `supabase/schema.sql` — esquema Postgres con `productos`, `imagenes`, `textos`, `imagenes_sitio`, la vista `catalogo` y políticas RLS (lectura pública solo de lo visible, escritura solo autenticada). Columnas `archivado`/`archivada` en vez de borrado. Campos nuevos: `orden`, `precio_mayorista`, fechas.

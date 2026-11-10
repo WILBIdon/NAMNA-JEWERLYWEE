@@ -22,8 +22,8 @@ Sustituir la Hoja de Google y Drive por Postgres y Storage, sin dejar de poder v
 | Esquema aplicado en la base | ✅ 4 tablas, 1 vista, 12 políticas, 1 bucket |
 | Datos migrados | ✅ 17 productos · 60 fotos · 47 textos · 0 fallos |
 | Sitio leyendo de Supabase | ✅ Portada y ficha de producto, 0 peticiones a Google |
-| Panel (`panel.html`) contra Supabase + Auth | ⏳ Pendiente |
-| Fotos en WebP al subir desde el panel | ⏳ Pendiente |
+| Panel (`panel.html`) contra Supabase + Auth | ✅ Hecho — falta crear el usuario |
+| Fotos en WebP al subir desde el panel | ✅ Hecho (canvas, 1400 px) |
 
 **Ahora mismo el sitio funciona exactamente igual que antes.** Mientras `SUPABASE_URL` esté vacío en
 `js/config.js`, todo sigue yendo por Apps Script. La migración se activa rellenando dos valores.
@@ -149,15 +149,13 @@ una reejecución no lo reintroduzca.
 
 ## Lo que falta
 
-1. **Panel contra Supabase.** Hoy `panel.html` escribe en la Hoja vía Apps Script. Hay que cambiarlo
-   a Supabase Auth (email + contraseña) y a escrituras sobre Postgres y Storage. Con eso desaparece
-   el sistema de tokens hecho a mano y `configurarAdmin()`.
-2. **WebP al subir desde el panel**, redimensionando en el navegador con canvas antes de enviar.
-   Son unas 30 líneas y es donde está la mayor parte de la ganancia de peso a futuro.
-3. **Exportar a CSV** desde el panel, para que el catálogo se pueda seguir mirando en una hoja.
-4. **Mover el frontend a un CDN europeo** (Cloudflare Pages o Vercel). Hoy se sirve desde Railway en
+1. **Crear el usuario del panel** en Authentication → Users. Es lo único que falta para usarlo.
+2. **Mover el frontend a un CDN europeo** (Cloudflare Pages o Vercel). Hoy se sirve desde Railway en
    Miami: `x-railway-edge: mia1`, 122 ms de TTFB. Nada que ver con Supabase, pero es la otra mitad
    del problema de velocidad.
+3. **Retirar Apps Script** cuando lleve unas semanas estable.
+4. **Cabeceras de seguridad reales**: `X-Frame-Options` y `frame-ancestors` están como `<meta>` y el
+   navegador las ignora. Solo valen como cabecera HTTP, configuradas en el hosting.
 
 ---
 

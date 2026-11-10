@@ -138,7 +138,11 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
   nav{top:53px}
   main{padding:1rem}
 }
+.foto[draggable]{cursor:grab}
+.foto[draggable]:active{cursor:grabbing}
+#quien{font-family:var(--sans)}
 </style>
+
 </head>
 <body>
 
@@ -147,6 +151,10 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
   <form class="caja-login" id="form-login">
     <h1>NAMNA</h1>
     <p class="sub">Panel de gestión</p>
+    <div style="text-align:left;margin-bottom:.9rem">
+      <label for="email">Email</label>
+      <input class="campo" type="email" id="email" autocomplete="username" required>
+    </div>
     <div style="text-align:left;margin-bottom:1rem">
       <label for="clave">Contraseña</label>
       <input class="campo" type="password" id="clave" autocomplete="current-password" required>
@@ -154,7 +162,7 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
     <button class="btn" type="submit" id="btn-entrar" style="width:100%">Entrar</button>
     <p id="login-err" style="color:var(--err);font-size:12.5px;margin:.9rem 0 0;display:none"></p>
     <p style="font-size:11px;color:var(--txt-mut);margin:1.5rem 0 0;line-height:1.6">
-      La contraseña se valida en el servidor.<br>La sesión caduca a las 2 horas.
+      Autenticación de Supabase.<br>La sesión se renueva sola mientras tengas la pestaña abierta.
     </p>
   </form>
 </div>
@@ -164,7 +172,7 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
   <header>
     <div class="marca">NAMNA<small>Panel de gestión</small></div>
     <div class="espacio"></div>
-    <button class="btn peq" id="btn-publicar" title="Vacía la caché del servidor y del navegador para que los cambios se vean ya">Publicar cambios</button>
+    <span id="quien" style="font-size:11px;opacity:.65"></span>
     <button class="btn peq" id="btn-recargar">Recargar</button>
     <button class="btn peq" id="btn-salir">Salir</button>
   </header>
@@ -178,13 +186,20 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
   <main>
     <!-- Productos -->
     <section class="panel activo" id="p-productos">
+      <div class="nota" id="aviso-directo">
+        Los cambios se guardan en la base al instante y se ven en la web al recargar.
+        Ya no hay que «publicar» nada.
+        <button class="btn txt" id="btn-cache" style="color:var(--verde)">Limpiar mi caché local</button>
+      </div>
       <div class="barra">
         <input class="campo" type="search" id="buscar" placeholder="Buscar por nombre, ID o categoría…">
         <select class="campo" id="filtro" style="width:auto">
           <option value="todos">Todos</option>
           <option value="visibles">Solo publicados</option>
           <option value="ocultos">Solo ocultos</option>
+          <option value="archivados">Archivados</option>
         </select>
+        <button class="btn sec" id="btn-csv">Exportar CSV</button>
         <button class="btn acc" id="btn-nuevo">+ Nuevo producto</button>
       </div>
       <div class="tabla" id="tabla-productos">
@@ -195,8 +210,7 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
     <!-- Textos -->
     <section class="panel" id="p-textos">
       <div class="nota">
-        Son los textos de la pestaña <code>TEXTOS</code> de la hoja. Cada uno tiene su versión en español y en inglés.
-        Al guardar se vacía la caché, así que el cambio se ve en la web al recargar.
+        Los textos de la web, en español y en inglés. Se guardan uno a uno y el cambio es inmediato.
       </div>
       <div class="barra">
         <input class="campo" type="search" id="buscar-texto" placeholder="Buscar texto o ID…">
@@ -207,34 +221,34 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
     <!-- Ayuda -->
     <section class="panel" id="p-ayuda">
       <div class="nota">
-        Este panel escribe directamente en la Hoja Maestra y en Drive. <strong>Nada se borra de forma definitiva:</strong>
-        al eliminar un producto se mueve a la pestaña <code>ARCHIVO_PRODUCTOS</code> y al quitar una foto se mueve a la
-        subcarpeta <code>ARCHIVO</code> de Drive. Todo es recuperable a mano.
+        Este panel escribe en Supabase (Postgres + Storage). <strong>Nada se borra:</strong>
+        eliminar un producto o una foto solo los marca como archivados; la fila y el archivo
+        siguen ahí y se pueden recuperar.
       </div>
       <div class="texto-item">
         <h3 style="font-size:1.2rem;margin-bottom:.6rem">Qué hace cada cosa</h3>
         <ul style="margin:0;padding-left:1.1rem;line-height:1.9;font-size:13px">
           <li><strong>Interruptor verde</strong> — publica o retira el producto de la web al instante.</li>
           <li><strong>Editar</strong> — nombre, precio, stock, categoría y descripción en los dos idiomas, más las fotos.</li>
-          <li><strong>Nuevo producto</strong> — crea una fila nueva en la hoja. El ID debe ser único y es el que enlaza las fotos de Drive.</li>
-          <li><strong>Fotos</strong> — la primera que subas es la principal; las siguientes se numeran <code>-1</code>, <code>-2</code>… y forman la galería.</li>
-          <li><strong>Publicar cambios</strong> — fuerza el refresco. Sin esto, un cambio tarda hasta 6 h en verse.</li>
+          <li><strong>Nuevo producto</strong> — el ID debe ser único; es lo que aparece en la URL de la ficha.</li>
+          <li><strong>Fotos</strong> — se convierten a WebP y se reducen a 1400&nbsp;px en tu navegador antes de subirlas. La primera es la principal.</li>
+          <li><strong>Stock vacío</strong> — sin control de inventario. <strong>0</strong> — se muestra «Agotado».</li>
+          <li><strong>Archivados</strong> — el filtro los enseña y desde ahí se pueden devolver.</li>
         </ul>
       </div>
       <div class="texto-item">
         <h3 style="font-size:1.2rem;margin-bottom:.6rem">Si algo falla</h3>
-        <p style="font-size:13px;margin:0 0 .5rem">Casi siempre es una de estas tres:</p>
         <ul style="margin:0;padding-left:1.1rem;line-height:1.9;font-size:13px">
-          <li><strong>«Sesión caducada»</strong> — han pasado 2 h. Vuelve a entrar.</li>
-          <li><strong>«Falta ejecutar configurarAdmin»</strong> — el Apps Script aún no tiene contraseña. Ver <code>PANEL-ADMIN.md</code>.</li>
-          <li><strong>El cambio no se ve en la web</strong> — pulsa «Publicar cambios» y recarga con Ctrl/Cmd + Shift + R.</li>
+          <li><strong>«Invalid login credentials»</strong> — email o contraseña mal, o el usuario no existe aún en Supabase (Authentication → Users).</li>
+          <li><strong>El cambio no se ve en la web</strong> — tu navegador guarda el catálogo 10 min. «Limpiar mi caché local» y recarga.</li>
+          <li><strong>Una foto recién subida no aparece</strong> — recarga la ficha; la URL es inmediata, no hay espera de propagación.</li>
         </ul>
       </div>
       <div class="texto-item">
         <h3 style="font-size:1.2rem;margin-bottom:.6rem">Herramientas técnicas</h3>
         <p style="font-size:13px;margin:0">
-          El panel antiguo con la documentación de las hojas, el código del servidor y la prueba de API sigue disponible en
-          <a href="admin.html">admin.html</a>.
+          El panel antiguo con la documentación de las hojas sigue en <a href="admin.html">admin.html</a>,
+          pero escribe en Google Sheets, que <strong>ya no alimenta la web</strong>. No lo uses para editar.
         </p>
       </div>
     </section>
@@ -250,7 +264,7 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
         <div>
           <label for="f-id">ID del producto *</label>
           <input class="campo" id="f-id" placeholder="N. Ruby D">
-          <p class="meta" id="aviso-id" style="margin:.3rem 0 0">Enlaza con el nombre de las fotos en Drive.</p>
+          <p class="meta" id="aviso-id" style="margin:.3rem 0 0"></p>
         </div>
         <div>
           <label for="f-nombre">Nombre visible</label>
@@ -289,10 +303,10 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
           </label>
         </div>
         <div class="ancho">
-          <label>Fotos</label>
+          <label>Fotos <span class="meta" style="text-transform:none;letter-spacing:0">— la primera es la principal; arrástralas para reordenar</span></label>
           <div class="fotos" id="f-fotos"></div>
           <div class="soltar" id="zona-foto" style="margin-top:.6rem">
-            Arrastra una imagen aquí o haz clic para elegirla
+            Arrastra imágenes aquí o haz clic para elegirlas
             <input type="file" id="input-foto" accept="image/*" multiple hidden>
           </div>
           <p class="meta" id="estado-foto" style="margin:.4rem 0 0"></p>
@@ -309,74 +323,105 @@ main{max-width:1180px;margin:0 auto;padding:1.5rem}
 </div>
 
 <div id="avisos"></div>
-
+<script src="js/config.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   NAMNA · Panel de gestión — cliente
-   La contraseña NO vive aquí: se valida en Apps Script (doPost).
+   NAMNA · Panel de gestión — cliente sobre Supabase
+
+   Auth, Postgres y Storage por REST con fetch a pelo, sin cargar la
+   librería de Supabase. La clave publicable es pública por diseño:
+   lo que protege los datos es el RLS, que exige sesión para escribir.
+
+   Nada se borra: archivar marca `archivado`/`archivada` y la fila y
+   el archivo siguen ahí.
    ═══════════════════════════════════════════════════════════════ */
-const API = 'https://script.google.com/macros/s/AKfycbxw6YuRZnb-xskmMK3lMn3DpPczY77gE8vm9m-u69_Avfg3Iv2pNtlMskxSwnVVmIGT/exec';
-const LLAVE_SESION = 'namna_panel_token';
+'use strict';
 
-let TOKEN = sessionStorage.getItem(LLAVE_SESION) || null;
+const CFG   = window.NAMNA_CONFIG || {};
+const URL_SB = CFG.SUPABASE_URL;
+const ANON   = CFG.SUPABASE_ANON_KEY;
+const BUCKET = 'productos';
+const ANCHO_MAX = 1400;
+const CALIDAD = 0.82;
+const LLAVE = 'namna_panel_sesion';
+
+let SESION = null;              // { access_token, refresh_token, expires_at, email }
 let DATOS = { productos: [], textos: [] };
-let EDITANDO = null;   // producto en edición, o null si es nuevo
+let EDITANDO = null;
 
-/* ── Transporte ──
-   text/plain evita el preflight CORS, que Apps Script no responde. */
-async function llamar(accion, extra = {}) {
-  const r = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ accion, token: TOKEN }, extra))
-  });
-  const texto = await r.text();
-  let datos;
-  try { datos = JSON.parse(texto); }
-  catch (e) { throw new Error('Respuesta inesperada del servidor. ¿Está implementada la última versión del Apps Script?'); }
-  if (datos.error === 'SESION_INVALIDA') { cerrarSesion(true); throw new Error(datos.mensaje); }
-  return datos;
-}
+/* ── Utilidades ── */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur = n => new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(n || 0);
+const slug = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'producto';
 
 function aviso(msg, tipo = '') {
   const d = document.createElement('div');
   d.className = 'aviso ' + tipo;
   d.textContent = msg;
   document.getElementById('avisos').appendChild(d);
-  setTimeout(() => { d.style.opacity = '0'; d.style.transition = '.3s'; setTimeout(() => d.remove(), 300); }, 3600);
+  setTimeout(() => { d.style.opacity = '0'; d.style.transition = '.3s'; setTimeout(() => d.remove(), 300); }, 3800);
 }
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const eur = n => new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 }).format(n || 0);
 
-/* ── Sesión ── */
-document.getElementById('form-login').addEventListener('submit', async ev => {
-  ev.preventDefault();
-  const btn = document.getElementById('btn-entrar');
-  const err = document.getElementById('login-err');
-  const clave = document.getElementById('clave').value;
-  btn.disabled = true; btn.innerHTML = '<span class="cargando"></span> Comprobando…';
-  err.style.display = 'none';
-  try {
-    const r = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ accion: 'login', password: clave })
-    }).then(x => x.json());
-    if (!r.ok) throw new Error(r.mensaje || 'No se pudo entrar.');
-    TOKEN = r.token;
-    sessionStorage.setItem(LLAVE_SESION, TOKEN);
-    document.getElementById('clave').value = '';
-    abrirApp();
-  } catch (e) {
-    err.textContent = e.message; err.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = 'Entrar';
-  }
-});
+/* ── Sesión ─────────────────────────────────────────────────── */
+function guardarSesion(s) {
+  SESION = s;
+  try { sessionStorage.setItem(LLAVE, JSON.stringify(s)); } catch (e) {}
+}
+function leerSesion() {
+  try { return JSON.parse(sessionStorage.getItem(LLAVE) || 'null'); } catch (e) { return null; }
+}
+function normalizarSesion(d, email) {
+  return {
+    access_token: d.access_token,
+    refresh_token: d.refresh_token,
+    // 60 s de margen para no usar un token que caduca a mitad de la petición
+    expires_at: Date.now() + ((d.expires_in || 3600) - 60) * 1000,
+    email: (d.user && d.user.email) || email || ''
+  };
+}
 
-function cerrarSesion(caducada) {
-  TOKEN = null;
-  sessionStorage.removeItem(LLAVE_SESION);
+async function entrar(email, password) {
+  const r = await fetch(`${URL_SB}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { apikey: ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(traducirError(d));
+  guardarSesion(normalizarSesion(d, email));
+}
+
+async function renovar() {
+  if (!SESION || !SESION.refresh_token) throw new Error('sin sesión');
+  const r = await fetch(`${URL_SB}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: { apikey: ANON, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: SESION.refresh_token })
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error('sesión caducada');
+  guardarSesion(normalizarSesion(d, SESION.email));
+}
+
+/** Devuelve un access_token válido, renovándolo si está a punto de caducar. */
+async function token() {
+  if (!SESION) throw new Error('sin sesión');
+  if (Date.now() >= SESION.expires_at) await renovar();
+  return SESION.access_token;
+}
+
+function traducirError(d) {
+  const m = (d && (d.error_description || d.msg || d.message || d.error)) || 'Error desconocido';
+  if (/invalid login credentials/i.test(m)) return 'Email o contraseña incorrectos.';
+  if (/email not confirmed/i.test(m))       return 'El usuario existe pero no está confirmado. Confírmalo en Supabase → Authentication → Users.';
+  if (/rate limit|too many/i.test(m))       return 'Demasiados intentos. Espera un minuto.';
+  return m;
+}
+
+function salir(caducada) {
+  SESION = null;
+  try { sessionStorage.removeItem(LLAVE); } catch (e) {}
   document.getElementById('app').style.display = 'none';
   document.getElementById('login').style.display = 'grid';
   if (caducada) {
@@ -385,38 +430,144 @@ function cerrarSesion(caducada) {
     err.style.display = 'block';
   }
 }
-document.getElementById('btn-salir').onclick = () => cerrarSesion(false);
+
+/* ── Postgres (PostgREST) ───────────────────────────────────── */
+async function db(ruta, opciones = {}) {
+  const tk = await token();
+  const r = await fetch(`${URL_SB}/rest/v1/${ruta}`, {
+    ...opciones,
+    headers: {
+      apikey: ANON,
+      Authorization: `Bearer ${tk}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...(opciones.headers || {})
+    }
+  });
+  if (r.status === 401) { salir(true); throw new Error('Sesión caducada.'); }
+  const texto = await r.text();
+  let datos = null;
+  if (texto) { try { datos = JSON.parse(texto); } catch (e) { datos = texto; } }
+  if (!r.ok) {
+    const msg = (datos && (datos.message || datos.hint || datos.details)) || `HTTP ${r.status}`;
+    throw new Error(msg);
+  }
+  return datos;
+}
+
+const dbGet    = ruta => db(ruta);
+const dbInsert = (tabla, fila) => db(tabla, { method: 'POST',  headers: { Prefer: 'return=representation' }, body: JSON.stringify(fila) });
+const dbUpdate = (ruta, campos) => db(ruta, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(campos) });
+
+/* ── Storage ────────────────────────────────────────────────── */
+const urlPublica = ruta => `${URL_SB}/storage/v1/object/public/${BUCKET}/${ruta}`;
+
+async function subirArchivo(ruta, blob) {
+  const tk = await token();
+  const r = await fetch(`${URL_SB}/storage/v1/object/${BUCKET}/${ruta}`, {
+    method: 'POST',
+    headers: {
+      apikey: ANON,
+      Authorization: `Bearer ${tk}`,
+      'Content-Type': blob.type || 'image/webp',
+      'x-upsert': 'true',
+      'cache-control': '31536000'
+    },
+    body: blob
+  });
+  if (!r.ok) {
+    let msg = `HTTP ${r.status}`;
+    try { const d = await r.json(); msg = d.message || d.error || msg; } catch (e) {}
+    throw new Error(msg);
+  }
+  return urlPublica(ruta);
+}
+
+/**
+ * Reduce a 1400 px y convierte a WebP en el navegador antes de subir.
+ * Sin esto, cada foto nueva entraría pesando lo que salga de la cámara:
+ * las originales de Drive eran PNG de 5-6 MB.
+ */
+function aWebp(archivo) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(archivo);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const escala = Math.min(1, ANCHO_MAX / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * escala);
+      const h = Math.round(img.naturalHeight * escala);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      c.toBlob(
+        b => b ? resolve({ blob: b, ancho: w, alto: h })
+               : reject(new Error('el navegador no pudo convertir la imagen')),
+        'image/webp', CALIDAD
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('no es una imagen válida')); };
+    img.src = url;
+  });
+}
+
+/* ── Login ──────────────────────────────────────────────────── */
+document.getElementById('form-login').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const btn = document.getElementById('btn-entrar');
+  const err = document.getElementById('login-err');
+  btn.disabled = true; btn.innerHTML = '<span class="cargando"></span> Comprobando…';
+  err.style.display = 'none';
+  try {
+    await entrar(document.getElementById('email').value.trim(), document.getElementById('clave').value);
+    document.getElementById('clave').value = '';
+    await abrirApp();
+  } catch (e) {
+    err.textContent = e.message; err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+});
+document.getElementById('btn-salir').onclick = () => salir(false);
 
 async function abrirApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  document.getElementById('quien').textContent = SESION.email;
   await cargar();
 }
 
-/* ── Carga de datos ── */
+/* ── Carga ──────────────────────────────────────────────────── */
 async function cargar() {
   try {
-    const r = await llamar('listar');
-    if (!r.ok) { aviso(r.mensaje, 'err'); return; }
-    DATOS = r;
-    document.getElementById('n-productos').textContent = '(' + r.productos.length + ')';
-    document.getElementById('n-textos').textContent = '(' + r.textos.length + ')';
+    const [productos, textos] = await Promise.all([
+      dbGet('productos?select=*,imagenes(id,ruta,url,orden,archivada)&order=orden.asc,creado_en.desc'),
+      dbGet('textos?select=id,es,en&order=id.asc')
+    ]);
+    productos.forEach(p => {
+      // PostgREST devuelve `numeric` como cadena ("590.00"): si no lo
+      // convertimos, el input type=number recibe "590.00" con step=1.
+      p.precio = Number(p.precio) || 0;
+      if (p.stock !== null && p.stock !== undefined) p.stock = Number(p.stock);
+      p.imagenes = (p.imagenes || []).filter(i => !i.archivada).sort((a, b) => a.orden - b.orden);
+    });
+    DATOS = { productos, textos };
+    document.getElementById('n-productos').textContent = '(' + productos.filter(p => !p.archivado).length + ')';
+    document.getElementById('n-textos').textContent = '(' + textos.length + ')';
     pintarProductos();
     pintarTextos();
     rellenarCategorias();
   } catch (e) { aviso(e.message, 'err'); }
 }
+
 document.getElementById('btn-recargar').onclick = async function () {
   this.disabled = true; await cargar(); this.disabled = false; aviso('Datos recargados.', 'ok');
 };
-document.getElementById('btn-publicar').onclick = async function () {
-  this.disabled = true; this.innerHTML = '<span class="cargando"></span> Publicando…';
-  try {
-    const r = await llamar('invalidar');
-    try { localStorage.removeItem('namna_catalog'); } catch (e) {}
-    aviso(r.ok ? 'Cambios publicados. Recarga la web para verlos.' : r.mensaje, r.ok ? 'ok' : 'err');
-  } catch (e) { aviso(e.message, 'err'); }
-  this.disabled = false; this.textContent = 'Publicar cambios';
+document.getElementById('btn-cache').onclick = function () {
+  try { localStorage.removeItem('namna_catalog'); } catch (e) {}
+  aviso('Caché local limpiada. Recarga la web para ver los cambios.', 'ok');
 };
 
 /* ── Pestañas ── */
@@ -425,25 +576,25 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('activo', p.id === b.dataset.panel));
 });
 
-/* ── Lista de productos ── */
+/* ── Lista de productos ─────────────────────────────────────── */
 function productosFiltrados() {
   const q = document.getElementById('buscar').value.trim().toLowerCase();
   const f = document.getElementById('filtro').value;
   return DATOS.productos.filter(p => {
+    if (f === 'archivados') { if (!p.archivado) return false; }
+    else if (p.archivado) return false;
     if (f === 'visibles' && !p.visible) return false;
     if (f === 'ocultos'  &&  p.visible) return false;
     if (!q) return true;
-    return (p.id + ' ' + p.nombre + ' ' + p.cat_es + ' ' + p.cat_en).toLowerCase().includes(q);
+    return (p.id + ' ' + p.nombre + ' ' + p.categoria_es + ' ' + p.categoria_en).toLowerCase().includes(q);
   });
 }
 
 function pintarProductos() {
   const lista = productosFiltrados();
   const cont = document.getElementById('tabla-productos');
-  if (!lista.length) {
-    cont.innerHTML = '<div class="vacio">No hay productos que coincidan.</div>';
-    return;
-  }
+  if (!lista.length) { cont.innerHTML = '<div class="vacio">No hay productos que coincidan.</div>'; return; }
+
   cont.innerHTML =
     '<div class="fila cab"><div></div><div>Producto</div><div class="col-cat">Categoría</div>' +
     '<div>Precio</div><div class="col-stock">Stock</div><div style="text-align:right">Publicado</div></div>' +
@@ -451,34 +602,49 @@ function pintarProductos() {
       const img = p.imagenes[0] ? p.imagenes[0].url : '';
       const stock = p.stock === null ? '<span class="chip sin">—</span>'
                   : (p.stock > 0 ? p.stock : '<span class="chip no">Agotado</span>');
-      return '<div class="fila' + (p.visible ? '' : ' oculto') + '" data-id="' + esc(p.id) + '">' +
+      return '<div class="fila' + (p.visible && !p.archivado ? '' : ' oculto') + '" data-id="' + esc(p.id) + '">' +
         (img ? '<img class="miniatura" src="' + esc(img) + '" alt="" loading="lazy">' : '<div class="miniatura"></div>') +
-        '<div><div class="nom">' + esc(p.nombre || p.id) + '</div>' +
+        '<div><div class="nom">' + esc(p.nombre || p.id) +
+          (p.archivado ? ' <span class="chip no">Archivado</span>' : '') + '</div>' +
           '<div class="meta">' + esc(p.id) + ' · ' + p.imagenes.length + ' foto' + (p.imagenes.length === 1 ? '' : 's') + '</div></div>' +
-        '<div class="col-cat meta">' + esc(p.cat_es || '—') + '</div>' +
+        '<div class="col-cat meta">' + esc(p.categoria_es || '—') + '</div>' +
         '<div class="precio">' + eur(p.precio) + '</div>' +
         '<div class="col-stock meta">' + stock + '</div>' +
         '<div style="display:flex;gap:.6rem;align-items:center;justify-content:flex-end">' +
-          '<label class="sw"><input type="checkbox" class="tog"' + (p.visible ? ' checked' : '') + '><span></span></label>' +
+          (p.archivado
+            ? '<button class="btn sec peq restaurar">Restaurar</button>'
+            : '<label class="sw"><input type="checkbox" class="tog"' + (p.visible ? ' checked' : '') + '><span></span></label>') +
           '<button class="btn sec peq editar">Editar</button>' +
         '</div></div>';
     }).join('');
 
   cont.querySelectorAll('.fila[data-id]').forEach(fila => {
     const id = fila.dataset.id;
-    fila.querySelector('.editar').onclick = () => abrirModal(DATOS.productos.find(x => x.id === id));
-    fila.querySelector('.tog').onchange = async function () {
+    const prod = () => DATOS.productos.find(x => x.id === id);
+
+    fila.querySelector('.editar').onclick = () => abrirModal(prod());
+
+    const tog = fila.querySelector('.tog');
+    if (tog) tog.onchange = async function () {
       const quiere = this.checked;
       this.disabled = true;
       try {
-        const r = await llamar('cambiarVisible', { id, visible: quiere });
-        if (!r.ok) throw new Error(r.mensaje);
-        const p = DATOS.productos.find(x => x.id === id);
-        p.visible = quiere;
+        await dbUpdate('productos?id=eq.' + encodeURIComponent(id), { visible: quiere });
+        prod().visible = quiere;
         fila.classList.toggle('oculto', !quiere);
-        aviso(r.mensaje, 'ok');
+        aviso(quiere ? 'Producto publicado.' : 'Producto retirado de la web.', 'ok');
       } catch (e) { this.checked = !quiere; aviso(e.message, 'err'); }
       this.disabled = false;
+    };
+
+    const rest = fila.querySelector('.restaurar');
+    if (rest) rest.onclick = async function () {
+      this.disabled = true;
+      try {
+        await dbUpdate('productos?id=eq.' + encodeURIComponent(id), { archivado: false, visible: false });
+        aviso('Producto restaurado. Queda oculto hasta que lo publiques.', 'ok');
+        await cargar();
+      } catch (e) { aviso(e.message, 'err'); this.disabled = false; }
     };
   });
 }
@@ -486,33 +652,33 @@ document.getElementById('buscar').oninput = pintarProductos;
 document.getElementById('filtro').onchange = pintarProductos;
 
 function rellenarCategorias() {
-  const es = [...new Set(DATOS.productos.map(p => p.cat_es).filter(Boolean))].sort();
-  const en = [...new Set(DATOS.productos.map(p => p.cat_en).filter(Boolean))].sort();
-  document.getElementById('cats-es').innerHTML = es.map(c => '<option value="' + esc(c) + '">').join('');
-  document.getElementById('cats-en').innerHTML = en.map(c => '<option value="' + esc(c) + '">').join('');
+  const uniq = clave => [...new Set(DATOS.productos.map(p => p[clave]).filter(Boolean))].sort();
+  document.getElementById('cats-es').innerHTML = uniq('categoria_es').map(c => '<option value="' + esc(c) + '">').join('');
+  document.getElementById('cats-en').innerHTML = uniq('categoria_en').map(c => '<option value="' + esc(c) + '">').join('');
 }
 
-/* ── Modal ── */
+/* ── Modal ──────────────────────────────────────────────────── */
 const velo = document.getElementById('velo');
 const campo = id => document.getElementById(id);
 
 function abrirModal(p) {
   EDITANDO = p || null;
   document.getElementById('modal-titulo').textContent = p ? 'Editar producto' : 'Nuevo producto';
-  campo('f-id').value      = p ? p.id : '';
-  campo('f-id').disabled   = !!p;      // el ID enlaza las fotos: no se cambia desde aquí
-  campo('aviso-id').textContent = p ? 'El ID no se puede cambiar: enlaza con las fotos de Drive.'
-                                    : 'Enlaza con el nombre de las fotos en Drive. Debe ser único.';
-  campo('f-nombre').value  = p ? p.nombre : '';
+  campo('f-id').value    = p ? p.id : '';
+  campo('f-id').disabled = !!p;
+  campo('aviso-id').textContent = p
+    ? 'El ID no se cambia: es lo que aparece en la URL de la ficha.'
+    : 'Debe ser único. Aparecerá en la URL de la ficha.';
+  campo('f-nombre').value  = p ? (p.nombre || '') : '';
   campo('f-precio').value  = p ? p.precio : '';
   campo('f-stock').value   = p && p.stock !== null ? p.stock : '';
-  campo('f-cat-es').value  = p ? p.cat_es : '';
-  campo('f-cat-en').value  = p ? p.cat_en : '';
-  campo('f-desc-es').value = p ? p.desc_es : '';
-  campo('f-desc-en').value = p ? p.desc_en : '';
+  campo('f-cat-es').value  = p ? (p.categoria_es || '') : '';
+  campo('f-cat-en').value  = p ? (p.categoria_en || '') : '';
+  campo('f-desc-es').value = p ? (p.descripcion_es || '') : '';
+  campo('f-desc-en').value = p ? (p.descripcion_en || '') : '';
   campo('f-visible').checked = p ? p.visible : true;
   campo('estado-foto').textContent = '';
-  document.getElementById('btn-archivar').style.display = p ? '' : 'none';
+  document.getElementById('btn-archivar').style.display = (p && !p.archivado) ? '' : 'none';
   pintarFotos();
   velo.classList.add('abierto');
   setTimeout(() => campo(p ? 'f-nombre' : 'f-id').focus(), 50);
@@ -523,6 +689,7 @@ document.getElementById('btn-nuevo').onclick = () => abrirModal(null);
 velo.onclick = e => { if (e.target === velo) cerrarModal(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && velo.classList.contains('abierto')) cerrarModal(); });
 
+/* ── Fotos ──────────────────────────────────────────────────── */
 function pintarFotos() {
   const cont = document.getElementById('f-fotos');
   const fotos = EDITANDO ? EDITANDO.imagenes : [];
@@ -531,28 +698,51 @@ function pintarFotos() {
       (EDITANDO ? 'Sin fotos todavía.' : 'Guarda el producto y después podrás subir fotos.') + '</p>';
     return;
   }
-  cont.innerHTML = fotos.map(f =>
-    '<div class="foto" data-file="' + esc(f.fileId) + '">' +
+  cont.innerHTML = fotos.map((f, i) =>
+    '<div class="foto" draggable="true" data-id="' + esc(f.id) + '" data-i="' + i + '">' +
       '<img src="' + esc(f.url) + '" alt="" loading="lazy">' +
-      (f.principal ? '<span class="pr">PRINCIPAL</span>' : '') +
-      '<button class="quitar" title="Mover al archivo">×</button>' +
+      (i === 0 ? '<span class="pr">PRINCIPAL</span>' : '') +
+      '<button class="quitar" title="Archivar foto">×</button>' +
     '</div>').join('');
+
   cont.querySelectorAll('.foto').forEach(div => {
     div.querySelector('.quitar').onclick = async () => {
-      if (!confirm('La foto se moverá a la carpeta ARCHIVO de Drive. No se borra y se puede recuperar a mano. ¿Seguir?')) return;
+      if (!confirm('La foto dejará de verse, pero el archivo se conserva y se puede recuperar. ¿Seguir?')) return;
       try {
-        const r = await llamar('archivarFoto', { fileId: div.dataset.file });
-        if (!r.ok) throw new Error(r.mensaje);
-        EDITANDO.imagenes = EDITANDO.imagenes.filter(x => x.fileId !== div.dataset.file);
-        if (EDITANDO.imagenes.length) EDITANDO.imagenes[0].principal = true;
+        await dbUpdate('imagenes?id=eq.' + div.dataset.id, { archivada: true });
+        EDITANDO.imagenes = EDITANDO.imagenes.filter(x => String(x.id) !== div.dataset.id);
+        await reordenarFotos();
         pintarFotos(); pintarProductos();
-        aviso(r.mensaje, 'ok');
+        aviso('Foto archivada.', 'ok');
       } catch (e) { aviso(e.message, 'err'); }
     };
+
+    // Reordenar arrastrando
+    div.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', div.dataset.i); div.style.opacity = '.4'; });
+    div.addEventListener('dragend',   () => { div.style.opacity = ''; });
+    div.addEventListener('dragover',  e => e.preventDefault());
+    div.addEventListener('drop', async e => {
+      e.preventDefault(); e.stopPropagation();
+      const desde = Number(e.dataTransfer.getData('text/plain'));
+      const hasta = Number(div.dataset.i);
+      if (isNaN(desde) || desde === hasta) return;
+      const arr = EDITANDO.imagenes;
+      arr.splice(hasta, 0, arr.splice(desde, 1)[0]);
+      pintarFotos();
+      try { await reordenarFotos(); pintarProductos(); aviso('Orden guardado.', 'ok'); }
+      catch (err) { aviso(err.message, 'err'); }
+    });
   });
 }
 
-/* ── Subida de fotos ── */
+/** Reescribe la columna `orden` según el orden actual del array. */
+async function reordenarFotos() {
+  if (!EDITANDO) return;
+  await Promise.all(EDITANDO.imagenes.map((f, i) =>
+    f.orden === i ? Promise.resolve() : dbUpdate('imagenes?id=eq.' + f.id, { orden: i }).then(() => { f.orden = i; })
+  ));
+}
+
 const zona = document.getElementById('zona-foto');
 const inputFoto = document.getElementById('input-foto');
 zona.onclick = () => {
@@ -570,29 +760,33 @@ async function subirFotos(archivos) {
   const lista = [...archivos].filter(f => f.type.startsWith('image/'));
   if (!lista.length) { aviso('Solo se admiten imágenes.', 'err'); return; }
 
+  const carpeta = slug(EDITANDO.id);
+  let siguiente = EDITANDO.imagenes.reduce((m, f) => Math.max(m, f.orden), -1) + 1;
+
   for (let i = 0; i < lista.length; i++) {
     const f = lista[i];
-    if (f.size > 8 * 1024 * 1024) { aviso(f.name + ' pesa más de 8 MB. Redúcela antes de subirla.', 'err'); continue; }
-    estado.innerHTML = '<span class="cargando"></span> Subiendo ' + esc(f.name) + ' (' + (i + 1) + '/' + lista.length + ')…';
+    estado.innerHTML = '<span class="cargando"></span> Procesando ' + esc(f.name) + ' (' + (i + 1) + '/' + lista.length + ')…';
     try {
-      const base64 = await new Promise((res, rej) => {
-        const fr = new FileReader();
-        fr.onload = () => res(String(fr.result).split(',')[1]);
-        fr.onerror = rej;
-        fr.readAsDataURL(f);
+      const { blob, ancho, alto } = await aWebp(f);
+      const ruta = `${carpeta}/${String(siguiente).padStart(2, '0')}-${Date.now()}.webp`;
+      const url = await subirArchivo(ruta, blob);
+      const [fila] = await dbInsert('imagenes', {
+        producto_id: EDITANDO.id, ruta, url, orden: siguiente,
+        ancho, alto, bytes: blob.size
       });
-      const r = await llamar('subirFoto', { id: EDITANDO.id, nombreArchivo: f.name, mimeType: f.type, base64 });
-      if (!r.ok) throw new Error(r.mensaje);
-      EDITANDO.imagenes.push({ fileId: r.fileId, url: r.url, principal: r.principal });
+      EDITANDO.imagenes.push(fila);
+      siguiente++;
       pintarFotos();
-      aviso(r.mensaje, 'ok');
-    } catch (e) { aviso('Error subiendo ' + f.name + ': ' + e.message, 'err'); }
+      aviso(`${f.name}: ${(f.size/1024/1024).toFixed(1)} MB → ${(blob.size/1024).toFixed(0)} KB`, 'ok');
+    } catch (e) {
+      aviso('Error con ' + f.name + ': ' + e.message, 'err');
+    }
   }
   estado.textContent = '';
   pintarProductos();
 }
 
-/* ── Guardar / archivar producto ── */
+/* ── Guardar y archivar ─────────────────────────────────────── */
 document.getElementById('btn-guardar').onclick = async function () {
   const id = campo('f-id').value.trim();
   if (!id) { aviso('El ID es obligatorio.', 'err'); campo('f-id').focus(); return; }
@@ -602,54 +796,56 @@ document.getElementById('btn-guardar').onclick = async function () {
     aviso('Ya existe un producto con ese ID.', 'err'); return;
   }
 
+  const campos = {
+    nombre: campo('f-nombre').value.trim(),
+    descripcion_es: campo('f-desc-es').value,
+    descripcion_en: campo('f-desc-en').value,
+    categoria_es: campo('f-cat-es').value.trim(),
+    categoria_en: campo('f-cat-en').value.trim(),
+    precio: Number(precio),
+    stock: campo('f-stock').value === '' ? null : Number(campo('f-stock').value),
+    visible: campo('f-visible').checked
+  };
+
   this.disabled = true; this.innerHTML = '<span class="cargando"></span> Guardando…';
   try {
-    const r = await llamar('guardarProducto', { producto: {
-      id, nombre: campo('f-nombre').value.trim(),
-      precio: Number(precio),
-      stock: campo('f-stock').value === '' ? undefined : Number(campo('f-stock').value),
-      cat_es: campo('f-cat-es').value.trim(), cat_en: campo('f-cat-en').value.trim(),
-      desc_es: campo('f-desc-es').value, desc_en: campo('f-desc-en').value,
-      visible: campo('f-visible').checked
-    }});
-    if (!r.ok) throw new Error(r.mensaje);
-    aviso(r.mensaje, 'ok');
-    const eraNuevo = !EDITANDO;
-    await cargar();
-    // Si acaba de crearse, reabrimos para poder subirle fotos sin dar otro paso
-    if (eraNuevo) {
-      const creado = DATOS.productos.find(p => p.id.toLowerCase() === id.toLowerCase());
-      if (creado) { abrirModal(creado); aviso('Ya puedes subirle fotos.', ''); }
-      else cerrarModal();
-    } else cerrarModal();
+    if (EDITANDO) {
+      await dbUpdate('productos?id=eq.' + encodeURIComponent(EDITANDO.id), campos);
+      aviso('Producto actualizado.', 'ok');
+      await cargar();
+      cerrarModal();
+    } else {
+      const orden = DATOS.productos.reduce((m, p) => Math.max(m, p.orden || 0), 0) + 1;
+      await dbInsert('productos', { id, ...campos, orden });
+      aviso('Producto creado. Ya puedes subirle fotos.', 'ok');
+      await cargar();
+      const creado = DATOS.productos.find(p => p.id === id);
+      if (creado) abrirModal(creado); else cerrarModal();
+    }
   } catch (e) { aviso(e.message, 'err'); }
   this.disabled = false; this.textContent = 'Guardar';
 };
 
 document.getElementById('btn-archivar').onclick = async function () {
   if (!EDITANDO) return;
-  if (!confirm('"' + (EDITANDO.nombre || EDITANDO.id) + '" se moverá a la pestaña ARCHIVO_PRODUCTOS de la hoja.\n\nNo se borra: la fila se conserva entera y se puede devolver a mano. Las fotos se quedan en Drive.\n\n¿Seguir?')) return;
+  if (!confirm('"' + (EDITANDO.nombre || EDITANDO.id) + '" dejará de verse en la web.\n\nNo se borra: la ficha y sus fotos se conservan y puedes recuperarla desde el filtro «Archivados».\n\n¿Seguir?')) return;
   this.disabled = true;
   try {
-    const r = await llamar('archivarProducto', { id: EDITANDO.id });
-    if (!r.ok) throw new Error(r.mensaje);
-    aviso(r.mensaje, 'ok');
+    await dbUpdate('productos?id=eq.' + encodeURIComponent(EDITANDO.id), { archivado: true, visible: false });
+    aviso('Producto archivado. Recuperable desde el filtro «Archivados».', 'ok');
     cerrarModal();
     await cargar();
   } catch (e) { aviso(e.message, 'err'); }
   this.disabled = false;
 };
 
-/* ── Textos ── */
+/* ── Textos ─────────────────────────────────────────────────── */
 function pintarTextos() {
   const q = document.getElementById('buscar-texto').value.trim().toLowerCase();
   const lista = DATOS.textos.filter(t => !q || (t.id + ' ' + t.es + ' ' + t.en).toLowerCase().includes(q));
   const cont = document.getElementById('lista-textos');
-  if (!DATOS.hojaTextos) {
-    cont.innerHTML = '<div class="vacio">No se encontró la pestaña <code>TEXTOS</code> en la hoja.</div>';
-    return;
-  }
   if (!lista.length) { cont.innerHTML = '<div class="vacio">Ningún texto coincide.</div>'; return; }
+
   cont.innerHTML = lista.map(t =>
     '<div class="texto-item" data-id="' + esc(t.id) + '">' +
       '<div style="display:flex;align-items:center;gap:.8rem">' +
@@ -669,12 +865,11 @@ function pintarTextos() {
     btn.onclick = async () => {
       btn.disabled = true; btn.innerHTML = '<span class="cargando"></span>';
       try {
-        const r = await llamar('guardarTexto', { id, es: ta[0].value, en: ta[1].value });
-        if (!r.ok) throw new Error(r.mensaje);
+        await dbUpdate('textos?id=eq.' + encodeURIComponent(id), { es: ta[0].value, en: ta[1].value });
         const t = DATOS.textos.find(x => x.id === id);
         t.es = ta[0].value; t.en = ta[1].value;
         btn.classList.add('sec');
-        aviso(r.mensaje, 'ok');
+        aviso('Texto ' + id + ' actualizado.', 'ok');
       } catch (e) { aviso(e.message, 'err'); btn.disabled = false; }
       btn.textContent = 'Guardar';
     };
@@ -682,13 +877,39 @@ function pintarTextos() {
 }
 document.getElementById('buscar-texto').oninput = pintarTextos;
 
-/* ── Arranque: si hay sesión guardada, la reutilizamos ── */
+/* ── Exportar CSV ───────────────────────────────────────────── */
+document.getElementById('btn-csv').onclick = function () {
+  const cols = ['id','nombre','precio','stock','categoria_es','categoria_en','visible','archivado','descripcion_es','descripcion_en'];
+  const campo = v => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const filas = [cols.join(';')].concat(
+    DATOS.productos.map(p => cols.map(c => campo(p[c])).join(';'))
+  );
+  // BOM para que Excel abra bien los acentos
+  const blob = new Blob(['﻿' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `namna-catalogo-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  aviso(`${DATOS.productos.length} productos exportados.`, 'ok');
+};
+
+/* ── Arranque ───────────────────────────────────────────────── */
 (async function arrancar() {
-  if (!TOKEN) return;
-  try {
-    const r = await llamar('renovar');
-    if (r.ok) abrirApp();
-  } catch (e) { /* token caducado: se queda en el login */ }
+  if (!URL_SB || !ANON) {
+    const err = document.getElementById('login-err');
+    err.textContent = 'Falta configurar Supabase en js/config.js.';
+    err.style.display = 'block';
+    return;
+  }
+  const guardada = leerSesion();
+  if (!guardada) return;
+  SESION = guardada;
+  try { await token(); await abrirApp(); }
+  catch (e) { salir(false); }
 })();
 </script>
 </body>

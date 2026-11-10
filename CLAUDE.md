@@ -20,7 +20,7 @@ La ruta activa depende de si `SUPABASE_URL` está relleno en `js/config.js`. Vac
 | `producto.html?id=XXX` | Ficha individual (`js/producto.js`) |
 | `info.html` | Info/contacto/FAQ — **106 KB, no leer entero** (ver abajo) |
 | `privacidad.html` | Legal |
-| `panel.html` | **Panel de gestión** (Fase 2): CRUD de productos, fotos y textos. Login contra `doPost` (`noindex`) |
+| `panel.html` | **Panel de gestión**: CRUD sobre Supabase, Auth propia, WebP al subir (`noindex`) |
 | `admin.html` | Panel antiguo: documentación y prueba de API (`noindex`) |
 | `generador-seo.html` | Generador de JSON-LD (`noindex`) |
 | `js/config.js` | **Configuración única.** Se carga antes que todo lo demás |
@@ -52,8 +52,9 @@ No hay tests, lint ni build. Sin `-s` en `serve`: esa bandera redirige `info.htm
 
 ## Abierto y conocido
 
-- **Bloqueante:** el panel de gestión no funciona hasta que el operador suba el Apps Script nuevo, ejecute `configurarAdmin("...")` y vuelva a publicar la app web. Pasos en `PANEL-ADMIN.md`.
-- La contraseña antigua `Junio2026` estuvo publicada en el código fuente de `index.html`. Comprometida.
+- **Bloqueante:** el panel no se puede usar hasta crear el usuario en Supabase → Authentication → Users.
+- `admin.html` escribe en Google Sheets, que **ya no alimenta la web**. No usarlo para editar.
+- La `sb_secret_` se compartió por chat durante la migración: conviene rotarla.
 - Analítica preparada pero desactivada (IDs vacíos).
 - `panel.html` es estático: la página de login es pública aunque no se pueda entrar. Falta auth básica en el hosting.
 
