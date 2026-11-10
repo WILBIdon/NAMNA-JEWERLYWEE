@@ -230,6 +230,15 @@ grant insert, update, delete on public.imagenes_sitio to authenticated;
 -- PostgREST cachea el esquema; sin esto los cambios tardan en verse.
 notify pgrst, 'reload schema';
 
--- ── Comprobación rápida: debe devolver 4 tablas y 1 vista ──
--- select table_name, table_type from information_schema.tables
---  where table_schema = 'public' order by table_name;
+-- ── Comprobación final ──
+-- Esto SÍ devuelve filas: si al ejecutar ves "No rows returned",
+-- es que el script no corrió y hay que volver a pegarlo entero.
+select
+  (select count(*) from information_schema.tables
+    where table_schema = 'public' and table_type = 'BASE TABLE')  as tablas,
+  (select count(*) from information_schema.views
+    where table_schema = 'public')                                 as vistas,
+  (select count(*) from pg_policies
+    where schemaname in ('public','storage'))                      as politicas,
+  (select count(*) from storage.buckets where id = 'productos')    as bucket;
+-- Esperado:  tablas = 4 · vistas = 1 · politicas >= 12 · bucket = 1

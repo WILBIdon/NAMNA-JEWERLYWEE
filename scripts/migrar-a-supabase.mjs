@@ -135,7 +135,12 @@ async function main() {
     categoria_es: p.categoria_es || p.categoria || '',
     categoria_en: p.categoria_en || '',
     precio: Number(p.precio) || 0,
-    stock: (p.stock === null || p.stock === undefined || p.stock === '') ? null : Number(p.stock),
+    // Apps Script convierte la celda vacía de Stock en 0, y el sitio antiguo
+    // lo deshacía con `Number(stock) || null`. Si no lo replicamos, los 17
+    // productos entran con stock 0 y la web los marca «Agotado».
+    // 0 en el origen = sin dato, no cero unidades.
+    stock: (p.stock === null || p.stock === undefined || p.stock === '' || Number(p.stock) === 0)
+      ? null : Number(p.stock),
     visible: true,              // el origen solo devuelve los visibles
     orden: i
   }));

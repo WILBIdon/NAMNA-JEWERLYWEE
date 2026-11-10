@@ -19,8 +19,9 @@ Sustituir la Hoja de Google y Drive por Postgres y Storage, sin dejar de poder v
 | Capa de datos del sitio (`js/config.js`, `js/datos.js`) | ✅ Escrita y probada con Supabase simulado |
 | `app.js` y `producto.js` enganchados | ✅ Hecho, con respaldo automático a Apps Script |
 | Proyecto creado (Frankfurt) | ✅ `mublwuvrpyztgblxqrmn` |
-| Esquema aplicado en la base | ⏳ Pendiente: paso 2 |
-| `anon key` en `js/config.js` | ⏳ Pendiente: paso 4 |
+| Esquema aplicado en la base | ✅ 4 tablas, 1 vista, 12 políticas, 1 bucket |
+| Datos migrados | ✅ 17 productos · 60 fotos · 47 textos · 0 fallos |
+| Sitio leyendo de Supabase | ✅ Portada y ficha de producto, 0 peticiones a Google |
 | Panel (`panel.html`) contra Supabase + Auth | ⏳ Pendiente |
 | Fotos en WebP al subir desde el panel | ⏳ Pendiente |
 
@@ -42,7 +43,7 @@ https://mublwuvrpyztgblxqrmn.supabase.co
 Comprobado el 09‑nov‑2026: responde en **37–115 ms**, contra los 1.540 ms de Apps Script.
 La URL ya está puesta en `js/config.js`; falta la `anon key`.
 
-### 2. Crear las tablas ← **te toca**
+### 2. Crear las tablas ✅ hecho
 
 SQL Editor → pegar entero `supabase/schema.sql` → Run.
 
@@ -56,7 +57,13 @@ y las políticas RLS. Es idempotente: se puede volver a ejecutar sin romper nada
 productos visibles y no archivados. Escribir exige sesión iniciada. Un visitante no puede ver
 productos ocultos ni modificar nada aunque se saque la clave del código fuente.
 
-### 3. Migrar los datos
+### 3. Migrar los datos ✅ hecho
+
+Ejecutado el 09‑nov‑2026: 17 productos, 60 fotos, 47 textos, **0 fallos**.
+Peso de las fotos: **179,3 MB → 5,5 MB (−97 %)**.
+
+<details><summary>Cómo volver a ejecutarlo</summary>
+
 
 ```bash
 npm install
@@ -83,10 +90,11 @@ Al final compara los totales de origen y destino y avisa si no cuadran.
 > La `service_role` key salta el RLS. Úsala solo en este comando, nunca en el navegador, y no la
 > dejes escrita en ningún archivo del repositorio.
 
-**Las fotos se convierten a WebP a 1400 px.** Medido sobre 4 fotos reales: los originales en Drive
-son PNG de 5‑6 MB y quedan en ~80 KB, un **98 % menos**. El catálogo entero pasa a ocupar unos 5 MB.
+**Las fotos se convierten a WebP a 1400 px.** Los originales en Drive eran PNG de 5‑6 MB.
 
-### 4. Encender Supabase en el sitio
+</details>
+
+### 4. Encender Supabase en el sitio ✅ hecho
 
 En `js/config.js`, rellenar:
 
@@ -98,10 +106,15 @@ SUPABASE_ANON_KEY: 'eyJ...',     // la anon / public, NO la service_role
 Con eso el sitio pasa a leer de Supabase. Si Supabase fallara, `js/datos.js` cae solo a Apps Script
 sin que el visitante note nada.
 
-### 5. Crear el usuario del panel
+### 5. Crear el usuario del panel ← **pendiente**
 
 Authentication → Users → Add user, con tu email y una contraseña nueva.
-(El panel todavía no usa esto: ver «Lo que falta».)
+(El panel todavía no lo usa: ver «Lo que falta».)
+
+### 5b. Rotar la clave secreta ← **pendiente**
+
+La `sb_secret_` se compartió por chat durante la migración. En Project Settings → API Keys → Roll.
+Ya no hace falta para nada: el sitio solo usa la publicable.
 
 ### 6. Comprobar y retirar
 
@@ -117,6 +130,20 @@ Deja Apps Script como respaldo unas semanas. Cuando lo retires:
 
 Vaciar `SUPABASE_URL` en `js/config.js`. El sitio vuelve a Apps Script en la siguiente recarga.
 No hay más que deshacer: la migración **no toca nada** en Google.
+
+---
+
+## Dos cosas que aparecieron al migrar
+
+**La Hoja pasó de 18 a 17 productos** entre dos mediciones del mismo día, con sus 4 fotos. No fue la
+migración: ambos orígenes devuelven ahora los mismos 17 IDs. Conviene revisar en la Hoja si una pieza
+se ocultó sin querer.
+
+**Todos los productos entraban como «Agotado».** La columna `Stock` de la Hoja está vacía y Apps
+Script convierte el vacío en `0`; el sitio antiguo lo deshacía con `Number(stock) || null`, así que
+nunca se vio. Al migrar fielmente, los 17 llegaron con stock 0 y la web los marcó agotados.
+Corregido en la base (`stock = NULL`, que es «sin control de inventario») y en el migrador, para que
+una reejecución no lo reintroduzca.
 
 ---
 

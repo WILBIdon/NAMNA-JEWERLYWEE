@@ -753,13 +753,18 @@ function showDataSourceBadge() {
   if (existing) existing.remove();
 
   const labels = {
+    'supabase': { text: `⚡ Supabase (${state.sheetProducts} prod)`, color: '#3ECF8E' },
     'sheets': { text: `● Sheets (Sin Fotos Hijas) — ${state.sheetProducts} prod`, color: '#F59E0B' },
-    'apps-script': { text: `⚡ Servidor (${state.sheetProducts} prod)`, color: '#25D366' },
+    'apps-script': { text: `● Apps Script — respaldo (${state.sheetProducts} prod)`, color: '#F59E0B' },
     'cache': { text: `⚡ Caché local (${state.sheetProducts} prod)`, color: '#E78A5E' },
     'error': { text: '● Catálogo Vacío / Error', color: '#EF4444' }
   };
 
-  const info = labels[state.dataSource];
+  // Nunca dejar que un origen nuevo tumbe la carga: antes, con un
+  // dataSource no listado, `info` era undefined y el `info.color` de
+  // abajo lanzaba, haciendo caer todo el catálogo al respaldo.
+  const info = labels[state.dataSource] ||
+    { text: `● ${state.dataSource} (${state.sheetProducts} prod)`, color: '#6B7A76' };
   const badge = document.createElement('div');
   badge.id = 'data-source-badge';
   badge.style.cssText = `

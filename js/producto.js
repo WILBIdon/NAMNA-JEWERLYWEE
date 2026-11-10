@@ -228,8 +228,8 @@ async function loadFromServer(productId) {
 // ── Background Refresh ──
 async function refreshInBackground(productId) {
   try {
-    if (!CONFIG.APPS_SCRIPT_URL) return;
-    const freshProducts = await fetchFromAppsScript();
+    if (!window.NAMNA_DATOS && !CONFIG.APPS_SCRIPT_URL) return;
+    const freshProducts = await fetchCatalogo();
     if (freshProducts && freshProducts.length > 0) {
       state.products = freshProducts;
       saveToCache(freshProducts);
@@ -363,13 +363,18 @@ async function fetchFromGoogleSheets() {
 
 // ── Cache ──
 function saveToCache(data) {
+  const cacheData = {
+    timestamp: Date.now(),
+    origen: state.dataSource,      // de él depende cuánto dura la caché
+    items: data,
+    textos_es: state.textos_es,
+    textos_en: state.textos_en
+  };
   try {
-    const cacheData = { timestamp: Date.now(), items: data, textos_es: state.textos_es, textos_en: state.textos_en };
     localStorage.setItem('namna_catalog', JSON.stringify(cacheData));
   } catch (e) {
     try {
       localStorage.removeItem('namna_catalog');
-      const cacheData = { timestamp: Date.now(), items: data, textos_es: state.textos_es, textos_en: state.textos_en };
       localStorage.setItem('namna_catalog', JSON.stringify(cacheData));
     } catch (e2) {}
   }
