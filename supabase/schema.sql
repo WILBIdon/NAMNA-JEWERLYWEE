@@ -204,3 +204,32 @@ create policy "fotos actualizacion admin" on storage.objects
 drop policy if exists "fotos borrado admin" on storage.objects;
 create policy "fotos borrado admin" on storage.objects
   for delete to authenticated using (bucket_id = 'productos');
+
+-- ════════════════════════════════════════════════════════════════
+-- PERMISOS Y RECARGA DEL API
+-- Supabase suele conceder esto solo cuando «Automatically expose new
+-- tables» está activo, pero dejarlo explícito evita el fallo más
+-- típico: el SQL se ejecuta bien y luego /rest/v1/ devuelve 404.
+-- ════════════════════════════════════════════════════════════════
+grant usage on schema public to anon, authenticated;
+
+grant select on public.catalogo       to anon, authenticated;
+grant select on public.productos      to anon, authenticated;
+grant select on public.imagenes       to anon, authenticated;
+grant select on public.textos         to anon, authenticated;
+grant select on public.imagenes_sitio to anon, authenticated;
+
+grant insert, update, delete on public.productos      to authenticated;
+grant insert, update, delete on public.imagenes       to authenticated;
+grant insert, update, delete on public.textos         to authenticated;
+grant insert, update, delete on public.imagenes_sitio to authenticated;
+
+-- Las políticas RLS de arriba son las que mandan: estos grants solo
+-- abren la puerta, el RLS decide qué filas se ven y quién escribe.
+
+-- PostgREST cachea el esquema; sin esto los cambios tardan en verse.
+notify pgrst, 'reload schema';
+
+-- ── Comprobación rápida: debe devolver 4 tablas y 1 vista ──
+-- select table_name, table_type from information_schema.tables
+--  where table_schema = 'public' order by table_name;

@@ -18,7 +18,10 @@ Sustituir la Hoja de Google y Drive por Postgres y Storage, sin dejar de poder v
 | Script de migración (`scripts/migrar-a-supabase.mjs`) | ✅ Escrito y probado en seco |
 | Capa de datos del sitio (`js/config.js`, `js/datos.js`) | ✅ Escrita y probada con Supabase simulado |
 | `app.js` y `producto.js` enganchados | ✅ Hecho, con respaldo automático a Apps Script |
-| Panel (`panel.html`) contra Supabase + Auth | ⏳ Pendiente: necesita el proyecto creado |
+| Proyecto creado (Frankfurt) | ✅ `mublwuvrpyztgblxqrmn` |
+| Esquema aplicado en la base | ⏳ Pendiente: paso 2 |
+| `anon key` en `js/config.js` | ⏳ Pendiente: paso 4 |
+| Panel (`panel.html`) contra Supabase + Auth | ⏳ Pendiente |
 | Fotos en WebP al subir desde el panel | ⏳ Pendiente |
 
 **Ahora mismo el sitio funciona exactamente igual que antes.** Mientras `SUPABASE_URL` esté vacío en
@@ -28,17 +31,23 @@ Sustituir la Hoja de Google y Drive por Postgres y Storage, sin dejar de poder v
 
 ## Pasos
 
-### 1. Crear el proyecto
+### 1. Crear el proyecto ✅ hecho
 
-En [supabase.com](https://supabase.com) → New project.
+Proyecto `namna-jewelry`, región **Central EU (Frankfurt)** `eu-central-1`.
 
-- **Region: EU (Ireland) o EU (Frankfurt).** No `Americas`: tus clientes están en España y Europa, y
-  la región no se puede cambiar después sin recrear el proyecto.
-- Guarda la contraseña de Postgres en tu gestor de contraseñas. No hace falta para nada de esto.
+```
+https://mublwuvrpyztgblxqrmn.supabase.co
+```
 
-### 2. Crear las tablas
+Comprobado el 09‑nov‑2026: responde en **37–115 ms**, contra los 1.540 ms de Apps Script.
+La URL ya está puesta en `js/config.js`; falta la `anon key`.
+
+### 2. Crear las tablas ← **te toca**
 
 SQL Editor → pegar entero `supabase/schema.sql` → Run.
+
+Para comprobar que fue bien, al final del archivo hay una consulta comentada que debe devolver
+4 tablas y 1 vista.
 
 Crea `productos`, `imagenes`, `textos` e `imagenes_sitio`, la vista `catalogo`, el bucket de Storage
 y las políticas RLS. Es idempotente: se puede volver a ejecutar sin romper nada.

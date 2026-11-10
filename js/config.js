@@ -15,8 +15,8 @@ window.NAMNA_CONFIG = {
   // ── Supabase (fuente de verdad desde noviembre de 2026) ──
   // La anon key es pública por diseño: el RLS es lo que protege los
   // datos. Nunca pongas aquí la service_role.
-  SUPABASE_URL: '',          // https://xxxxxxxx.supabase.co
-  SUPABASE_ANON_KEY: '',     // eyJhbGciOi…
+  SUPABASE_URL: 'https://mublwuvrpyztgblxqrmn.supabase.co',
+  SUPABASE_ANON_KEY: '',     // ← pegar aquí la anon/public key (Project Settings · API Keys)
 
   // ── Google Apps Script (respaldo durante la transición) ──
   // Se usa solo si Supabase no está configurado o falla. Cuando la
