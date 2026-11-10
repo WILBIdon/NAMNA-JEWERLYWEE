@@ -32,6 +32,7 @@ Sin eso, el panel dirá *«Email o contraseña incorrectos»* por mucho que la e
 | Quitar foto | `imagenes.archivada = true` (el archivo se conserva) |
 | Editar textos | Tabla `textos`, columnas `es` y `en` |
 | Ver dónde va cada texto | Columnas `pagina`, `seccion`, `papel`, `nota` (las rellena `scripts/mapear-textos.mjs`) |
+| Cambiar imágenes de diseño | Storage + tabla `imagenes_sitio` |
 | Exportar CSV | Descarga, no escribe nada |
 
 ### Las fotos se optimizan solas
@@ -57,6 +58,24 @@ luego el resto. Y el buscador entiende «pie de página» o «botón», no solo 
 Esa información no está escrita a mano: `scripts/mapear-textos.mjs` lee los `data-txt` de los HTML y
 la deduce. Si mueves un texto de sitio en el código, vuelve a ejecutarlo y se actualiza sola.
 Los textos que ya no aparecen en ninguna página se marcan como **«Sin usar»**.
+
+### Imágenes de diseño
+
+Pestaña aparte, para las fotos que no son de producto. Hay 4 huecos:
+
+| Hueco | Dónde sale | Tamaño recomendado |
+|---|---|---|
+| Encabezado de la portada | Detrás de «Timeless Elegance» | 1600×1600, cuadrada |
+| Encabezado de Información | Al abrir la página de información | 1600×1200, apaisada |
+| Tarjeta «Quiénes somos» | Junto a la historia de la marca | 1600×1200, apaisada |
+| Tarjeta «Envíos» | Junto a las políticas de envío | 1024×1536, vertical |
+
+Se convierten a WebP igual que las de producto. Cada cambio guarda un nombre de archivo nuevo: si
+reusara el mismo, el navegador y el CDN seguirían sirviendo la anterior durante un año.
+
+Si alguna fallara, la web cae a la copia local de `assets/`, así que nunca se queda en blanco.
+Los huecos los define el atributo `data-site-img` del HTML: si añades uno, hay que añadirlo también
+a `scripts/subir-imagenes-sitio.mjs` y a la constante `HUECOS` de `panel.html`.
 
 ### Sobre el ID
 

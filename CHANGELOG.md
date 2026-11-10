@@ -11,6 +11,15 @@
 
 ---
 
+## 2026-11-10 — Imágenes de diseño editables
+
+- **feat:** pestaña «Imágenes de diseño» en el panel. Los 4 huecos decorativos (encabezado de portada, encabezado de información, tarjeta «Quiénes somos», tarjeta «Envíos») se cambian arrastrando una imagen, con conversión a WebP en el navegador. Antes salían de archivos en `assets/` y cambiarlos exigía tocar código y desplegar.
+- **feat:** `scripts/subir-imagenes-sitio.mjs` — sube las imágenes actuales de `assets/` a Storage y crea sus filas en `imagenes_sitio`. Los archivos locales se quedan como respaldo: si Supabase fallara, la web no se queda en blanco.
+- Cada cambio guarda un nombre de archivo nuevo con marca de tiempo. Reusando la ruta, el `cache-control` de un año haría que navegador y CDN siguieran sirviendo la imagen anterior.
+- Verificado: upsert sobre clave existente devuelve 200 sin duplicar fila, y las 4 imágenes se sirven ya desde Supabase en portada e información.
+
+---
+
 ## 2026-11-10 — Los textos dicen dónde van
 
 - **feat:** `scripts/mapear-textos.mjs` — recorre los HTML, localiza cada `data-txt` y deduce en qué página sale, en qué zona, qué papel cumple y si se repite. Lo vuelca en `textos.pagina/seccion/papel/nota/orden_ui`. No hay nada escrito a mano: si un texto cambia de sitio en el código, se vuelve a ejecutar.
