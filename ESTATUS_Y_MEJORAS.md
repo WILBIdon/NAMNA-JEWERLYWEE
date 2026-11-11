@@ -1,6 +1,6 @@
 # Estatus y Mejoras — NAMNA Fine Jewelry
 
-_Última revisión: 09‑nov‑2026_
+_Última revisión: 10‑nov‑2026_
 
 ## 1. Estado por fase (según el blueprint)
 
@@ -45,6 +45,24 @@ _Última revisión: 09‑nov‑2026_
 13. Fase 2: login ligero o código VIP para mostrar `Precio_Mayorista`.
 14. Fase 4: pasarela de pago (Stripe/Redsys) con descuento de stock en la Hoja.
 15. PWA (manifest + service worker) para uso offline e "instalar app".
+
+## 3b. Auditoría del 10‑nov‑2026
+
+Siete dimensiones auditadas en paralelo con verificación adversarial. **Cerrado ese día:** el registro
+público de Supabase estaba abierto y las políticas daban permiso total a cualquier `authenticated`
+(cualquiera podía registrarse y editar el catálogo); el XSS almacenado que eso permitía; el respaldo
+que marcaba los 17 productos «Agotado»; la caché envenenada por `privacidad.html`; el `cache-control`
+inválido; y la etiqueta de diagnóstico visible a los clientes.
+
+**Lo que queda está en [AUDITORIA-2026-11.md](AUDITORIA-2026-11.md)** — 8 hallazgos confirmados y 24
+sin verificar. Los tres primeros por impacto:
+
+1. **Las 17 fichas de producto no tienen ruta rastreable** — las tarjetas son `<article>` con
+   escuchadores de clic, no enlaces, y el sitemap no incluye ninguna. Las fichas ya están preparadas
+   para indexarse; falta el camino hacia ellas.
+2. **No hay copias de seguridad** de la base ni de Storage. Un borrado hoy es definitivo.
+3. **Las miniaturas del catálogo son las fotos a tamaño completo**: 1,47 MB de los 1,71 MB que pesa
+   la portada.
 
 ## 4. Próximos pasos sugeridos
 - [x] Corregir puntos 1 y 2 (seguridad) — hecho en el código; **falta desplegar el Apps Script** (`PANEL-ADMIN.md`)

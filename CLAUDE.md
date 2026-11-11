@@ -80,6 +80,7 @@ Regla del proyecto: las operaciones destructivas archivan en vez de eliminar. Pr
 | `MIGRACION-SUPABASE.md` (5 KB) | Estado y pasos de la migración a Postgres |
 | `supabase/schema.sql` | Esquema y políticas RLS |
 | `PANEL-ADMIN.md` (4 KB) | Puesta en marcha del panel y solución de problemas |
+| `AUDITORIA-2026-11.md` (19 KB) | Backlog de la auditoría: 8 confirmados, 24 sin verificar |
 | `copia-local/BITACORA.md` | Registro de la copia local y hallazgos de eficiencia |
 
 ## Economía de tokens
