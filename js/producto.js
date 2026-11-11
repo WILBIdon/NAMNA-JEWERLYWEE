@@ -587,16 +587,28 @@ function updateMetaTags(product) {
       "image": product.imagenes,
       "description": desc,
       "brand": { "@type": "Brand", "name": "NAMNA Fine Jewelry" },
-      "offers": {
+      "sku": product.id,
+      "material": "18k gold",
+      // Sin precio real no se publica oferta: mejor callar que anunciar 0 EUR.
+      ...(product.precioPublico > 0 ? { "offers": {
         "@type": "Offer",
         "priceCurrency": "EUR",
-        "price": product.precioPublico || 0,
-        "availability": (product.stock !== null && product.stock <= 0)
-          ? "https://schema.org/OutOfStock"
-          : "https://schema.org/InStock",
+        "price": product.precioPublico,
+        // Stock nulo = no tenemos el dato. No se afirma InStock sin saberlo.
+        "availability": product.stock === null
+          ? "https://schema.org/LimitedAvailability"
+          : (product.stock <= 0 ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"),
+        "itemCondition": "https://schema.org/NewCondition",
         "url": productUrl,
-        "seller": { "@type": "Organization", "name": "NAMNA Fine Jewelry" }
-      }
+        "seller": { "@type": "Organization", "name": "NAMNA Fine Jewelry" },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "ES",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 14,
+          "returnMethod": "https://schema.org/ReturnByMail"
+        }
+      } } : {})
     });
   }
 

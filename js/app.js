@@ -857,17 +857,28 @@ function injectProductSchema(products) {
     "name": p.nombre,
     "image": p.imagenes[0],
     "description": p.descripcion || `${getSingularCategory(p.categoria)} by NAMNA Fine Jewelry. 18k gold with natural stones.`,
+    "sku": p.id,
+    "material": "18k gold",
     "brand": { "@type": "Brand", "name": "NAMNA Fine Jewelry" },
-    "offers": {
+    // Solo se publica la oferta si hay precio de verdad. Antes caia a
+    // `|| 0` y ante cualquier fallo del dato se anunciaba la pieza a
+    // 0 EUR, que es peor que no anunciarla.
+    ...(p.precioPublico > 0 ? { "offers": {
       "@type": "Offer",
       "priceCurrency": "EUR",
-      "price": p.precioPublico || 0,
-      "availability": (p.stock !== null && p.stock <= 0) 
-        ? "https://schema.org/OutOfStock" 
-        : "https://schema.org/InStock",
-      "url": "https://www.namnafine.com/",
+      "price": p.precioPublico,
+      // Con stock nulo no sabemos si queda: antes se afirmaba InStock
+      // para las 17 piezas sin tener el dato. Declarar algo que no se
+      // ha comprobado es justo lo que resta credibilidad al resto.
+      "availability": p.stock === null
+        ? "https://schema.org/LimitedAvailability"
+        : (p.stock <= 0 ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"),
+      "itemCondition": "https://schema.org/NewCondition",
+      // Cada oferta a SU ficha. Antes las 17 apuntaban a la portada,
+      // asi que un motor no podia llevar al comprador a la pieza.
+      "url": `https://www.namnafine.com/producto?id=${encodeURIComponent(p.id)}`,
       "seller": { "@type": "Organization", "name": "NAMNA Fine Jewelry" }
-    }
+    } } : {})
   }));
 
   const script = document.createElement('script');
