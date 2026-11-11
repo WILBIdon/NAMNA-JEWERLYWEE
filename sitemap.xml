@@ -1,43 +1,188 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generado por scripts/generar-sitemap.mjs desde el catálogo de Supabase.
+     No editar a mano: se reescribe. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.namnafine.com/</loc>
-    <lastmod>2026-06-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.namnafine.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.namnafine.com/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.namnafine.com/" />
-  </url>
-  <url>
-    <loc>https://www.namnafine.com/index.html</loc>
-    <lastmod>2026-06-30</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.namnafine.com/info.html</loc>
-    <lastmod>2026-06-30</lastmod>
+    <loc>https://www.namnafine.com/info</loc>
+    <lastmod>2026-11-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.namnafine.com/privacidad.html</loc>
-    <lastmod>2026-06-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://www.namnafine.com/llms.txt</loc>
-    <lastmod>2026-06-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://www.namnafine.com/producto.html</loc>
-    <lastmod>2026-07-09</lastmod>
+    <loc>https://www.namnafine.com/producto?id=N.%20Ruby%20D</loc>
+    <lastmod>2026-11-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-ruby-d/00.webp</image:loc>
+      <image:title>N. Ruby D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Star%20D</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-star-d/00.webp</image:loc>
+      <image:title>N. Star D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Flower%20D</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-flower-d/00.webp</image:loc>
+      <image:title>N. Flower D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Heart%20D</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-heart-d/00.webp</image:loc>
+      <image:title>N. Heart D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Moon%20D</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-moon-d/00.webp</image:loc>
+      <image:title>N. Moon D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Heart%20Y</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-heart-y/00.webp</image:loc>
+      <image:title>N. Heart Y</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Heart%20R</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-heart-r/00.webp</image:loc>
+      <image:title>N. Heart R</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=E.%20Heart%20Y</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/e-heart-y/00.webp</image:loc>
+      <image:title>E. Heart Y</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=E.%20Zafiros</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/e-zafiros/00.webp</image:loc>
+      <image:title>E. Zafiros</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Cruz%20D</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-cruz-d/00.webp</image:loc>
+      <image:title>N. Cross D</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=E.%20Opal</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/e-opal/00.webp</image:loc>
+      <image:title>E. Opal</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=E.%20Diamond</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/e-diamond/00.webp</image:loc>
+      <image:title>E. Diamond</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Dia%20Emerald</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-dia-emerald/00.webp</image:loc>
+      <image:title>N. Dia Emerald</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Dia%20Sapphire</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-dia-sapphire/00.webp</image:loc>
+      <image:title>N. Dia Sapphire</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Dia%20Peridot</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-dia-peridot/00.webp</image:loc>
+      <image:title>N. Dia Peridot</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Diamond%20F</loc>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-diamond-f/00.webp</image:loc>
+      <image:title>N. Diamond F</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.namnafine.com/producto?id=N.%20Pear%20Shape</loc>
+    <lastmod>2026-11-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://mublwuvrpyztgblxqrmn.supabase.co/storage/v1/object/public/productos/n-pear-shape/00.webp</image:loc>
+      <image:title>N. Pear Shape</image:title>
+    </image:image>
   </url>
 </urlset>

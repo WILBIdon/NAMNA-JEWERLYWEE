@@ -2170,3 +2170,22 @@ body.modal-open {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Enlaces de la tarjeta de producto ──
+   La imagen y el nombre son <a> reales para que los buscadores y los
+   rastreadores de IA puedan llegar a las fichas. Visualmente no deben
+   notarse: el modal se sigue abriendo al hacer clic. */
+.product-card-link,
+.product-card-name a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+.product-card-link { width: 100%; height: 100%; }
+.product-card-link img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.product-card-name a:hover { color: var(--color-accent); }
+.product-card-link:focus-visible,
+.product-card-name a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

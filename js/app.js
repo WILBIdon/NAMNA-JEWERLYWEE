@@ -907,22 +907,45 @@ function createProductCard(product, index) {
   const isWished = state.wishlist.includes(product.id);
   const heartIconHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
 
+  // La imagen y el nombre son ENLACES REALES a la ficha. Antes eran
+  // elementos con escuchadores de clic, asi que ningun buscador —ni el
+  // de Google ni los de IA— tenia por donde llegar a las 17 fichas:
+  // existian pero no habia camino. El modal se sigue abriendo igual,
+  // interceptando el clic; quien navegue con teclado o abra en pestana
+  // nueva llega a la pagina de verdad.
+  // Sin la extension .html: el servidor estatico redirige
+  // /producto.html?id=X a /producto TIRANDO la cadena de consulta, asi
+  // que el enlace acabaria en "Producto no encontrado". /producto?id=X
+  // se sirve directamente con 200. Es la misma forma que ya usan el
+  // canonical y el boton de compartir (js/producto.js:546).
+  const enlace = `producto?id=${encodeURIComponent(product.id)}`;
+
   card.innerHTML = `
     <div class="product-card-image">
       ${stockHTML}
       <button class="wishlist-heart-btn ${isWished ? 'active' : ''}" data-id="${product.id}" aria-label="Favorito">
         ${heartIconHTML}
       </button>
-      <img src="${mainImage}" alt="${product.nombre}" loading="lazy" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
+      <a href="${enlace}" class="product-card-link" aria-label="${product.nombre}">
+        <img src="${mainImage}" alt="${product.nombre}" loading="lazy" onerror="this.onerror=null; this.src='${CATEGORY_IMAGE_FALLBACK[product._categoria_es] || CATEGORY_IMAGE_FALLBACK._default}'" />
+      </a>
       <button class="quick-view-btn" aria-label="${t('quickView')}">${t('quickView')}</button>
     </div>
     <div class="product-card-info">
       <p class="product-card-category">${getSingularCategory(product.categoria)}</p>
-      <h3 class="product-card-name">${product.nombre}</h3>
+      <h3 class="product-card-name"><a href="${enlace}">${product.nombre}</a></h3>
       <p class="product-card-price">${formatPrice(product.precioPublico)}</p>
     </div>
   `;
-  card.querySelector('.product-card-image > img').addEventListener('click', () => openModal(product));
+
+  // Clic normal -> modal. Cmd/Ctrl, rueda o "abrir en pestana nueva"
+  // siguen el enlace, que es lo que espera cualquiera.
+  const abrirModal = (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    e.preventDefault();
+    openModal(product);
+  };
+  card.querySelectorAll('a[href]').forEach(a => a.addEventListener('click', abrirModal));
   card.querySelector('.quick-view-btn').addEventListener('click', (e) => { e.stopPropagation(); openModal(product); });
   card.querySelector('.wishlist-heart-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleWishlist(product.id, e.currentTarget); });
   return card;
